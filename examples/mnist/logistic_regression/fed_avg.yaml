@@ -1,0 +1,30 @@
+wandb:
+  dataset_name: MNIST
+  model_name: Logistic Regression
+simulation:
+  batch_size: -1
+  client_count: 4
+  fraction_fit: 1
+  global_rounds: 10
+  learning_method:
+    method: FedAVG
+    learning_rate: 0.05
+    local_rounds: 10
+dataset:
+  name: MNIST
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": element["image"].reshape(784) / 255.,
+        "y": element["label"]
+      }
+  splitter:
+    alpha: 1
+    percent_noniid: 25
+model:
+  layers:
+    - type: Linear
+      in_features: 784
+      out_features: 10
+    - type: Softmax
+      dim: 0

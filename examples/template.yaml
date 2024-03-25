@@ -1,0 +1,21 @@
+wandb:
+  dataset_name:
+  model_name:
+simulation:
+  batch_size:
+  client_count:
+  fraction_fit:
+  global_rounds:
+  learning_method:
+    method:
+    # Add learning Rate specifics
+dataset:
+  name:
+  preprocess_fn:
+    # Python function
+  splitter:
+    alpha:
+    percent_noniid:
+model:
+  layers:
+    # Complete PyTorch model
