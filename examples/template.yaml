@@ -7,8 +7,9 @@ simulation:
   fraction_fit:
   global_rounds:
   learning_method:
-    method:
+    optimizer:
     # Add learning Rate specifics
+  local_rounds:
 dataset:
   name:
   preprocess_fn:
@@ -17,5 +18,7 @@ dataset:
     alpha:
     percent_noniid:
 model:
+  criterion:
+    type:
   layers:
     # Complete PyTorch model

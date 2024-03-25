@@ -7,9 +7,9 @@ simulation:
   fraction_fit: 1
   global_rounds: 10
   learning_method:
-    method: FedAVG
-    learning_rate: 0.05
-    local_rounds: 10
+    optimizer: SGD
+    lr: 0.05
+  local_rounds: 10
 dataset:
   name: MNIST
   preprocess_fn: |
@@ -22,6 +22,8 @@ dataset:
     alpha: 1
     percent_noniid: 25
 model:
+  criterion:
+    type: BCELoss
   layers:
     - type: Linear
       in_features: 784
