@@ -1,1 +1,3 @@
-from .config import load_dataloaders, load_func, load_model, load_yaml_file
+from .config_parser import load_yaml_file
+from .data import load_dataloaders_from_config, load_preprocess_func_from_function_string
+from .model import load_model_from_yaml_file

@@ -15,7 +15,7 @@ def set_weights(model, weights) -> None:
 	model.load_state_dict(state_dict, strict=True)
 
 
-def train(epochs, parameters, Net, trainloader, Criterion, Optimizer):
+def train(epochs, parameters, Net, train_loader, Criterion, Optimizer):
 	"""Train the network on the training set."""
 	net = Net().to(DEVICE)
 
@@ -25,7 +25,7 @@ def train(epochs, parameters, Net, trainloader, Criterion, Optimizer):
 	criterion = Criterion()
 	optimizer = Optimizer(net.parameters())
 	for _ in range(epochs):
-		for features, labels in trainloader:
+		for features, labels in train_loader:
 			features, labels = features.to(DEVICE), labels.to(DEVICE)
 			optimizer.zero_grad()
 			loss = criterion(net(features), labels)
@@ -34,11 +34,11 @@ def train(epochs, parameters, Net, trainloader, Criterion, Optimizer):
 
 	# Prepare return values
 	parameters = get_weights(net)
-	data_size = len(trainloader)
+	data_size = len(train_loader)
 	return parameters, data_size
 
 
-def test(parameters, Net, testloader, Criterion):
+def test(parameters, Net, test_loader, Criterion):
 	"""Validate the network on the entire test set."""
 	# Create model
 	net = Net().to(DEVICE)
@@ -50,7 +50,7 @@ def test(parameters, Net, testloader, Criterion):
 	criterion = Criterion()
 	correct, total, loss = 0, 0, 0.0
 	with torch.no_grad():
-		for data in testloader:
+		for data in test_loader:
 			features, labels = data['x'].to(DEVICE), data['y'].to(DEVICE)
 			outputs = net(features)
 			loss += criterion(outputs, labels).item()
@@ -62,5 +62,5 @@ def test(parameters, Net, testloader, Criterion):
 			correct += (predicted == labels).sum().item()
 	accuracy = correct / total
 
-	data_size = len(testloader)
+	data_size = len(test_loader)
 	return loss, accuracy, data_size

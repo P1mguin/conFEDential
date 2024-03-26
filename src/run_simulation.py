@@ -39,7 +39,7 @@ parser.add_argument(
 
 
 def get_client_fn(
-		trainloaders: List[DataLoader],
+		train_loaders: List[DataLoader],
 		epochs: int,
 		model_class: Type[nn.Module],
 		criterion_class: Type[nn.Module],
@@ -49,7 +49,7 @@ def get_client_fn(
 		# Client does not get evaluation method, that is done at server level over all data at once
 		def __init__(self, cid: int):
 			self.parameters = None
-			self.trainloader = trainloaders[cid]
+			self.train_loader = train_loaders[cid]
 
 		def get_parameters(self, config):
 			return self.parameters
@@ -60,7 +60,7 @@ def get_client_fn(
 		def fit(self, parameters, config):
 			self.set_parameters(parameters)
 
-			new_parameters, data_size = helper.train(epochs, parameters, model_class, self.trainloader, criterion_class,
+			new_parameters, data_size = helper.train(epochs, parameters, model_class, self.train_loader, criterion_class,
 													 optimizer_class)
 
 			return new_parameters, data_size, {}
@@ -73,12 +73,12 @@ def get_client_fn(
 
 
 def get_evaluate_fn(
-		testloader: DataLoader,
+		test_loader: DataLoader,
 		model_class: Type[nn.Module],
 		criterion_class: Type[nn.Module]
 ) -> Callable[[int, fl.common.NDArrays, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]:
 	def evaluate(server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]):
-		loss, accuracy, data_size = helper.test(parameters, model_class, testloader, criterion_class)
+		loss, accuracy, data_size = helper.test(parameters, model_class, test_loader, criterion_class)
 
 		return loss, {"accuracy": accuracy, "data_size": data_size, "server_round": server_round}
 
@@ -98,14 +98,14 @@ def main() -> None:
 	yaml_file = str(Path(args.yaml_file).resolve())
 	config = utils.load_yaml_file(yaml_file)
 
-	model_class = utils.load_model(yaml_file)
+	model_class = utils.load_model_from_yaml_file(yaml_file)
 	criterion_class = getattr(torch.nn, config["model"]["criterion"]["type"])
 	optimizer_class = getattr(torch.optim, config["simulation"]["learning_method"]["optimizer"])
-	trainloaders, testloader = utils.load_dataloaders(config)
+	train_loaders, test_loader = utils.load_dataloaders_from_config(config)
 	epochs = config["simulation"]["local_rounds"]
 	global_rounds = config["simulation"]["global_rounds"]
 
-	client_fn = get_client_fn(trainloaders, epochs, model_class, criterion_class, optimizer_class)
+	client_fn = get_client_fn(train_loaders, epochs, model_class, criterion_class, optimizer_class)
 
 	client_count = config["simulation"]["client_count"]
 
@@ -113,7 +113,7 @@ def main() -> None:
 	fraction_evaluate = 0.0
 	min_fit_clients = max(math.floor(fraction_fit * client_count), 1)
 	min_evaluate_clients = 0
-	evaluate = get_evaluate_fn(testloader, model_class, criterion_class)
+	evaluate = get_evaluate_fn(test_loader, model_class, criterion_class)
 	initial_parameters = fl.common.ndarrays_to_parameters(helper.get_weights(model_class()))
 
 	strategy = fl.server.strategy.FedAvg(
