@@ -1,3 +1,8 @@
+import os
+import sys
+PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
+sys.path.append(PROJECT_DIRECTORY)
+
 import argparse
 import math
 from pathlib import Path
@@ -152,6 +157,12 @@ def main() -> None:
 	wandb.define_metric("server_round")
 	wandb.define_metric("accuracy", step_metric="server_round")
 	wandb.define_metric("loss", step_metric="server_round")
+	ray_init_args = {
+		"runtime_env": {
+			"working_dir": PROJECT_DIRECTORY,
+		}
+	}
+        
 
 	try:
 		fl.simulation.start_simulation(
@@ -159,7 +170,8 @@ def main() -> None:
 			num_clients=client_count,
 			client_resources=client_resources,
 			config=fl.server.ServerConfig(num_rounds=global_rounds),
-			strategy=strategy
+			ray_init_args=ray_init_args,
+			strategy=strategy,
 		)
 	except Exception as _:
 		wandb.finish(exit_code=1)
