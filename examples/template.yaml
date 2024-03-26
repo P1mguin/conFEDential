@@ -19,6 +19,5 @@ dataset:
     percent_non_iid:
 model:
   criterion:
-    type:
   layers:
     # Complete PyTorch model

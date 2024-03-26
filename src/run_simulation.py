@@ -2,7 +2,7 @@ import argparse
 import math
 import multiprocessing as mp
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple, Type
+from typing import Callable, Dict, Iterator, List, Tuple, Type
 
 import flwr as fl
 import torch
@@ -10,8 +10,8 @@ import torch.nn as nn
 from flwr.common import Scalar
 from torch.utils.data import DataLoader
 
-import helper
 import src.utils as utils
+from src.training import helper
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description="Running conFEDential simulation")
@@ -43,7 +43,7 @@ def get_client_fn(
 		epochs: int,
 		model_class: Type[nn.Module],
 		criterion_class: Type[nn.Module],
-		optimizer_class: Type[torch.optim.Optimizer]
+		optimizer_class: Callable[[Iterator[nn.Parameter]], Type[torch.optim.Optimizer]]
 ) -> Callable[[str], fl.client.Client]:
 	class FlowerClient(fl.client.NumPyClient):
 		# Client does not get evaluation method, that is done at server level over all data at once
@@ -99,8 +99,8 @@ def main() -> None:
 	config = utils.load_yaml_file(yaml_file)
 
 	model_class = utils.load_model_from_yaml_file(yaml_file)
-	criterion_class = getattr(torch.nn, config["model"]["criterion"]["type"])
-	optimizer_class = getattr(torch.optim, config["simulation"]["learning_method"]["optimizer"])
+	criterion_class = getattr(torch.nn, config["model"]["criterion"])
+	optimizer_class = utils.load_optimizer_from_yaml_file(yaml_file)
 	train_loaders, test_loader = utils.load_data_loaders_from_config(config)
 	epochs = config["simulation"]["local_rounds"]
 	global_rounds = config["simulation"]["global_rounds"]
@@ -114,7 +114,7 @@ def main() -> None:
 	min_fit_clients = max(math.floor(fraction_fit * client_count), 1)
 	min_evaluate_clients = 0
 	evaluate = get_evaluate_fn(test_loader, model_class, criterion_class)
-	initial_parameters = fl.common.ndarrays_to_parameters(helper.get_weights(model_class()))
+	initial_parameters = fl.common.ndarrays_to_parameters(helper.get_weights_from_model(model_class()))
 
 	strategy = fl.server.strategy.FedAvg(
 		fraction_fit=fraction_fit,

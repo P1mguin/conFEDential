@@ -22,8 +22,7 @@ dataset:
     alpha: 1
     percent_non_iid: 25
 model:
-  criterion:
-    type: CrossEntropyLoss
+  criterion: CrossEntropyLoss
   layers:
     - type: Linear
       in_features: 784
