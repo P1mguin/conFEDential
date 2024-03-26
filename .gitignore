@@ -256,3 +256,4 @@ fabric.properties
 # Project specifics
 .idea/
 cache/
+/src/wandb/

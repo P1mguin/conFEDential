@@ -1,6 +1,3 @@
-wandb:
-  dataset_name: MNIST
-  model_name: Logistic Regression
 simulation:
   batch_size: -1
   client_count: 4
@@ -22,6 +19,7 @@ dataset:
     alpha: 1
     percent_non_iid: 25
 model:
+  name: Logistic Regression
   criterion: CrossEntropyLoss
   layers:
     - type: Linear

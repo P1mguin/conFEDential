@@ -1,6 +1,5 @@
 import argparse
 import math
-import multiprocessing as mp
 from pathlib import Path
 from typing import Callable, Dict, Iterator, List, Tuple, Type
 
@@ -8,11 +7,14 @@ import flwr as fl
 import numpy.typing as npt
 import torch
 import torch.nn as nn
+import wandb
 from flwr.common import Scalar
 from torch.utils.data import DataLoader
 
 import src.utils as utils
 from src.training import helper
+
+wandb.login()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description="Running conFEDential simulation")
@@ -99,6 +101,8 @@ def get_evaluate_fn(
 	) -> Tuple[float, Dict[str, Scalar]]:
 		loss, accuracy, data_size = helper.test(parameters, model_class, test_loader, criterion_class)
 
+		wandb.log({"loss": loss, "accuracy": accuracy, "server_round": server_round})
+
 		return loss, {"accuracy": accuracy, "data_size": data_size, "server_round": server_round}
 
 	return evaluate
@@ -106,8 +110,6 @@ def get_evaluate_fn(
 
 def main() -> None:
 	args = parser.parse_args()
-
-	mp.set_start_method("spawn")
 
 	client_resources = {
 		"num_cpus": args.num_cpus,
@@ -145,13 +147,24 @@ def main() -> None:
 		initial_parameters=initial_parameters
 	)
 
-	fl.simulation.start_simulation(
-		client_fn=client_fn,
-		num_clients=client_count,
-		client_resources=client_resources,
-		config=fl.server.ServerConfig(num_rounds=global_rounds),
-		strategy=strategy
-	)
+	wandb_kwargs = utils.get_wandb_kwargs(config)
+	wandb.init(**wandb_kwargs)
+	wandb.define_metric("server_round")
+	wandb.define_metric("accuracy", step_metric="server_round")
+	wandb.define_metric("loss", step_metric="server_round")
+
+	try:
+		fl.simulation.start_simulation(
+			client_fn=client_fn,
+			num_clients=client_count,
+			client_resources=client_resources,
+			config=fl.server.ServerConfig(num_rounds=global_rounds),
+			strategy=strategy
+		)
+	except Exception as _:
+		wandb.finish(exit_code=1)
+
+	wandb.finish()
 
 
 if __name__ == '__main__':
