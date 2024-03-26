@@ -6,7 +6,7 @@ import src.utils as utils
 from src import federated_datasets
 
 
-def load_dataloaders_from_config(config: dict) -> Tuple[List[DataLoader], DataLoader]:
+def load_data_loaders_from_config(config: dict) -> Tuple[List[DataLoader], DataLoader]:
 	"""
 	Loads non-iid data loaders from YAML file for training and testing.
 	The amount of training data loaders is equal to the amount of clients specified in the yaml file,
@@ -18,9 +18,9 @@ def load_dataloaders_from_config(config: dict) -> Tuple[List[DataLoader], DataLo
 	batch_size = config["simulation"]["batch_size"]
 	preprocess_fn = utils.load_preprocess_func_from_function_string(config["dataset"]["preprocess_fn"])
 	alpha = config["dataset"]["splitter"]["alpha"]
-	percent_noniid = config["dataset"]["splitter"]["percent_noniid"]
+	percent_non_iid = config["dataset"]["splitter"]["percent_non_iid"]
 	dataclass = getattr(federated_datasets, config["dataset"]["name"])
-	return dataclass.load_data(client_count, batch_size, preprocess_fn, alpha, percent_noniid)
+	return dataclass.load_data(client_count, batch_size, preprocess_fn, alpha, percent_non_iid)
 
 
 def load_preprocess_func_from_function_string(function_string: str) -> Callable[[dict], dict]:

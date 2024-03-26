@@ -101,7 +101,7 @@ def main() -> None:
 	model_class = utils.load_model_from_yaml_file(yaml_file)
 	criterion_class = getattr(torch.nn, config["model"]["criterion"]["type"])
 	optimizer_class = getattr(torch.optim, config["simulation"]["learning_method"]["optimizer"])
-	train_loaders, test_loader = utils.load_dataloaders_from_config(config)
+	train_loaders, test_loader = utils.load_data_loaders_from_config(config)
 	epochs = config["simulation"]["local_rounds"]
 	global_rounds = config["simulation"]["global_rounds"]
 
@@ -110,7 +110,7 @@ def main() -> None:
 	client_count = config["simulation"]["client_count"]
 
 	fraction_fit = config["simulation"]["fraction_fit"]
-	fraction_evaluate = 0.0
+	fraction_evaluate = 0.
 	min_fit_clients = max(math.floor(fraction_fit * client_count), 1)
 	min_evaluate_clients = 0
 	evaluate = get_evaluate_fn(test_loader, model_class, criterion_class)

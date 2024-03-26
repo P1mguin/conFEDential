@@ -16,7 +16,7 @@ dataset:
     # Python function
   splitter:
     alpha:
-    percent_noniid:
+    percent_non_iid:
 model:
   criterion:
     type:

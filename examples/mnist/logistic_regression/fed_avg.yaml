@@ -20,7 +20,7 @@ dataset:
       }
   splitter:
     alpha: 1
-    percent_noniid: 25
+    percent_non_iid: 25
 model:
   criterion:
     type: CrossEntropyLoss

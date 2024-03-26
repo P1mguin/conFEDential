@@ -48,7 +48,7 @@ def test(parameters, Net, test_loader, Criterion):
 		set_weights(net, parameters)
 
 	criterion = Criterion()
-	correct, total, loss = 0, 0, 0.0
+	correct, total, loss = 0, 0, 0.
 	with torch.no_grad():
 		for data in test_loader:
 			features, labels = data['x'].to(DEVICE), data['y'].to(DEVICE)
