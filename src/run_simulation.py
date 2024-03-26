@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable, Dict, Iterator, List, Tuple, Type
 
 import flwr as fl
+import numpy.typing as npt
 import torch
 import torch.nn as nn
 from flwr.common import Scalar
@@ -15,7 +16,6 @@ from src.training import helper
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description="Running conFEDential simulation")
-seed = 78
 
 parser.add_argument(
 	"--yaml-file",
@@ -45,23 +45,38 @@ def get_client_fn(
 		criterion_class: Type[nn.Module],
 		optimizer_class: Callable[[Iterator[nn.Parameter]], Type[torch.optim.Optimizer]]
 ) -> Callable[[str], fl.client.Client]:
+	"""
+	Returns a client representing a training party in the federation
+	:param train_loaders: the list of data loaders where each index $i$ represents the data of client $i$
+	:param epochs: the amount of local rounds each client will run
+	:param model_class: the model class that the clients will train, initialization takes no parameters
+	:param criterion_class: the criterion class that the clients will train for, initialization takes no parameters
+	:param optimizer_class: the optimizer class that the clients will train with, initialization only takes the
+	parameters of a model
+	"""
 	class FlowerClient(fl.client.NumPyClient):
 		# Client does not get evaluation method, that is done at server level over all data at once
 		def __init__(self, cid: int):
 			self.parameters = None
-			self.train_loader = train_loaders[cid]
+			self.cid = cid
 
-		def get_parameters(self, config):
+		def get_parameters(self, config: dict) -> List[npt.NDArray]:
 			return self.parameters
 
-		def set_parameters(self, parameters):
+		def set_parameters(self, parameters: List[npt.NDArray]) -> None:
 			self.parameters = parameters
 
-		def fit(self, parameters, config):
+		def fit(self, parameters: List[npt.NDArray], config: dict) -> Tuple[List[npt.NDArray], int, dict]:
 			self.set_parameters(parameters)
 
-			new_parameters, data_size = helper.train(epochs, parameters, model_class, self.train_loader, criterion_class,
-													 optimizer_class)
+			new_parameters, data_size = helper.train(
+				epochs,
+				parameters,
+				model_class,
+				train_loaders[self.cid],
+				criterion_class,
+				optimizer_class
+			)
 
 			return new_parameters, data_size, {}
 
@@ -77,7 +92,11 @@ def get_evaluate_fn(
 		model_class: Type[nn.Module],
 		criterion_class: Type[nn.Module]
 ) -> Callable[[int, fl.common.NDArrays, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]:
-	def evaluate(server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]):
+	def evaluate(
+			server_round: int,
+			parameters: fl.common.NDArrays,
+			config: Dict[str, Scalar]
+	) -> Tuple[float, Dict[str, Scalar]]:
 		loss, accuracy, data_size = helper.test(parameters, model_class, test_loader, criterion_class)
 
 		return loss, {"accuracy": accuracy, "data_size": data_size, "server_round": server_round}
