@@ -10,7 +10,7 @@ simulation:
 dataset:
   name:
   preprocess_fn:
-    # Python function
+  # Python function
   splitter:
     alpha:
     percent_non_iid:
@@ -18,4 +18,4 @@ model:
   name:
   criterion:
   layers:
-    # Complete PyTorch model
+  # Complete PyTorch model

@@ -1,5 +1,6 @@
 import os
 import sys
+
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
 
@@ -61,6 +62,7 @@ def get_client_fn(
 	:param optimizer_class: the optimizer class that the clients will train with, initialization only takes the
 	parameters of a model
 	"""
+
 	class FlowerClient(fl.client.NumPyClient):
 		# Client does not get evaluation method, that is done at server level over all data at once
 		def __init__(self, cid: int):
@@ -162,7 +164,6 @@ def main() -> None:
 			"working_dir": PROJECT_DIRECTORY,
 		}
 	}
-        
 
 	try:
 		fl.simulation.start_simulation(
