@@ -4,8 +4,8 @@ wandb:
 simulation:
   batch_size: -1
   client_count: 4
-  fraction_fit: 1
-  global_rounds: 10
+  fraction_fit: 1.0
+  global_rounds: 1
   learning_method:
     optimizer: SGD
     lr: 0.05
@@ -23,7 +23,7 @@ dataset:
     percent_noniid: 25
 model:
   criterion:
-    type: BCELoss
+    type: CrossEntropyLoss
   layers:
     - type: Linear
       in_features: 784

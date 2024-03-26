@@ -4,7 +4,7 @@ wandb:
 simulation:
   batch_size: -1
   client_count: 4
-  fraction_fit: 1
+  fraction_fit: 1.0
   global_rounds: 10
   learning_method:
     optimizer: SGD

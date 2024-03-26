@@ -22,11 +22,11 @@ class MNIST(Dataset):
 			image_list=train_dataset["x"], label_list=train_dataset["y"], num_clients=client_count, method="dirichlet",
 			alpha=alpha, percent_noniid=percent_noniid)
 
-		dataloaders = []
+		trainloaders = []
 		for client_data in federated_train_data["with_class_completion"].values():
 			if batch_size == -1:
 				batch_size = len(client_data)
 			dataloader = DataLoader(client_data, batch_size=batch_size)
-			dataloaders.append(dataloader)
+			trainloaders.append(dataloader)
 		testloader = DataLoader(test_dataset, batch_size=len(test_dataset))
-		return dataloaders, testloader
+		return trainloaders, testloader
