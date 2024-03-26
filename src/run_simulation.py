@@ -108,9 +108,9 @@ def get_evaluate_fn(
 	) -> Tuple[float, Dict[str, Scalar]]:
 		loss, accuracy, data_size = helper.test(parameters, model_class, test_loader, criterion_class)
 
-		wandb.log({"loss": loss, "accuracy": accuracy, "server_round": server_round})
+		wandb.log({"loss": loss, "accuracy": accuracy})
 
-		return loss, {"accuracy": accuracy, "data_size": data_size, "server_round": server_round}
+		return loss, {"accuracy": accuracy, "data_size": data_size}
 
 	return evaluate
 
@@ -156,9 +156,6 @@ def main() -> None:
 
 	wandb_kwargs = utils.get_wandb_kwargs(config)
 	wandb.init(**wandb_kwargs)
-	wandb.define_metric("server_round")
-	wandb.define_metric("accuracy", step_metric="server_round")
-	wandb.define_metric("loss", step_metric="server_round")
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
