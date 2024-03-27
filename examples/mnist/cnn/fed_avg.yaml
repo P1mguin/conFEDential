@@ -5,7 +5,7 @@ simulation:
   global_rounds: 20
   learning_method:
     optimizer: SGD
-    learning_rate: 0.01
+    lr: 0.01
   local_rounds: 10
 dataset:
   name: MNIST
