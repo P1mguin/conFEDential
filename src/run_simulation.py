@@ -17,8 +17,9 @@ import wandb
 from flwr.common import Scalar
 from torch.utils.data import DataLoader
 
-import src.utils as utils
+import src.server_aggregation_strategies as agg
 from src.training import helper
+import src.utils as utils
 
 wandb.login()
 
@@ -144,7 +145,12 @@ def main() -> None:
 	evaluate = get_evaluate_fn(test_loader, model_class, criterion_class)
 	initial_parameters = fl.common.ndarrays_to_parameters(helper.get_weights_from_model(model_class()))
 
-	strategy = fl.server.strategy.FedAvg(
+	capture_name = utils.get_capture_path_from_config(config)
+
+	strategy = agg.get_capturing_class(
+		strategy=fl.server.strategy.FedAvg,
+		client_count=client_count,
+		output_path=capture_name,
 		fraction_fit=fraction_fit,
 		fraction_evaluate=fraction_evaluate,
 		min_fit_clients=min_fit_clients,
