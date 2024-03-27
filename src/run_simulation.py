@@ -127,30 +127,23 @@ def main() -> None:
 	yaml_file = str(Path(args.yaml_file).resolve())
 	config = utils.load_yaml_file(yaml_file)
 
-	print("get model and so")
 	model_class = utils.load_model_from_yaml_file(yaml_file)
 	criterion_class = getattr(torch.nn, config["model"]["criterion"])
 	optimizer_class = utils.load_optimizer_from_yaml_file(yaml_file)
 	train_loaders, test_loader = utils.load_data_loaders_from_config(config)
-	print("got train loader")
 	epochs = config["simulation"]["local_rounds"]
 	global_rounds = config["simulation"]["global_rounds"]
-
-	print("get clients")
 
 	client_fn = get_client_fn(train_loaders, epochs, model_class, criterion_class, optimizer_class)
 
 	client_count = config["simulation"]["client_count"]
-
 	fraction_fit = config["simulation"]["fraction_fit"]
 	fraction_evaluate = 0.
 	min_fit_clients = max(math.floor(fraction_fit * client_count), 1)
 	min_evaluate_clients = 0
 	evaluate = get_evaluate_fn(test_loader, model_class, criterion_class)
 
-	print("Initialize")
 	initial_parameters = fl.common.ndarrays_to_parameters(helper.get_weights_from_model(model_class()))
-	print("Initialized")
 
 	capture_name = utils.get_capture_path_from_config(config)
 

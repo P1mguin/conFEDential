@@ -41,7 +41,7 @@ model:
       kernel_size: 2
       stride: 2
     - type: Flatten
-      start_dim: 0
+      start_dim: 1
       end_dim: -1
     - type: Linear
       in_features: 3136
