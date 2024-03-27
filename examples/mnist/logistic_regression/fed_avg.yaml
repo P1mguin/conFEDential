@@ -1,8 +1,8 @@
 simulation:
   batch_size: 20
-  client_count: 4
-  fraction_fit: 1.0
-  global_rounds: 100
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 10
   learning_method:
     optimizer: SGD
     lr: 0.05
