@@ -7,8 +7,9 @@ from torch.utils.data import DataLoader
 from src.federated_datasets.Dataset import Dataset
 
 
-# Wrap in class to make code more readable
-class MNIST(Dataset):
+class Cifar10(Dataset):
+	class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
 	@staticmethod
 	def load_data(
 			client_count: int,
@@ -32,7 +33,7 @@ class MNIST(Dataset):
 		:param seed: Controls the starting point of the random number generator. Value is passed for reproducibility,
 		use your favourite number.
 		"""
-		train_dataset, test_dataset = load_dataset("mnist", cache_dir="cache/mnist", split=["train", "test"])
+		train_dataset, test_dataset = load_dataset("cifar10", cache_dir="cache/cifar10", split=["train", "test"])
 		train_dataset.set_format(type="np")
 		test_dataset.set_format(type="np")
 
@@ -40,8 +41,8 @@ class MNIST(Dataset):
 		test_dataset = test_dataset.map(preprocess_fn)
 
 		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
-			image_list=train_dataset["x"],
-			label_list=train_dataset["y"],
+			image_list=train_dataset["img"],
+			label_list=train_dataset["label"],
 			num_clients=client_count,
 			method="dirichlet",
 			alpha=alpha,
