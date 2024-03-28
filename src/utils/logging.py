@@ -19,8 +19,8 @@ def get_wandb_kwargs(config: dict) -> dict:
 			"batch_size": config["simulation"]["batch_size"],
 			"client_count": config["simulation"]["client_count"],
 			"fraction_fit": config["simulation"]["fraction_fit"],
-			"learning_method": config["simulation"]["learning_method"]["optimizer"],
-			"local_rounds": config["simulation"]["local_rounds"]
+			"local_rounds": config["simulation"]["local_rounds"],
+			**config["simulation"]["learning_method"]
 		}
 	}
 
