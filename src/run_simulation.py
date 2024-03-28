@@ -122,20 +122,10 @@ def get_evaluate_fn(
 	return evaluate
 
 
-def main() -> None:
-	args = parser.parse_args()
-
-	client_resources = {
-		"num_cpus": args.num_cpus,
-		"num_gpus": args.num_gpus
-	}
-
-	yaml_file = str(Path(args.yaml_file).resolve())
-	config = utils.load_yaml_file(yaml_file)
-
-	model_class = utils.load_model_from_yaml_file(yaml_file)
+def run_simulation(config: dict, client_resources: dict) -> None:
+	model_class = utils.load_model_from_config(config)
 	criterion_class = getattr(torch.nn, config["model"]["criterion"])
-	optimizer_class = utils.load_optimizer_from_yaml_file(yaml_file)
+	optimizer_class = utils.load_optimizer_from_config(config)
 	train_loaders, test_loader = utils.load_data_loaders_from_config(config)
 	epochs = config["simulation"]["local_rounds"]
 	global_rounds = config["simulation"]["global_rounds"]
@@ -187,6 +177,20 @@ def main() -> None:
 		wandb.finish(exit_code=1)
 
 	wandb.finish()
+
+
+def main() -> None:
+	args = parser.parse_args()
+
+	client_resources = {
+		"num_cpus": args.num_cpus,
+		"num_gpus": args.num_gpus
+	}
+
+	yaml_file = str(Path(args.yaml_file).resolve())
+	config = utils.load_yaml_file(yaml_file)
+	run_simulation(config, client_resources)
+
 
 
 if __name__ == '__main__':
