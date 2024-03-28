@@ -8,12 +8,12 @@ from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
 from flwr.server.client_proxy import ClientProxy
 
 
-def get_capturing_class(
+def get_capturing_strategy(
 		strategy: Type[fl.server.strategy.Strategy],
 		client_count: int,
 		output_path: str,
 		**agg_kwargs
-) -> Type[fl.server.strategy.Strategy]:
+) -> fl.server.strategy.Strategy:
 	class FedCapture(strategy):
 		def __init__(self, **kwargs):
 			super(FedCapture, self).__init__(**kwargs)

@@ -1,1 +1,1 @@
-from .capture_generator import get_capturing_class
+from .capture_generator import get_capturing_strategy

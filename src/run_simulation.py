@@ -147,7 +147,7 @@ def main() -> None:
 
 	capture_name = utils.get_capture_path_from_config(config)
 
-	strategy = agg.get_capturing_class(
+	strategy = agg.get_capturing_strategy(
 		strategy=fl.server.strategy.FedAvg,
 		client_count=client_count,
 		output_path=capture_name,
