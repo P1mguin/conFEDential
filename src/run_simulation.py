@@ -20,6 +20,12 @@ from torch.utils.data import DataLoader
 import src.server_aggregation_strategies as agg
 from src.training import helper
 import src.utils as utils
+import random
+import numpy as np
+
+torch.manual_seed(78)
+random.seed(78)
+np.random.seed(78)
 
 wandb.login()
 
