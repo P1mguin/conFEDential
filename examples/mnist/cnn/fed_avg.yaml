@@ -2,11 +2,11 @@ simulation:
   batch_size: 10
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 20
+  global_rounds: 100
   learning_method:
     optimizer: SGD
-    lr: 0.01
-  local_rounds: 10
+    lr: 0.15
+  local_rounds: 5
 dataset:
   name: MNIST
   preprocess_fn: |
