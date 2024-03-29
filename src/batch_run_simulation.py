@@ -57,8 +57,9 @@ def main() -> None:
 	batch_config = utils.load_yaml_file(yaml_file)
 	configs = utils.load_configs_from_batch_config(batch_config)
 	print(f"Loaded {len(configs)} configs, running...")
+	batch_run_name = input("What is the name of the batch run?\n")
 	for config in configs:
-		run_simulation(config, client_resources)
+		run_simulation(config, client_resources, batch_run_name)
 
 
 if __name__ == '__main__':

@@ -122,7 +122,7 @@ def get_evaluate_fn(
 	return evaluate
 
 
-def run_simulation(config: dict, client_resources: dict) -> None:
+def run_simulation(config: dict, client_resources: dict, batch_run_name: str = None) -> None:
 	model_class = utils.load_model_from_config(config)
 	criterion_class = getattr(torch.nn, config["model"]["criterion"])
 	optimizer_class = utils.load_optimizer_from_config(config)
@@ -156,7 +156,8 @@ def run_simulation(config: dict, client_resources: dict) -> None:
 		initial_parameters=initial_parameters
 	)
 
-	wandb_kwargs = utils.get_wandb_kwargs(config)
+	tags = [batch_run_name]
+	wandb_kwargs = utils.get_wandb_kwargs(config, tags)
 	wandb.init(**wandb_kwargs)
 	ray_init_args = {
 		"runtime_env": {
