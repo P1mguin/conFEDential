@@ -50,6 +50,7 @@ def main() -> None:
 	yaml_file = str(Path(args.yaml_file).resolve())
 	batch_config = utils.load_yaml_file(yaml_file)
 	configs = utils.load_configs_from_batch_config(batch_config)
+	print(f"Loaded {len(configs)} configs, running...")
 	for config in configs:
 		run_simulation(config, client_resources)
 
