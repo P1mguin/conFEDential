@@ -1,3 +1,9 @@
+import os
+import sys
+
+PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
+sys.path.append(PROJECT_DIRECTORY)
+
 import argparse
 import random
 from pathlib import Path
