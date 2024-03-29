@@ -1,0 +1,34 @@
+simulation:
+  batch_size:
+    values: [ -1, 1, 8, 16, 32, 64 ]
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 10
+  learning_method:
+    optimizer: SGD
+    lr:
+      min: 0.001
+      max: 0.301
+      step_size: 0.05
+  local_rounds:
+    values: [ 1, 5, 10, 20 ]
+dataset:
+  name: MNIST
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": element["image"].reshape(784) / 255.,
+        "y": element["label"]
+      }
+  splitter:
+    alpha: 1
+    percent_non_iid: 25
+model:
+  name: Logistic Regression
+  criterion: CrossEntropyLoss
+  layers:
+    - type: Linear
+      in_features: 784
+      out_features: 10
+    - type: Softmax
+      dim: 0
