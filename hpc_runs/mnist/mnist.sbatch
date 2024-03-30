@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -partition=main,students
+#SBATCH --partition=main,students
 #SBATCH --ntasks=2
 #SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-task=1
