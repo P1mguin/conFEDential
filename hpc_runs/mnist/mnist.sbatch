@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition=main,students
+#SBATCH --partition=main
 #SBATCH --ntasks=2
 #SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-task=1
@@ -9,7 +9,8 @@
 hostname
 
 # Load relevant modules
-module load nvidia/nvhpc/23.3
+module load nvidia/cuda-11.8
+module load nvidia/cuda-11.x_cudnn-8.8
 module load python/3.10.7
 source venv/bin/activate
 
