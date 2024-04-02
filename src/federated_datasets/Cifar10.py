@@ -34,7 +34,13 @@ class Cifar10(Dataset):
 		use your favourite number.
 		"""
 		Dataset.is_data_downloaded("cifar10")
-		train_dataset, test_dataset = load_dataset("cifar10", cache_dir=".cache", split=["train", "test"])
+		train_dataset, test_dataset = load_dataset(
+			"cifar10",
+			name="cifar10",
+			cache_dir=".cache",
+			split=["train", "test"],
+			download_mode="reuse_dataset_if_exists"
+		)
 		train_dataset.set_format(type="np")
 		test_dataset.set_format(type="np")
 

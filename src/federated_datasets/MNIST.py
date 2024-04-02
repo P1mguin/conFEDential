@@ -35,7 +35,13 @@ class MNIST(Dataset):
 		"""
 		Dataset.is_data_downloaded("mnist")
 		print("Working directory in MNIST:", os.getcwd())
-		train_dataset, test_dataset = load_dataset("mnist", cache_dir=".cache", split=["train", "test"])
+		train_dataset, test_dataset = load_dataset(
+			"mnist",
+			name="mnist",
+			cache_dir=".cache",
+			split=["train", "test"],
+			download_mode="reuse_dataset_if_exists"
+		)
 		train_dataset.set_format(type="np")
 		test_dataset.set_format(type="np")
 

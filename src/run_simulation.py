@@ -23,6 +23,7 @@ import src.utils as utils
 import random
 import numpy as np
 
+os.environ["HF_DATASETS_OFFLINE"] = "1"
 torch.manual_seed(78)
 random.seed(78)
 np.random.seed(78)
