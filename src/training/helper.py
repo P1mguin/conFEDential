@@ -52,7 +52,7 @@ def train(
 
 	criterion = criterion_class()
 	optimizer = optimizer_class(net.parameters())
-	old_parameters = get_weights_from_model(net)
+
 	for _ in range(epochs):
 		for features, labels in train_loader:
 			features, labels = features.to(DEVICE), labels.to(DEVICE)
@@ -62,8 +62,7 @@ def train(
 			optimizer.step()
 
 	parameters = get_weights_from_model(net)
-	new_parameters = get_weights_from_model(net)
-	print(old_parameters, new_parameters, old_parameters == new_parameters)
+
 	data_size = len(train_loader.dataset)
 	return parameters, data_size
 
