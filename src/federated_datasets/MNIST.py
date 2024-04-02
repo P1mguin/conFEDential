@@ -34,7 +34,6 @@ class MNIST(Dataset):
 		use your favourite number.
 		"""
 		Dataset.is_data_downloaded("mnist")
-		print("Working directory in MNIST:", os.getcwd())
 		train_dataset, test_dataset = load_dataset(
 			"mnist",
 			name="mnist",
