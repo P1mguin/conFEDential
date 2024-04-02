@@ -257,4 +257,4 @@ fabric.properties
 .idea/
 cache/
 wandb/
-captured/
+.captured/
