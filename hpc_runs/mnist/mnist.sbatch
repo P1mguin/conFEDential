@@ -4,6 +4,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-task=1
 #SBATCH --mail-type=ALL
+#SBATCH --output hpc_runs/slurm_outputs/mnist/slurm-%j.out
 
 # Show node in output file
 hostname
