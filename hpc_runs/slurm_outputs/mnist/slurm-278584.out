@@ -1,0 +1,175 @@
+ctit082
+2024-04-02 14:09:40.405075: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-02 14:09:40.405075: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-02 14:09:42.249041: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+2024-04-02 14:09:42.249041: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Using the latest cached version of the dataset since mnist couldn't be found on the Hugging Face Hub
+Using the latest cached version of the dataset since mnist couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'mnist' at .cache/mnist/mnist/1.0.0/b06aab39e05f7bcd9635d18ed25d06eae523c574 (last modified on Tue Apr  2 11:37:01 2024).
+Found the latest cached dataset configuration 'mnist' at .cache/mnist/mnist/1.0.0/b06aab39e05f7bcd9635d18ed25d06eae523c574 (last modified on Tue Apr  2 11:37:01 2024).
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-02 14:16:53,974 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=10, round_timeout=None)
+2024-04-02 14:16:56,747	INFO worker.py:1621 -- Started a local Ray instance.
+2024-04-02 14:16:57,041	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-04-02 14:16:57,225	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_dbcac029be709133.zip' (7.10MiB) to Ray cluster...
+2024-04-02 14:16:57,253	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_dbcac029be709133.zip'.
+INFO flwr 2024-04-02 14:17:03,740 | app.py:213 | Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'node:10.20.240.12': 1.0, 'GPU': 1.0, 'object_store_memory': 80386686566.0, 'CPU': 64.0, 'memory': 177568935322.0, 'accelerator_type:TITAN': 1.0}
+INFO flwr 2024-04-02 14:17:03,741 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-04-02 14:17:03,741 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.125}
+INFO flwr 2024-04-02 14:17:03,759 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-04-02 14:17:03,760 | server.py:89 | Initializing global parameters
+INFO flwr 2024-04-02 14:17:03,761 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-04-02 14:17:03,761 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-04-02 14:17:07,435 | server.py:94 | initial parameters (loss, other metrics): 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}
+INFO flwr 2024-04-02 14:17:07,436 | server.py:104 | FL starting
+DEBUG flwr 2024-04-02 14:17:07,436 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=1766682)[0m 2024-04-02 14:17:07.540890: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=1766682)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=1766682)[0m 2024-04-02 14:17:09.196720: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[2m[36m(DefaultActor pid=1766682)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=1766682)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=1766678)[0m 2024-04-02 14:17:07.821699: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.[32m [repeated 7x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/ray-logging.html#log-deduplication for more options.)[0m
+[2m[36m(pid=1766678)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=1766678)[0m 2024-04-02 14:17:09.682846: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT[32m [repeated 7x across cluster][0m
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-02 14:17:17,699 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=10, round_timeout=None)
+DEBUG flwr 2024-04-02 14:17:18,920 | server.py:236 | fit_round 1 received 10 results and 0 failures
+WARNING flwr 2024-04-02 14:17:18,957 | fedavg.py:250 | No fit_metrics_aggregation_fn provided
+2024-04-02 14:17:20,299	INFO worker.py:1621 -- Started a local Ray instance.
+INFO flwr 2024-04-02 14:17:20,406 | server.py:125 | fit progress: (1, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 12.969894409005065)
+INFO flwr 2024-04-02 14:17:20,406 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:17:20,407 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+2024-04-02 14:17:20,491	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-04-02 14:17:20,686	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_492c5e04f58903e3.zip' (7.11MiB) to Ray cluster...
+2024-04-02 14:17:20,709	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_492c5e04f58903e3.zip'.
+INFO flwr 2024-04-02 14:17:27,701 | app.py:213 | Flower VCE: Ray initialized with resources: {'object_store_memory': 78067900416.0, 'GPU': 1.0, 'node:__internal_head__': 1.0, 'node:10.20.240.12': 1.0, 'accelerator_type:TITAN': 1.0, 'memory': 172158434304.0, 'CPU': 64.0}
+INFO flwr 2024-04-02 14:17:27,701 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-04-02 14:17:27,701 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.125}
+INFO flwr 2024-04-02 14:17:27,720 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-04-02 14:17:27,721 | server.py:89 | Initializing global parameters
+INFO flwr 2024-04-02 14:17:27,721 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-04-02 14:17:27,722 | server.py:91 | Evaluating initial parameters
+[2m[36m(pid=1769718)[0m 2024-04-02 14:17:31.495822: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=1769718)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+DEBUG flwr 2024-04-02 14:17:32,957 | server.py:236 | fit_round 2 received 10 results and 0 failures
+[2m[36m(pid=1769720)[0m 2024-04-02 14:17:33.250558: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-02 14:17:34,880 | server.py:125 | fit progress: (2, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 27.444145891000517)
+INFO flwr 2024-04-02 14:17:34,880 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:17:34,881 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+INFO flwr 2024-04-02 14:17:35,738 | server.py:94 | initial parameters (loss, other metrics): 2.3025906085968018, {'accuracy': 0.146, 'data_size': 10000}
+INFO flwr 2024-04-02 14:17:35,738 | server.py:104 | FL starting
+DEBUG flwr 2024-04-02 14:17:35,738 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(DefaultActor pid=1769730)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=1769730)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=1769716)[0m 2024-04-02 14:17:31.765287: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.[32m [repeated 7x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/ray-logging.html#log-deduplication for more options.)[0m
+[2m[36m(pid=1769716)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=1769716)[0m 2024-04-02 14:17:33.634483: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT[32m [repeated 7x across cluster][0m
+DEBUG flwr 2024-04-02 14:17:42,905 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:17:44,584 | server.py:125 | fit progress: (3, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 37.14766110200435)
+INFO flwr 2024-04-02 14:17:44,584 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:17:44,584 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+[2m[36m(DefaultActor pid=1769718)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)[32m [repeated 6x across cluster][0m
+[2m[36m(DefaultActor pid=1769718)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)[32m [repeated 6x across cluster][0m
+DEBUG flwr 2024-04-02 14:17:46,995 | server.py:236 | fit_round 1 received 10 results and 0 failures
+WARNING flwr 2024-04-02 14:17:50,906 | fedavg.py:250 | No fit_metrics_aggregation_fn provided
+DEBUG flwr 2024-04-02 14:17:52,148 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:17:53,696 | server.py:125 | fit progress: (4, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 46.25975039502373)
+INFO flwr 2024-04-02 14:17:53,696 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:17:53,696 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+INFO flwr 2024-04-02 14:17:55,395 | server.py:125 | fit progress: (1, 2.3025906085968018, {'accuracy': 0.146, 'data_size': 10000}, 19.656559914990794)
+INFO flwr 2024-04-02 14:17:55,395 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:17:55,395 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:18:01,317 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:18:02,728 | server.py:125 | fit progress: (5, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 55.291645453020465)
+INFO flwr 2024-04-02 14:18:02,728 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:02,728 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:18:04,457 | server.py:236 | fit_round 2 received 10 results and 0 failures
+DEBUG flwr 2024-04-02 14:18:10,657 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:18:12,157 | server.py:125 | fit progress: (6, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 64.72129981100443)
+INFO flwr 2024-04-02 14:18:12,158 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:12,158 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+INFO flwr 2024-04-02 14:18:19,066 | server.py:125 | fit progress: (2, 2.3025906085968018, {'accuracy': 0.1459, 'data_size': 10000}, 43.32809132800321)
+INFO flwr 2024-04-02 14:18:19,067 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:19,067 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:18:19,609 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:18:21,349 | server.py:125 | fit progress: (7, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 73.91292939501)
+INFO flwr 2024-04-02 14:18:21,349 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:21,350 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:18:26,868 | server.py:236 | fit_round 3 received 10 results and 0 failures
+DEBUG flwr 2024-04-02 14:18:29,046 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:18:30,755 | server.py:125 | fit progress: (8, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 83.3192418180115)
+INFO flwr 2024-04-02 14:18:30,756 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:30,756 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:18:38,323 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:18:40,084 | server.py:125 | fit progress: (9, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 92.64824370099814)
+INFO flwr 2024-04-02 14:18:40,085 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:40,085 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:18:47,302 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:18:48,313 | server.py:125 | fit progress: (3, 2.3025906085968018, {'accuracy': 0.1459, 'data_size': 10000}, 72.57476116300677)
+INFO flwr 2024-04-02 14:18:48,313 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:18:48,314 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+INFO flwr 2024-04-02 14:18:48,883 | server.py:125 | fit progress: (10, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 101.44663964601932)
+INFO flwr 2024-04-02 14:18:48,883 | server.py:171 | evaluate_round 10: no clients selected, cancel
+INFO flwr 2024-04-02 14:18:48,883 | server.py:153 | FL finished in 101.44715601400821
+INFO flwr 2024-04-02 14:18:48,884 | app.py:226 | app_fit: losses_distributed []
+INFO flwr 2024-04-02 14:18:48,884 | app.py:227 | app_fit: metrics_distributed_fit {}
+INFO flwr 2024-04-02 14:18:48,884 | app.py:228 | app_fit: metrics_distributed {}
+INFO flwr 2024-04-02 14:18:48,884 | app.py:229 | app_fit: losses_centralized [(0, 2.302588701248169), (1, 2.302588701248169), (2, 2.302588701248169), (3, 2.302588701248169), (4, 2.302588701248169), (5, 2.302588701248169), (6, 2.302588701248169), (7, 2.302588701248169), (8, 2.302588701248169), (9, 2.302588701248169), (10, 2.302588701248169)]
+INFO flwr 2024-04-02 14:18:48,884 | app.py:230 | app_fit: metrics_centralized {'accuracy': [(0, 0.0679), (1, 0.0679), (2, 0.0679), (3, 0.0679), (4, 0.0679), (5, 0.0679), (6, 0.0679), (7, 0.0679), (8, 0.0679), (9, 0.0679), (10, 0.0679)], 'data_size': [(0, 10000), (1, 10000), (2, 10000), (3, 10000), (4, 10000), (5, 10000), (6, 10000), (7, 10000), (8, 10000), (9, 10000), (10, 10000)]}
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.0679
+wandb:     loss 2.30259
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240402_141653-8428t9lf
+wandb: Find logs at: ./wandb/offline-run-20240402_141653-8428t9lf/logs
+DEBUG flwr 2024-04-02 14:18:55,607 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:19:22,193 | server.py:125 | fit progress: (4, 2.3025906085968018, {'accuracy': 0.1461, 'data_size': 10000}, 106.45460588301648)
+INFO flwr 2024-04-02 14:19:22,193 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:19:22,193 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:19:29,570 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:20:02,313 | server.py:125 | fit progress: (5, 2.3025906085968018, {'accuracy': 0.1459, 'data_size': 10000}, 146.57428611599607)
+INFO flwr 2024-04-02 14:20:02,313 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:20:02,313 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:20:09,772 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:20:54,046 | server.py:125 | fit progress: (6, 2.3025906085968018, {'accuracy': 0.146, 'data_size': 10000}, 198.30788146500709)
+INFO flwr 2024-04-02 14:20:54,047 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:20:54,047 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:21:01,894 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:21:51,787 | server.py:125 | fit progress: (7, 2.3025906085968018, {'accuracy': 0.146, 'data_size': 10000}, 256.0489803609962)
+INFO flwr 2024-04-02 14:21:51,788 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:21:51,788 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:21:59,320 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-04-02 14:22:58,591 | server.py:125 | fit progress: (8, 2.3025906085968018, {'accuracy': 0.1463, 'data_size': 10000}, 322.852761637012)
+INFO flwr 2024-04-02 14:22:58,591 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-04-02 14:22:58,592 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 14:23:05,861 | server.py:236 | fit_round 9 received 10 results and 0 failures
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit082: error: *** STEP 278584.0 ON ctit082 CANCELLED AT 2024-04-02T14:23:08 ***
+*** SIGTERM received at time=1712060588 on cpu 2 ***
+slurmstepd-ctit082: error: *** JOB 278584 ON ctit082 CANCELLED AT 2024-04-02T14:23:08 ***
+slurmstepd-ctit082: error: *** STEP 278584.1 ON ctit082 CANCELLED AT 2024-04-02T14:23:08 ***
+*** SIGTERM received at time=1712060588 on cpu 10 ***
+PC: @     0x7f419a3bc743  (unknown)  (unknown)
+    @     0x7f419a274090  (unknown)  (unknown)
+[2024-04-02 14:23:08,131 E 1763819 1763819] logging.cc:361: *** SIGTERM received at time=1712060588 on cpu 2 ***
+[2024-04-02 14:23:08,131 E 1763819 1763819] logging.cc:361: PC: @     0x7f419a3bc743  (unknown)  (unknown)
+[2024-04-02 14:23:08,131 E 1763819 1763819] logging.cc:361:     @     0x7f419a274090  (unknown)  (unknown)
+Loaded 168 configs, running...
+PC: @     0x7f010e15d99f  (unknown)  poll
+    @     0x7f010e08e090  (unknown)  (unknown)
+    @ ... and at least 7 more frames
+[2024-04-02 14:23:08,139 E 1763821 1763821] logging.cc:361: *** SIGTERM received at time=1712060588 on cpu 10 ***
+[2024-04-02 14:23:08,139 E 1763821 1763821] logging.cc:361: PC: @     0x7f010e15d99f  (unknown)  poll
+[2024-04-02 14:23:08,139 E 1763821 1763821] logging.cc:361:     @     0x7f010e08e090  (unknown)  (unknown)
+[2024-04-02 14:23:08,139 E 1763821 1763821] logging.cc:361:     @ ... and at least 7 more frames
+Loaded 168 configs, running...
