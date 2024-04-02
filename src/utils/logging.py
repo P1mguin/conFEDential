@@ -40,6 +40,6 @@ def get_capture_path_from_config(config: dict) -> str:
 	model_name = config["model"]["name"]
 	strategy = config["simulation"]["learning_method"]["optimizer"]
 	time = datetime.now().strftime("%Y-%m-%d_%H-%M")
-	relative_path = f"./captured/{dataset}/{model_name}/{strategy}/{time}"
+	relative_path = f"./.captured/{dataset}/{model_name}/{strategy}/{time}"
 	absolute_path = str(Path(relative_path).resolve())
 	return absolute_path
