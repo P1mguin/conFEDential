@@ -1,18 +1,14 @@
 project_name = "conFEDential"
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 
-def get_wandb_kwargs(config: dict, tags: List[str] = None) -> dict:
+def get_wandb_kwargs(config: dict, *tags: str) -> dict:
 	"""
 	A centralized configuration of what key word args are given to the wandb init command
 	:param config: contents of the YAML config
 	:param tags: any additional tags that need to be added
 	"""
-	if tags is None:
-		tags = []
-
 	time = datetime.now().strftime("%Y-%m-%d_%H:%M")
 
 	return {

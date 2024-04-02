@@ -155,9 +155,13 @@ def run_simulation(config: dict, client_resources: dict, batch_run_name: str = N
 		initial_parameters=initial_parameters
 	)
 
-	tags = [batch_run_name]
-	wandb_kwargs = utils.get_wandb_kwargs(config, tags)
-	wandb.init(**wandb_kwargs)
+	if batch_run_name is not None:
+		wandb_kwargs = utils.get_wandb_kwargs(config, batch_run_name)
+		wandb.init(mode="offline", **wandb_kwargs)
+	else:
+		wandb_kwargs = utils.get_wandb_kwargs(config)
+		wandb.init(**wandb_kwargs)
+
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
