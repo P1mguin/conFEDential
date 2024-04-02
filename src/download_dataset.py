@@ -14,7 +14,7 @@ parser.add_argument(
 def main() -> None:
 	args = parser.parse_args()
 	dataset = args.dataset
-	load_dataset(dataset, cache_dir="../.cache", download_mode="force_redownload", split=["train", "test"])
+	load_dataset(dataset, cache_dir=".cache", download_mode="force_redownload", split=["train", "test"])
 
 
 if __name__ == '__main__':
