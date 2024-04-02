@@ -1,0 +1,89 @@
+ctit088
+	Adding python 3.10.7 (ubuntu 20.04) to your environment
+2024-04-02 15:45:02.949266: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-04-02 15:45:24.070144: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-02 15:46:25.416550: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Using the latest cached version of the dataset since mnist couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'mnist' at .cache/mnist/mnist/1.0.0/b06aab39e05f7bcd9635d18ed25d06eae523c574 (last modified on Tue Apr  2 11:37:01 2024).
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-02 15:55:32,079 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=10, round_timeout=None)
+2024-04-02 15:55:57,400	ERROR services.py:1207 -- Failed to start the dashboard 
+2024-04-02 15:55:57,401	ERROR services.py:1232 -- Error should be written to 'dashboard.log' or 'dashboard.err'. We are printing the last 20 lines for you. See 'https://docs.ray.io/en/master/ray-observability/ray-logging.html#logging-directory-structure' to find where the log file is.
+2024-04-02 15:55:57,402	ERROR services.py:1276 -- 
+The last 20 lines of /tmp/ray/session_2024-04-02_15-55-32_411790_2902227/logs/dashboard.log (it contains the error message from the dashboard): 
+2024-04-02 15:55:48,582	INFO utils.py:123 -- Module ray.dashboard.modules.actor.actor_head cannot be loaded because we cannot import all dependencies. Install this module using `pip install 'ray[default]'` for the full dashboard functionality. Error: No module named 'opencensus'
+2024-04-02 15:55:50,189	INFO utils.py:123 -- Module ray.dashboard.modules.event.event_head cannot be loaded because we cannot import all dependencies. Install this module using `pip install 'ray[default]'` for the full dashboard functionality. Error: No module named 'opencensus'
+2024-04-02 15:55:50,342	INFO utils.py:123 -- Module ray.dashboard.modules.healthz.healthz_agent cannot be loaded because we cannot import all dependencies. Install this module using `pip install 'ray[default]'` for the full dashboard functionality. Error: No module named 'opencensus'
+2024-04-02 15:55:50,382	INFO utils.py:123 -- Module ray.dashboard.modules.healthz.healthz_head cannot be loaded because we cannot import all dependencies. Install this module using `pip install 'ray[default]'` for the full dashboard functionality. Error: No module named 'opencensus'
+
+2024-04-02 15:56:00,378	INFO worker.py:1621 -- Started a local Ray instance.
+2024-04-02 15:56:10,683	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-04-02 15:56:12,069	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_cacdeb5eb42d7cf8.zip' (7.31MiB) to Ray cluster...
+2024-04-02 15:56:12,105	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_cacdeb5eb42d7cf8.zip'.
+INFO flwr 2024-04-02 15:56:26,133 | app.py:213 | Flower VCE: Ray initialized with resources: {'CPU': 64.0, 'node:__internal_head__': 1.0, 'GPU': 1.0, 'accelerator_type:G': 1.0, 'memory': 178058274612.0, 'node:10.20.240.18': 1.0, 'object_store_memory': 80596403404.0}
+INFO flwr 2024-04-02 15:56:26,134 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-04-02 15:56:26,134 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 4, 'num_gpus': 0.125}
+INFO flwr 2024-04-02 15:56:26,148 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-04-02 15:56:26,149 | server.py:89 | Initializing global parameters
+INFO flwr 2024-04-02 15:56:26,149 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-04-02 15:56:26,149 | server.py:91 | Evaluating initial parameters
+[2m[36m(pid=2906129)[0m 2024-04-02 15:56:30.085162: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=2906134)[0m 2024-04-02 15:56:30.166801: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=2906134)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=2906129)[0m 2024-04-02 15:56:31.985517: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-02 15:56:34,046 | server.py:94 | initial parameters (loss, other metrics): 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}
+INFO flwr 2024-04-02 15:56:34,046 | server.py:104 | FL starting
+DEBUG flwr 2024-04-02 15:56:34,046 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(DefaultActor pid=2906129)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=2906129)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=2906132)[0m 2024-04-02 15:56:30.242425: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.[32m [repeated 7x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/ray-logging.html#log-deduplication for more options.)[0m
+[2m[36m(pid=2906132)[0m 2024-04-02 15:56:30.327624: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=2906132)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=2906132)[0m 2024-04-02 15:56:31.985414: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT[32m [repeated 7x across cluster][0m
+DEBUG flwr 2024-04-02 15:56:55,389 | server.py:236 | fit_round 1 received 10 results and 0 failures
+WARNING flwr 2024-04-02 15:56:55,433 | fedavg.py:250 | No fit_metrics_aggregation_fn provided
+INFO flwr 2024-04-02 15:56:56,648 | server.py:125 | fit progress: (1, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 22.601505362981698)
+INFO flwr 2024-04-02 15:56:56,648 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:56:56,648 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:03,674 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:04,996 | server.py:125 | fit progress: (2, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 30.949590296979295)
+INFO flwr 2024-04-02 15:57:04,996 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:04,996 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:11,202 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:12,447 | server.py:125 | fit progress: (3, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 38.40107745298883)
+INFO flwr 2024-04-02 15:57:12,448 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:12,448 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:18,915 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:20,242 | server.py:125 | fit progress: (4, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 46.1955431039969)
+INFO flwr 2024-04-02 15:57:20,242 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:20,242 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:26,885 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:28,009 | server.py:125 | fit progress: (5, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 53.96279840398347)
+INFO flwr 2024-04-02 15:57:28,009 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:28,009 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:34,753 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:35,888 | server.py:125 | fit progress: (6, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 61.842014636000386)
+INFO flwr 2024-04-02 15:57:35,888 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:35,889 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:42,520 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:43,916 | server.py:125 | fit progress: (7, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 69.86969740397763)
+INFO flwr 2024-04-02 15:57:43,916 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:43,916 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-04-02 15:57:50,067 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-04-02 15:57:51,462 | server.py:125 | fit progress: (8, 2.302588701248169, {'accuracy': 0.0679, 'data_size': 10000}, 77.41617607200169)
+INFO flwr 2024-04-02 15:57:51,463 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-04-02 15:57:51,463 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit088: error: *** JOB 278592 ON ctit088 CANCELLED AT 2024-04-02T15:57:53 ***
+slurmstepd-ctit088: error: *** STEP 278592.0 ON ctit088 CANCELLED AT 2024-04-02T15:57:53 ***
+*** SIGTERM received at time=1712066273 on cpu 56 ***
+PC: @     0x7f1e90bc0454  (unknown)  do_futex_wait.constprop.0
+    @     0x7f1e91023090  (unknown)  (unknown)
+    @     0x7f1e00000000  (unknown)  (unknown)
+[2024-04-02 15:57:53,108 E 2902227 2902227] logging.cc:361: *** SIGTERM received at time=1712066273 on cpu 56 ***
+[2024-04-02 15:57:53,108 E 2902227 2902227] logging.cc:361: PC: @     0x7f1e90bc0454  (unknown)  do_futex_wait.constprop.0
+[2024-04-02 15:57:53,108 E 2902227 2902227] logging.cc:361:     @     0x7f1e91023090  (unknown)  (unknown)
+[2024-04-02 15:57:53,108 E 2902227 2902227] logging.cc:361:     @     0x7f1e00000000  (unknown)  (unknown)
