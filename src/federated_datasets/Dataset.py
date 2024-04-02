@@ -1,3 +1,4 @@
+import os.path
 from abc import ABC, abstractmethod
 from typing import Callable, List, Tuple
 
@@ -30,3 +31,8 @@ class Dataset(ABC):
 		use your favourite number.
 		"""
 		pass
+
+	@staticmethod
+	def is_data_downloaded(dataset):
+		if not os.path.isdir(f".cache/{dataset}"):
+			raise FileNotFoundError(f"Was unable to open cache for {dataset}, download it using the command:\npython download_dataset.py --dataset {dataset}")

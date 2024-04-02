@@ -33,7 +33,8 @@ class Cifar10(Dataset):
 		:param seed: Controls the starting point of the random number generator. Value is passed for reproducibility,
 		use your favourite number.
 		"""
-		train_dataset, test_dataset = load_dataset("cifar10", cache_dir="cache/cifar10", split=["train", "test"])
+		Dataset.is_data_downloaded("cifar10")
+		train_dataset, test_dataset = load_dataset("cifar10", cache_dir=".cache", split=["train", "test"])
 		train_dataset.set_format(type="np")
 		test_dataset.set_format(type="np")
 

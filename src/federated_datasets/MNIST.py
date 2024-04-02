@@ -32,7 +32,8 @@ class MNIST(Dataset):
 		:param seed: Controls the starting point of the random number generator. Value is passed for reproducibility,
 		use your favourite number.
 		"""
-		train_dataset, test_dataset = load_dataset("mnist", cache_dir="cache/mnist", split=["train", "test"])
+		Dataset.is_data_downloaded("mnist")
+		train_dataset, test_dataset = load_dataset("mnist", cache_dir=".cache", split=["train", "test"])
 		train_dataset.set_format(type="np")
 		test_dataset.set_format(type="np")
 
