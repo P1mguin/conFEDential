@@ -1,42 +1,10 @@
 import copy
+import pickle
 from typing import List, Tuple
 
 import yaml
 
 import src.utils as utils
-
-
-def load_yaml_file(yaml_file: str) -> dict:
-	"""
-	Loads contents of YAML file into a dictionary
-	:param yaml_file: absolute path to YAML file
-	"""
-	with open(yaml_file, 'r') as f:
-		return yaml.safe_load(f)
-
-
-def load_configs_from_batch_config(configs: dict | List[dict], *path: Tuple[str]) -> List[dict]:
-	"""
-	Loads the possible configs from a batch config
-	:param configs: either the batch config, or a helper variable for the recursion that transfers the possible
-	configs into several function calls
-	:param path: a helper variable for the recursion that transfers which path is being checked
-	"""
-	if not isinstance(configs, list):
-		configs = [configs]
-
-	config = utils.get_dict_value_from_path(configs[0], *path)
-
-	if not isinstance(config, dict):
-		return configs
-
-	if config.get("values") is not None or config.get("min") is not None:
-		configs = _adjust_config_values(config, configs, *path)
-	else:
-		for value in config.keys():
-			configs = load_configs_from_batch_config(configs, *path, value)
-
-	return configs
 
 
 def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> List[dict]:
@@ -67,3 +35,54 @@ def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> Lis
 			new_configs.append(new_config)
 
 	return new_configs
+
+
+def generate_configs_from_batch_config(configs: dict | List[dict], *path: str) -> List[dict]:
+	"""
+	Loads the possible configs from a batch config
+	:param configs: either the batch config, or a helper variable for the recursion that transfers the possible
+	configs into several function calls
+	:param path: a helper variable for the recursion that transfers which path is being checked
+	"""
+	if not isinstance(configs, list):
+		configs = [configs]
+
+	config = utils.get_dict_value_from_path(configs[0], *path)
+
+	if not isinstance(config, dict):
+		return configs
+
+	if config.get("values") is not None or config.get("min") is not None:
+		configs = _adjust_config_values(config, configs, *path)
+	else:
+		for value in config.keys():
+			configs = generate_configs_from_batch_config(configs, *path, value)
+
+	return configs
+
+
+def load_configs_from_batch_config_path(config_path):
+	file_path = config_path.replace('.yaml', '.pkl')
+
+	try:
+		with open(file_path, "rb") as f:
+			return pickle.load(f)
+	except FileNotFoundError as _:
+		pass
+
+	batch_config = utils.load_yaml_file(config_path)
+	configs = utils.generate_configs_from_batch_config(batch_config)
+
+	with open(file_path, "wb") as f:
+		pickle.dump(configs, f)
+
+	return configs
+
+
+def load_yaml_file(yaml_file: str) -> dict:
+	"""
+	Loads contents of YAML file into a dictionary
+	:param yaml_file: absolute path to YAML file
+	"""
+	with open(yaml_file, 'r') as f:
+		return yaml.safe_load(f)
