@@ -10,7 +10,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import wandb
 
 from src import utils
 from src.run_simulation import run_simulation
@@ -53,7 +52,7 @@ def main() -> None:
 
 	yaml_file = str(Path(args.yaml_file).resolve())
 	batch_config = utils.load_yaml_file(yaml_file)
-	configs = utils.load_configs_from_batch_config(batch_config)
+	configs = utils.load_configs_from_batch_config_path(yaml_file)
 	print(f"Loaded {len(configs)} configs, running...")
 	batch_run_name = f"{batch_config['dataset']['name']}-{batch_config['model']['name']}-{batch_config['simulation']['learning_method']['optimizer']}"
 	for config in configs:
