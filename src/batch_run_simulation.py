@@ -56,6 +56,7 @@ def main() -> None:
 	print(f"Loaded {len(configs)} configs, running...")
 	batch_run_name = f"{batch_config['dataset']['name']}-{batch_config['model']['name']}-{batch_config['simulation']['learning_method']['optimizer']}"
 	for config in configs:
+		print(config)
 		run_simulation(config, client_resources, batch_run_name)
 
 

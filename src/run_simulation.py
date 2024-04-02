@@ -179,7 +179,7 @@ def run_simulation(config: dict, client_resources: dict, batch_run_name: str = N
 		)
 	except Exception as _:
 		wandb.finish(exit_code=1)
-
+	print("Finished")
 	wandb.finish()
 
 
