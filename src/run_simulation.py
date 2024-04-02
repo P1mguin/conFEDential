@@ -27,8 +27,6 @@ torch.manual_seed(78)
 random.seed(78)
 np.random.seed(78)
 
-wandb.login()
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description="Running conFEDential simulation")
 
