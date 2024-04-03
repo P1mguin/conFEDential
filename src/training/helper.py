@@ -48,7 +48,7 @@ def train(
 	net = model_class().to(DEVICE)
 
 	if parameters is not None:
-		set_weights(net, parameters.copy())
+		set_weights(net, parameters)
 
 	criterion = criterion_class()
 	optimizer = optimizer_class(net.parameters())
