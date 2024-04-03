@@ -80,6 +80,7 @@ def get_capturing_strategy(
 				captured_parameters[cid] = parameters
 			self._capture_parameters(captured_parameters)
 
+			print(strategy.aggregate_fit(self, server_round, results, failures))
 			return strategy.aggregate_fit(self, server_round, results, failures)
 
 	return FedCapture(**agg_kwargs)
