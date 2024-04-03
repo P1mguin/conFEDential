@@ -76,7 +76,7 @@ def get_capturing_strategy(
 			captured_parameters = {}
 			for client_proxy, fit_results in results:
 				cid = int(client_proxy.cid)
-				parameters = parameters_to_ndarrays(fit_results.parameters)
+				parameters = [parameter.copy() for parameter in parameters_to_ndarrays(fit_results.parameters)]
 				captured_parameters[cid] = parameters
 			self._capture_parameters(captured_parameters)
 
