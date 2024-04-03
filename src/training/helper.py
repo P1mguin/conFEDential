@@ -92,10 +92,7 @@ def test(
 			features, labels = data['x'].to(DEVICE), data['y'].to(DEVICE)
 			outputs = net(features)
 			loss += criterion(outputs, labels).item()
-			if outputs.data.shape[1] == 1:
-				predicted = torch.round(outputs.data)
-			else:
-				predicted = torch.max(outputs.data, 1)[1]
+			_, predicted = torch.max(outputs.data, 1)
 			total += labels.size(0)
 			correct += (predicted == labels).sum().item()
 	accuracy = correct / total
