@@ -14,7 +14,7 @@ def get_weights_from_model(model: nn.Module) -> List[npt.NDArray]:
 	Takes a PyTorch model and returns its parameters as a list of NumPy arrays
 	:param model: the PyTorch model
 	"""
-	return [val.cpu().numpy() for _, val in model.state_dict().items()]
+	return [val.cpu().numpy().copy() for _, val in model.state_dict().items()]
 
 
 def set_weights(model: nn.Module, weights: List[npt.NDArray]) -> None:
@@ -48,7 +48,7 @@ def train(
 	net = model_class().to(DEVICE)
 
 	if parameters is not None:
-		set_weights(net, parameters)
+		set_weights(net, parameters.copy())
 
 	criterion = criterion_class()
 	optimizer = optimizer_class(net.parameters())

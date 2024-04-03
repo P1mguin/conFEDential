@@ -47,14 +47,6 @@ class MNIST(Dataset):
 		train_dataset = train_dataset.map(preprocess_fn)
 		test_dataset = test_dataset.map(preprocess_fn)
 
-		def values_to_tensor(d):
-			for key in d.keys():
-				d[key] = torch.tensor(d[key])
-			return d
-
-		train_dataset = train_dataset.map(values_to_tensor)
-		test_dataset = test_dataset.map(values_to_tensor)
-
 		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
 			image_list=train_dataset["x"],
 			label_list=train_dataset["y"],
