@@ -51,4 +51,4 @@ model:
       in_features: 512
       out_features: 10
     - type: Softmax
-      dim: 0
+      dim: -1
