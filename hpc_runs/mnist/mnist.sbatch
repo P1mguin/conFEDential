@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=main
 #SBATCH --mail-type=ALL
-#SBATCH --ntasks=1
+#SBATCH --ntasks=2
 #SBATCH --output hpc_runs/slurm_outputs/mnist/slurm-%j.out
 #SBATCH --gpus-per-task 1
 #SBATCH --cpus-per-task 8
@@ -14,7 +14,8 @@ module load python/3.10.7
 module load nvidia/nvhpc/23.3
 source venv/bin/activate
 
-python3 src/batch_run_simulation.py --yaml-file batch_examples/mnist/cnn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8
-#python src/batch_run_simulation.py --yaml-file batch_examples/mnist/logistic_regression/fed_avg.yaml --num-gpus 0.125 --num-cpus 8
+srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/cnn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 &
+srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/logistic_regression/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 &
+wait
 
 wandb sync --sync-all
