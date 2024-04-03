@@ -1,0 +1,618 @@
+ctit090
+	Adding python 3.10.7 (ubuntu 20.04) to your environment
+2024-04-02 18:14:47.106343: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-04-02 18:14:47.658591: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-02 18:14:49.228627: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Using the latest cached version of the dataset since mnist couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'mnist' at .cache/mnist/mnist/1.0.0/b06aab39e05f7bcd9635d18ed25d06eae523c574 (last modified on Tue Apr  2 18:09:57 2024).
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-02 18:22:17,804 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=10, round_timeout=None)
+2024-04-02 18:22:20,455	INFO worker.py:1621 -- Started a local Ray instance.
+2024-04-02 18:22:21,009	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-04-02 18:22:21,199	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_75e7d1f0b8dca0cf.zip' (7.50MiB) to Ray cluster...
+2024-04-02 18:22:21,220	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_75e7d1f0b8dca0cf.zip'.
+INFO flwr 2024-04-02 18:22:31,139 | app.py:213 | Flower VCE: Ray initialized with resources: {'accelerator_type:A40': 1.0, 'object_store_memory': 74533161369.0, 'CPU': 64.0, 'node:10.20.240.20': 1.0, 'memory': 163910709863.0, 'GPU': 4.0, 'node:__internal_head__': 1.0}
+INFO flwr 2024-04-02 18:22:31,139 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-04-02 18:22:31,140 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.0}
+INFO flwr 2024-04-02 18:22:31,154 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-04-02 18:22:31,155 | server.py:89 | Initializing global parameters
+INFO flwr 2024-04-02 18:22:31,155 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-04-02 18:22:31,155 | server.py:91 | Evaluating initial parameters
+[2m[36m(pid=1930282)[0m 2024-04-02 18:22:36.464562: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=1930282)[0m 2024-04-02 18:22:36.556090: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=1930282)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=1930282)[0m 2024-04-02 18:22:38.455570: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-02 18:22:43,683 | server.py:94 | initial parameters (loss, other metrics): 2.3025906085968018, {'accuracy': 0.1462, 'data_size': 10000}
+INFO flwr 2024-04-02 18:22:43,683 | server.py:104 | FL starting
+DEBUG flwr 2024-04-02 18:22:43,684 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(DefaultActor pid=1930282)[0m Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+[2m[36m(DefaultActor pid=1930282)[0m Traceback (most recent call last):
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 387, in deserialize_objects
+[2m[36m(DefaultActor pid=1930282)[0m     obj = self._deserialize_object(data, metadata, object_ref)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 268, in _deserialize_object
+[2m[36m(DefaultActor pid=1930282)[0m     return self._deserialize_msgpack_data(data, metadata_fields)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 223, in _deserialize_msgpack_data
+[2m[36m(DefaultActor pid=1930282)[0m     python_objects = self._deserialize_pickle5_data(pickle5_data)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 211, in _deserialize_pickle5_data
+[2m[36m(DefaultActor pid=1930282)[0m     obj = pickle.loads(in_band, buffers=buffers)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+[2m[36m(DefaultActor pid=1930282)[0m     return torch.load(io.BytesIO(b))
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+[2m[36m(DefaultActor pid=1930282)[0m     return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+[2m[36m(DefaultActor pid=1930282)[0m     result = unpickler.load()
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+[2m[36m(DefaultActor pid=1930282)[0m     wrap_storage=restore_location(obj, location),
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+[2m[36m(DefaultActor pid=1930282)[0m     result = fn(storage, location)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+[2m[36m(DefaultActor pid=1930282)[0m     device = validate_cuda_device(location)
+[2m[36m(DefaultActor pid=1930282)[0m   File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+[2m[36m(DefaultActor pid=1930282)[0m     raise RuntimeError('Attempting to deserialize object on a CUDA '
+[2m[36m(DefaultActor pid=1930282)[0m RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+[2m[36m(pid=1930268)[0m 2024-04-02 18:22:36.653821: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.[32m [repeated 7x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/ray-logging.html#log-deduplication for more options.)[0m
+[2m[36m(pid=1930268)[0m 2024-04-02 18:22:36.746470: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=1930268)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=1930268)[0m 2024-04-02 18:22:38.560607: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT[32m [repeated 7x across cluster][0m
+ERROR flwr 2024-04-02 18:22:51,345 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930282, ip=10.20.240.20, actor_id=54a780578199a386c1de41a701000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f12bff19240>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,592 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930282, ip=10.20.240.20, actor_id=54a780578199a386c1de41a701000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f12bff19240>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,948 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930283, ip=10.20.240.20, actor_id=4d9ee8e76d4cece4f8819a2401000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f78cf6013c0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,949 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930283, ip=10.20.240.20, actor_id=4d9ee8e76d4cece4f8819a2401000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f78cf6013c0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,951 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930277, ip=10.20.240.20, actor_id=33b145b5982972e31810a94a01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f83c08117e0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,952 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930277, ip=10.20.240.20, actor_id=33b145b5982972e31810a94a01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f83c08117e0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,954 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930270, ip=10.20.240.20, actor_id=82a6daa4272d5da056ee117001000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f6a42af95a0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,955 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930271, ip=10.20.240.20, actor_id=683c19ef7227da91b0aaf0a101000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f380b10d570>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,955 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930270, ip=10.20.240.20, actor_id=82a6daa4272d5da056ee117001000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f6a42af95a0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,957 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930271, ip=10.20.240.20, actor_id=683c19ef7227da91b0aaf0a101000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f380b10d570>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,957 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930268, ip=10.20.240.20, actor_id=93757110436a674b3aa169c801000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f12d459d5a0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,959 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930269, ip=10.20.240.20, actor_id=fc1e26cd76b0b75e1775e0e901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f66bb1f9090>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,959 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930282, ip=10.20.240.20, actor_id=54a780578199a386c1de41a701000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f12bff19240>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:51,960 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930268, ip=10.20.240.20, actor_id=93757110436a674b3aa169c801000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f12d459d5a0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,960 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930269, ip=10.20.240.20, actor_id=fc1e26cd76b0b75e1775e0e901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f66bb1f9090>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:51,960 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930282, ip=10.20.240.20, actor_id=54a780578199a386c1de41a701000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f12bff19240>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:52,277 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930283, ip=10.20.240.20, actor_id=4d9ee8e76d4cece4f8819a2401000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f78cf6013c0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:52,277 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930283, ip=10.20.240.20, actor_id=4d9ee8e76d4cece4f8819a2401000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f78cf6013c0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+ERROR flwr 2024-04-02 18:22:52,557 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=1930267, ip=10.20.240.20, actor_id=115122f90caea6c7a2b4d86b01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f6bfae10fa0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+
+ERROR flwr 2024-04-02 18:22:52,557 | ray_client_proxy.py:162 | [36mray::DefaultActor.run()[39m (pid=1930267, ip=10.20.240.20, actor_id=115122f90caea6c7a2b4d86b01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x7f6bfae10fa0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+traceback: Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/storage.py", line 371, in _load_from_bytes
+    return torch.load(io.BytesIO(b))
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1040, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1268, in _legacy_load
+    result = unpickler.load()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 1205, in persistent_load
+    wrap_storage=restore_location(obj, location),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 391, in default_restore_location
+    result = fn(storage, location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 266, in _cuda_deserialize
+    device = validate_cuda_device(location)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/serialization.py", line 250, in validate_cuda_device
+    raise RuntimeError('Attempting to deserialize object on a CUDA '
+RuntimeError: Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False. If you are running on a CPU-only machine, please use torch.load with map_location=torch.device('cpu') to map your storages to the CPU.
+DEBUG flwr 2024-04-02 18:22:52,559 | server.py:236 | fit_round 1 received 0 results and 10 failures
+ERROR flwr 2024-04-02 18:22:52,559 | app.py:313 | list index out of range
+ERROR flwr 2024-04-02 18:22:52,622 | app.py:314 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/app.py", line 308, in start_simulation
+    hist = run_fl(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/app.py", line 225, in run_fl
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/server.py", line 109, in fit
+    res_fit = self.fit_round(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/server.py", line 248, in fit_round
+    ] = self.strategy.aggregate_fit(server_round, results, failures)
+  File "/home/s2240084/conFEDential/src/server_aggregation_strategies/capture_generator.py", line 81, in aggregate_fit
+    self._capture_parameters(captured_parameters)
+  File "/home/s2240084/conFEDential/src/server_aggregation_strategies/capture_generator.py", line 35, in _capture_parameters
+    captures = self._load_npz_file(captured_parameters)
+  File "/home/s2240084/conFEDential/src/server_aggregation_strategies/capture_generator.py", line 61, in _load_npz_file
+    list(captured_parameters.values())[0]]
+IndexError: list index out of range
+
+ERROR flwr 2024-04-02 18:22:52,623 | app.py:315 | Your simulation crashed :(. This could be because of several reasons. The most common are: 
+	 > Sometimes, issues in the simulation code itself can cause crashes. It's always a good idea to double-check your code for any potential bugs or inconsistencies that might be contributing to the problem. For example: 
+		 - You might be using a class attribute in your clients that hasn't been defined.
+		 - There could be an incorrect method call to a 3rd party library (e.g., PyTorch).
+		 - The return types of methods in your clients/strategies might be incorrect.
+	 > Your system couldn't fit a single VirtualClient: try lowering `client_resources`.
+	 > All the actors in your pool crashed. This could be because: 
+		 - You clients hit an out-of-memory (OOM) error and actors couldn't recover from it. Try launching your simulation with more generous `client_resources` setting (i.e. it seems {'num_cpus': 8, 'num_gpus': 0.0} is not enough for your run). Use fewer concurrent actors. 
+		 - You were running a multi-node simulation and all worker nodes disconnected. The head node might still be alive but cannot accommodate any actor with resources: {'num_cpus': 8, 'num_gpus': 0.0}.
+Take a look at the Flower simulation examples for guidance <https://flower.dev/docs/framework/how-to-run-simulations.html>.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.1462
+wandb:     loss 2.30259
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240402_182217-f0sjo8b7
+wandb: Find logs at: ./wandb/offline-run-20240402_182217-f0sjo8b7/logs
+slurmstepd-ctit090: error: *** JOB 278625 ON ctit090 CANCELLED AT 2024-04-02T18:24:34 ***
