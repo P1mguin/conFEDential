@@ -8,7 +8,7 @@ simulation:
     lr: 0.01
   local_rounds: 10
 dataset:
-  name: MNIST
+  name: Cifar10
   preprocess_fn: |
     def preprocess_fn(element):
       return {

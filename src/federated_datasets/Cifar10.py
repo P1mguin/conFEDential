@@ -36,7 +36,7 @@ class Cifar10(Dataset):
 		Dataset.is_data_downloaded("cifar10")
 		train_dataset, test_dataset = load_dataset(
 			"cifar10",
-			name="cifar10",
+			name="plain_text",
 			cache_dir=".cache",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
