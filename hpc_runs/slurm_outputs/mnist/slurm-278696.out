@@ -2433,3 +2433,19 @@ The last 20 lines of /tmp/ray/session_2024-04-03_15-55-24_077915_2335/logs/dashb
 2024-04-03 15:56:00,008	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
 2024-04-03 15:56:08,772	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_a2e4acd62702b34c.zip' (7.36MiB) to Ray cluster...
 2024-04-03 15:56:08,791	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_a2e4acd62702b34c.zip'.
+srun: error: Unable to create step for job 278696: Job/step already completing or completed
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit082: error: *** STEP 278696.0 ON ctit082 CANCELLED AT 2024-04-04T13:21:11 ***
+*** SIGTERM received at time=1712229671 on cpu 62 ***
+*** SIGTERM received at time=1712229671 on cpu 20 ***
+slurmstepd-ctit082: error: *** JOB 278696 ON ctit082 CANCELLED AT 2024-04-04T13:21:11 ***
+PC: @     0x7fe60d8e135c  (unknown)  recv
+    @     0x7fe60d804090  (unknown)  (unknown)
+[2024-04-04 13:21:11,839 E 37023 37023] logging.cc:361: *** SIGTERM received at time=1712229671 on cpu 62 ***
+[2024-04-04 13:21:11,839 E 37023 37023] logging.cc:361: PC: @     0x7fe60d8e135c  (unknown)  recv
+[2024-04-04 13:21:11,839 E 37023 37023] logging.cc:361:     @     0x7fe60d804090  (unknown)  (unknown)
+PC: @     0x7f6bfd47b35c  (unknown)  recv
+    @     0x7f6bfd39e090  (unknown)  (unknown)
+[2024-04-04 13:21:11,842 E 2335 2335] logging.cc:361: *** SIGTERM received at time=1712229671 on cpu 20 ***
+[2024-04-04 13:21:11,843 E 2335 2335] logging.cc:361: PC: @     0x7f6bfd47b35c  (unknown)  recv
+[2024-04-04 13:21:11,843 E 2335 2335] logging.cc:361:     @     0x7f6bfd39e090  (unknown)  (unknown)
