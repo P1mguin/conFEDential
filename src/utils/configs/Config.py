@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import random
+import string
 from datetime import datetime
 from typing import Any, Dict, Iterator, List, Tuple, Type
 
@@ -106,7 +108,8 @@ class Config:
 		model = self.get_model_name()
 		optimizer = self.simulation.get_optimizer_name()
 		time = datetime.now().strftime("%Y-%m-%d_%H-%M")
-		path = f".captured/{dataset}/{model}/{optimizer}/{time}.npz"
+		salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+		path = f".captured/{dataset}/{model}/{optimizer}/{salt}-{time}.npz"
 		return path
 
 	def get_wandb_kwargs(self, batch_name: str = None) -> Dict[str, Any]:
