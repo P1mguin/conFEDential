@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import flwr as fl
 import numpy as np
@@ -7,21 +7,41 @@ import numpy.typing as npt
 from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
 from flwr.server.client_proxy import ClientProxy
 
+from src.utils.configs import Config
+
 
 def get_capturing_strategy(
 		strategy: Type[fl.server.strategy.Strategy],
-		client_count: int,
-		output_path: str,
-		**agg_kwargs
+		config: Config,
+		evaluate_fn: Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]
 ) -> fl.server.strategy.Strategy:
 	class FedCapture(strategy):
-		def __init__(self, **kwargs):
-			super(FedCapture, self).__init__(**kwargs)
-			self.client_count = client_count
-			self.output_path = f"{output_path}.npz"
+		def __init__(self):
+			# TODO: Make applicable for way more aggregation strategies than just FedAvg
+			(
+				fraction_evaluate,
+				fraction_fit,
+				min_available_clients,
+				min_evaluate_clients,
+				min_fit_clients
+			) = config.get_client_selection_config()
+
+			initial_parameters = config.get_initial_parameters()
+			super(FedCapture, self).__init__(
+				fraction_fit=fraction_fit,
+				fraction_evaluate=fraction_evaluate,
+				min_fit_clients=min_fit_clients,
+				min_evaluate_clients=min_evaluate_clients,
+				min_available_clients=min_available_clients,
+				evaluate_fn=evaluate_fn,
+				initial_parameters=initial_parameters
+			)
+
+			self.client_count = config.get_client_count()
+			self.output_path = config.get_output_capture_file_path()
 			self._initialize_directory_path()
 
-		def _initialize_directory_path(self):
+		def _initialize_directory_path(self) -> None:
 			"""
 			Ensures all directories to the output file exist by creating them if they do not yet exist
 			"""
@@ -83,4 +103,4 @@ def get_capturing_strategy(
 
 			return strategy.aggregate_fit(self, server_round, results, failures)
 
-	return FedCapture(**agg_kwargs)
+	return FedCapture()

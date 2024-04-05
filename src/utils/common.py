@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, Callable, Tuple
 
 
 def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
@@ -11,6 +11,17 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	for key in path:
 		value = value[key]
 	return value
+
+
+def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
+	"""
+	Loads and parses a python function described as string
+	:param function_string: python function with correct indentation
+	:param function_name: the name of the function in the string
+	"""
+	namespace = {}
+	exec(function_string, namespace)
+	return namespace[function_name]
 
 
 def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]) -> dict:

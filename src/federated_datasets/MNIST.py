@@ -1,6 +1,5 @@
 from typing import Callable, List, Tuple
 
-import torch
 from datasets import load_dataset
 from fedartml import SplitAsFederatedData
 from torch.utils.data import DataLoader

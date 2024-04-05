@@ -1,10 +1,10 @@
 import copy
-import pickle
 from typing import List, Tuple
 
 import yaml
 
 import src.utils as utils
+from src.utils.configs import Config
 
 
 def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> List[dict]:
@@ -37,6 +37,15 @@ def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> Lis
 	return new_configs
 
 
+def generate_configs_from_yaml_file(file_path: str) -> List[Config]:
+	with open(file_path, "r") as f:
+		yaml_file = yaml.safe_load(f)
+
+	raw_configs = generate_configs_from_batch_config(yaml_file)
+	configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+	return configs
+
+
 def generate_configs_from_batch_config(configs: dict | List[dict], *path: str) -> List[dict]:
 	"""
 	Loads the possible configs from a batch config
@@ -59,30 +68,3 @@ def generate_configs_from_batch_config(configs: dict | List[dict], *path: str) -
 			configs = generate_configs_from_batch_config(configs, *path, value)
 
 	return configs
-
-
-def load_configs_from_batch_config_path(config_path):
-	file_path = config_path.replace('.yaml', '.pkl')
-
-	try:
-		with open(file_path, "rb") as f:
-			return pickle.load(f)
-	except FileNotFoundError as _:
-		pass
-
-	batch_config = utils.load_yaml_file(config_path)
-	configs = utils.generate_configs_from_batch_config(batch_config)
-
-	with open(file_path, "wb") as f:
-		pickle.dump(configs, f)
-
-	return configs
-
-
-def load_yaml_file(yaml_file: str) -> dict:
-	"""
-	Loads contents of YAML file into a dictionary
-	:param yaml_file: absolute path to YAML file
-	"""
-	with open(yaml_file, 'r') as f:
-		return yaml.safe_load(f)

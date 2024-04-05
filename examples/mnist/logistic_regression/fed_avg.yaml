@@ -3,21 +3,21 @@ simulation:
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  learning_method:
-    optimizer: SGD
-    lr: 0.05
   local_rounds: 10
+  optimizer:
+    optimizer_name: SGD
+    lr: 0.05
 dataset:
   name: MNIST
+  splitter:
+    alpha: 1
+    percent_non_iid: 25
   preprocess_fn: |
     def preprocess_fn(element):
       return {
         "x": element["image"].reshape(784) / 255.,
         "y": element["label"]
       }
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
 model:
   name: Logistic Regression
   criterion: CrossEntropyLoss

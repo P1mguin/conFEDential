@@ -1,10 +1,12 @@
 from collections import OrderedDict
-from typing import Callable, Iterator, List, Tuple, Type
+from typing import List, Tuple
 
 import numpy.typing as npt
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+
+from src.utils.configs import Config
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -28,32 +30,17 @@ def set_weights(model: nn.Module, weights: List[npt.NDArray]) -> None:
 	model.load_state_dict(state_dict, strict=True)
 
 
-def train(
-		epochs: int,
-		parameters: List[npt.NDArray],
-		model_class: Type[nn.Module],
-		train_loader: DataLoader,
-		criterion_class: Type[nn.Module],
-		optimizer_class: Callable[[Iterator[nn.Parameter]], Type[torch.optim.Optimizer]]
-) -> Tuple[List[npt.NDArray], int]:
-	"""
-	Helper function that trains the model in an isolated function scope
-	:param epochs: number of epochs
-	:param parameters: initial parameters of the model
-	:param model_class: class of the model
-	:param train_loader: data loader containing the data for the batches
-	:param criterion_class: class of the criterion
-	:param optimizer_class: callable method that summons the optimizer given the model parameters
-	"""
-	net = model_class().to(DEVICE)
+def train(parameters: List[npt.NDArray], train_loader: DataLoader, config: Config) -> Tuple[List[npt.NDArray], int]:
+	net = config.get_model().to(DEVICE)
 
 	if parameters is not None:
 		set_weights(net, parameters)
 
-	criterion = criterion_class()
-	optimizer = optimizer_class(net.parameters())
+	criterion = config.get_criterion()
+	optimizer = config.get_optimizer(net.parameters())
+	local_rounds = config.get_local_rounds()
 
-	for _ in range(epochs):
+	for _ in range(local_rounds):
 		for features, labels in train_loader:
 			features, labels = features.to(DEVICE), labels.to(DEVICE)
 			optimizer.zero_grad()
@@ -67,26 +54,15 @@ def train(
 	return parameters, data_size
 
 
-def test(
-		parameters: List[npt.NDArray],
-		model_class: Type[nn.Module],
-		test_loader: DataLoader,
-		criterion_class: Type[nn.Module]
-) -> Tuple[float, float, int]:
-	"""
-	Helper function that tests the model in an isolated function scope
-	:param parameters: initial parameters of the model
-	:param model_class: class of the model
-	:param test_loader: data loader containing the data for the batches
-	:param criterion_class: class of the criterion
-	"""
-	net = model_class().to(DEVICE)
+def test(parameters: List[npt.NDArray], test_loader: DataLoader, config: Config) -> Tuple[float, float, int]:
+	net = config.get_model().to(DEVICE)
 
 	if parameters is not None:
 		set_weights(net, parameters)
 
-	criterion = criterion_class()
+	criterion = config.get_criterion()
 	correct, total, loss = 0, 0, 0.
+
 	with torch.no_grad():
 		for data in test_loader:
 			features, labels = data['x'].to(DEVICE), data['y'].to(DEVICE)

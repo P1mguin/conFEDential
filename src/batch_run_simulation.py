@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
@@ -7,11 +8,13 @@ sys.path.append(PROJECT_DIRECTORY)
 import argparse
 import random
 from pathlib import Path
+from logging import INFO
 
+from flwr.common.logger import log
 import numpy as np
 import torch
+import src.utils.batch_config as batch_config
 
-from src import utils
 from src.run_simulation import run_simulation
 
 torch.manual_seed(78)
@@ -50,13 +53,15 @@ def main() -> None:
 		"num_gpus": args.num_gpus
 	}
 
-	yaml_file = str(Path(args.yaml_file).resolve())
-	batch_config = utils.load_yaml_file(yaml_file)
-	configs = utils.load_configs_from_batch_config_path(yaml_file)
-	print(f"Loaded {len(configs)} configs, running...")
-	batch_run_name = f"{batch_config['dataset']['name']}-{batch_config['model']['name']}-{batch_config['simulation']['learning_method']['optimizer']}"
+	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+	dataset_name = configs[0].get_dataset_name()
+	model_name = configs[0].get_model_name()
+	optimizer = configs[0].get_optimizer_name()
+	start_day = datetime.now().strftime("%Y-%m-%d")
+	batch_run_name = f"{dataset_name}-{model_name}-{optimizer}-{start_day}"
+
+	log(INFO, f"Loaded {len(configs)} configs, running...")
 	for config in configs:
-		print(config)
 		run_simulation(config, client_resources, batch_run_name)
 
 
