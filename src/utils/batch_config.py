@@ -38,6 +38,10 @@ def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> Lis
 
 
 def generate_configs_from_yaml_file(file_path: str) -> List[Config]:
+	"""
+	Generates a list of Config from the path to a batch_configuration YAML file.
+	:param file_path: the path to the batch_configuration YAML file
+	"""
 	with open(file_path, "r") as f:
 		yaml_file = yaml.safe_load(f)
 

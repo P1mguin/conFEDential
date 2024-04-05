@@ -15,8 +15,15 @@ def get_capturing_strategy(
 		config: Config,
 		evaluate_fn: Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]
 ) -> fl.server.strategy.Strategy:
+	"""
+	Generates a flower learning strategy in which the transmitted parameters
+	are captured in a numpy file in the .captured folder
+	:param strategy: the class of the flower strategy to extend
+	:param config: the loaded yaml config
+	:param evaluate_fn: the evaluation function to use on the server level
+	"""
 	class FedCapture(strategy):
-		def __init__(self):
+		def __init__(self) -> None:
 			# TODO: Make applicable for way more aggregation strategies than just FedAvg
 			(
 				fraction_evaluate,

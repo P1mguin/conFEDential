@@ -7,6 +7,12 @@ import torch.nn as nn
 
 
 class Optimizer:
+	"""
+	A class that represents the optimizer the experiment will run with.
+	optimizer_name: The name of an optimizer function of torch.optim that will be used to compute the update to the
+	model parameters
+	kwargs: All key word arguments except the model parameters that are required to summon the optimizer
+	"""
 	def __init__(self, optimizer_name: str, **kwargs) -> None:
 		self.optimizer_name = optimizer_name
 		self.kwargs = kwargs
@@ -25,6 +31,10 @@ class Optimizer:
 
 	@staticmethod
 	def from_dict(config: dict) -> Optimizer:
+		"""
+		Returns the optimizer object from a dictionary
+		:param config: The configuration dictionary
+		"""
 		return Optimizer(**config)
 
 	def get_kwargs(self) -> Dict[str, Any]:
@@ -41,6 +51,16 @@ class Optimizer:
 
 
 class Simulation:
+	"""
+	A class that represents the simulation configuration of the experiment.
+	batch_size: The batch size that the clients will train with
+	client_count: The number of clients that the simulation will run with
+	fraction_fit: The fraction of clients that are selected each round, i.e. if client_count = 100, fraction_fit = 0.1,
+	the server will train with 10 clients in each round
+	global_rounds: The amount of times the server will ask a fraction of clients to train on their data
+	local_rounds: The amount of times the client will repeat the learning process, i.e. epochs
+	optimizer: A valid configuration for an Optimizer instance
+	"""
 	def __init__(
 			self,
 			batch_size: int,
@@ -92,6 +112,7 @@ class Simulation:
 		)
 
 	def get_fraction_evaluate(self) -> float:
+		# In the current code base, the server only does the evaluation. Therefore, the evaluation fraction is 0.
 		return 0.
 
 	def get_fraction_fit(self) -> float:

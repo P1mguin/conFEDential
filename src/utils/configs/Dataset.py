@@ -9,6 +9,14 @@ from src import federated_datasets
 
 
 class Dataset:
+	"""
+	A class that represents the dataset on which the experiment will be performed.
+	name: the name of the dataset loaded from the Hugging Face library. Before calling get_dataloaders, this dataset
+	should be downloaded in .cache
+	splitter: a dictionary that should contain alpha and percent_non_idd. These values are used to dirichlet split
+	the data using FedArtML.
+	preprocess_fn: a function that is applied to each element before it is returned, represented as a string.
+	"""
 	def __init__(self, name: str, splitter: dict, preprocess_fn: str) -> None:
 		self.name = name
 		self.alpha = float(splitter['alpha'])
@@ -32,6 +40,10 @@ class Dataset:
 
 	@staticmethod
 	def from_dict(config: dict) -> Dataset:
+		"""
+		Loads in a dataset instance from a dictionary
+		:param config: the configuration dictionary
+		"""
 		return Dataset(**config)
 
 	def get_dataloaders(self, client_count: int, batch_size: int) -> Tuple[List[DataLoader], DataLoader]:

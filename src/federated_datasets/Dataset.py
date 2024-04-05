@@ -33,6 +33,12 @@ class Dataset(ABC):
 		pass
 
 	@staticmethod
-	def is_data_downloaded(dataset):
+	def is_data_downloaded(dataset: str) -> bool:
+		"""
+		Checks if a given dataset is downloaded
+		:param dataset: name of the dataset
+		:return: True if the dataset is downloaded, otherwise raise FileNotFoundError
+		"""
 		if not os.path.isdir(f".cache/{dataset}"):
 			raise FileNotFoundError(f"Was unable to open cache for {dataset}, download it using the command:\npython download_dataset.py --dataset {dataset}")
+		return True

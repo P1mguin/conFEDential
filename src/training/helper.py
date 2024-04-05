@@ -31,6 +31,12 @@ def set_weights(model: nn.Module, weights: List[npt.NDArray]) -> None:
 
 
 def train(parameters: List[npt.NDArray], train_loader: DataLoader, config: Config) -> Tuple[List[npt.NDArray], int]:
+	"""
+	A helper method to train a PyTorch model with a given train loader with a method described in a configuration
+	:param parameters: the initial parameters of the model
+	:param train_loader: the data to train with
+	:param config: the configuration that describes the experiment
+	"""
 	net = config.get_model().to(DEVICE)
 
 	if parameters is not None:
@@ -55,6 +61,12 @@ def train(parameters: List[npt.NDArray], train_loader: DataLoader, config: Confi
 
 
 def test(parameters: List[npt.NDArray], test_loader: DataLoader, config: Config) -> Tuple[float, float, int]:
+	"""
+	A helper method to test a PyTorch model on a given test loader via criteria described in a configuration
+	:param parameters: the initial parameters of the model
+	:param test_loader: the data to test with
+	:param config: the configuration that describes the experiment
+	"""
 	net = config.get_model().to(DEVICE)
 
 	if parameters is not None:

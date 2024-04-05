@@ -10,6 +10,15 @@ from src.training import helper
 
 
 class Model:
+	"""
+	A class that represents the model configuration of the experiment.
+	name: The name of the model. This is how the model will be named in your configuration files and in your W&B dashboard.
+	criterion: The name of a criterion function of torch.nn that will be used to compute the loss of the model
+	layers: The layers of the model as would be described in a Python class. Each layer starts with a type attribute
+	in which the torch.nn function is described, it is followed up by the key word arguments of that layer. For instance:
+	- type: Softmax
+	  dim: -1
+	"""
 	def __init__(self, name: str, criterion: str, layers: List[dict]) -> None:
 		self.name = name
 		self.criterion = getattr(nn, criterion)
@@ -49,6 +58,10 @@ class Model:
 
 	@staticmethod
 	def from_dict(config: dict) -> Model:
+		"""
+		Loads the model from a dictionary
+		:param config: the configuration dictionary
+		"""
 		return Model(**config)
 
 	def get_criterion_class(self) -> Type[nn.Module]:

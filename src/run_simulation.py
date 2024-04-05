@@ -56,6 +56,12 @@ parser.add_argument(
 
 
 def get_client_fn(train_loaders: List[DataLoader], run_config: Config) -> Callable[[str], fl.client.Client]:
+	"""
+	Returns a function that can be called to summon a client that will run the simulation on the given train loader
+	with the given run configuration
+	:param train_loaders: the train dataset of the client
+	:param run_config: the run configuration
+	"""
 	class FlowerClient(fl.client.NumPyClient):
 		# Client does not get evaluation method, that is done at server level over all data at once
 		def __init__(self, cid: int) -> None:
@@ -84,6 +90,12 @@ def get_evaluate_fn(
 		test_loader: DataLoader,
 		run_config: Config
 ) -> Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]:
+	"""
+	The evaluation function that the server will use to measure loss and accuracy each round. The results are tracked
+	in W&B
+	:param test_loader: the test data the server will test with
+	:param run_config: the run configuration with which rules the server will test
+	"""
 	def evaluate(
 			server_round: int,
 			parameters: fl.common.NDArrays,
@@ -97,6 +109,12 @@ def get_evaluate_fn(
 
 
 def run_simulation(config: Config, client_resources: dict, batch_run_name: str = None) -> None:
+	"""
+	Runs a federated learning simulation with the rules defined in the config. The results are tracked using W&B.
+	:param config: the experiment configuration
+	:param client_resources: the resource eac client gets
+	:param batch_run_name: an identifier that will be added to the tags to mark it as being part of a batch run
+	"""
 	log(INFO, f"\nRunning with {config}")
 
 	train_loaders, test_loader = config.get_dataloaders()
