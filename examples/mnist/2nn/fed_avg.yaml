@@ -1,17 +1,12 @@
 simulation:
-  batch_size:
-    values: [ -1, 1, 8, 16, 32 ]
+  batch_size: 20
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  local_rounds:
-    values: [ 1, 5, 10, 20 ]
+  local_rounds: 10
   optimizer:
     optimizer_name: SGD
-    lr:
-      min: 0.001
-      max: 0.301
-      step_size: 0.05
+    lr: 0.05
 dataset:
   name: MNIST
   splitter:
@@ -24,11 +19,23 @@ dataset:
         "y": element["label"]
       }
 model:
-  name: Logistic Regression
+  name: 2NN
   criterion: CrossEntropyLoss
   layers:
     - type: Linear
       in_features: 784
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
       out_features: 10
     - type: Softmax
       dim: -1
