@@ -1,6 +1,26 @@
 from typing import Any, Callable, Tuple
 
 
+def find_all_paths(dictionary: dict, key: str, path=None):
+	"""
+	Recursive function that finds all path to a given key name in a dictionary
+	:param dictionary: the dictionary to search
+	:param key: the key to which the paths need to be found
+	:param path: A helper variable for the recursion
+	"""
+	if path is None:
+		path = []
+
+	paths = []
+	if isinstance(dictionary, dict):
+		for k, v in dictionary.items():
+			new_path = path + [k]
+			if k == key:
+				paths.append(new_path)
+			else:
+				paths.extend(find_all_paths(v, key, new_path))
+	return paths
+
 def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	"""
 	Common function that gets a value from a dict given a path
@@ -26,11 +46,11 @@ def load_func_from_function_string(function_string: str, function_name: str) -> 
 
 def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]) -> dict:
 	"""
-	Common function that sets a value from a dict given a path, sets it in place but also returns the updated dictionary
+	Common function that sets a value from a dict given a path, sets it in place but also returns the part
+	of the dictionary that was updated
 	:param dictionary: the dictionary on which the value should be set
 	:param new_value: the new value to set
 	:param path: the path at which the new value should be set
-	:return:
 	"""
 	for key in path[:-1]:
 		dictionary = dictionary[key]

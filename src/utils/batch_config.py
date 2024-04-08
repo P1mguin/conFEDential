@@ -7,7 +7,7 @@ import src.utils as utils
 from src.utils.configs import Config
 
 
-def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> List[dict]:
+def _adjust_config_values(config: dict, configs: List[dict], *path: Tuple[str]) -> List[dict]:
 	"""
 	Adjusts a list of configs with the possible values that are described in the config for a given path
 	:param config: The config from which the steps should be taken
@@ -17,7 +17,7 @@ def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> Lis
 	# Get the steps that will be taken
 	if config.get("values") is not None:
 		steps = config.get("values")
-	else:
+	elif config.get("min") is not None:
 		step_value = config.get("min")
 		maximum = config.get("max")
 		step_size = config.get("step_size")
@@ -25,6 +25,9 @@ def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> Lis
 		while step_value <= maximum:
 			steps.append(step_value)
 			step_value += step_size
+	else:
+		raise RuntimeError(
+			"Config step value did not find supporting keyword, either try: values, steps, or min-max-step_size")
 
 	# Adjust the configs
 	new_configs = []
@@ -36,6 +39,25 @@ def _adjust_config_values(config, configs: List[dict], *path: Tuple[str]) -> Lis
 
 	return new_configs
 
+
+def _get_stepped_config(config: dict) -> List[dict]:
+	"""
+	Generates the configurations possible to a stepped experiment
+	:param config: The base config
+	"""
+	paths = utils.find_all_paths(config, "steps")
+
+	step_values = [utils.get_dict_value_from_path(config, *path) for path in paths]
+	steps = list(map(list, zip(*step_values)))  # Transpose the stapvalues
+
+	configs = []
+	for step in steps:
+		new_config = copy.deepcopy(config)
+		for i, value in enumerate(step):
+			utils.set_dict_value_from_path(new_config, value, *paths[i][:-1])
+		configs.append(new_config)
+
+	return configs
 
 def generate_configs_from_yaml_file(file_path: str) -> List[Config]:
 	"""
@@ -67,6 +89,8 @@ def generate_configs_from_batch_config(configs: dict | List[dict], *path: str) -
 
 	if config.get("values") is not None or config.get("min") is not None:
 		configs = _adjust_config_values(config, configs, *path)
+	elif config.get("steps") is not None:
+		return _get_stepped_config(configs[0])
 	else:
 		for value in config.keys():
 			configs = generate_configs_from_batch_config(configs, *path, value)
