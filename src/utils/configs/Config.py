@@ -112,6 +112,9 @@ class Config:
 		path = f".captured/{dataset}/{model}/{optimizer}/{salt}-{time}.npz"
 		return path
 
+	def get_strategy(self):
+		return self.simulation.get_strategy()
+
 	def get_wandb_kwargs(self, batch_name: str = None) -> Dict[str, Any]:
 		"""
 		Returns the configuration for the Weights and Biases run

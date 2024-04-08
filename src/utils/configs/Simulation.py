@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Iterator, Tuple, Type
+from typing import Any, Dict, Iterator, Tuple, Type
 
 import torch
 import torch.nn as nn
+
+import src.training.strategies as strategies
 
 
 class Optimizer:
@@ -37,17 +39,17 @@ class Optimizer:
 		"""
 		return Optimizer(**config)
 
-	def get_kwargs(self) -> Dict[str, Any]:
-		return self.kwargs
+	def get_strategy(self) -> strategies.Strategy:
+		return getattr(strategies, self.optimizer_name)(**self.get_kwargs())
 
 	def get_name(self):
 		return self.optimizer_name
 
-	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
-		return getattr(torch.optim, self.optimizer_name)(parameters, **self.kwargs)
+	def get_kwargs(self) -> Dict[str, Any]:
+		return self.kwargs
 
-	def get_optimizer_spawner(self) -> Callable[[Iterator[nn.Parameter]], Type[torch.optim.Optimizer]]:
-		return lambda parameters: getattr(torch.optim, self.optimizer_name)(parameters, **self.kwargs)
+	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
+		return self.get_strategy().get_optimizer_instance(parameters)
 
 
 class Simulation:
@@ -141,3 +143,6 @@ class Simulation:
 
 	def get_optimizer_name(self):
 		return self.optimizer.get_name()
+
+	def get_strategy(self):
+		return self.optimizer.get_strategy()

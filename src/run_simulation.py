@@ -3,6 +3,7 @@ import sys
 
 import wandb
 
+from src.training.strategies import Strategy
 from src.utils.configs import Config
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
@@ -22,7 +23,6 @@ from flwr.common import Scalar
 from torch.utils.data import DataLoader
 
 import src.server_aggregation_strategies as agg
-from src.training import helper
 import random
 import numpy as np
 
@@ -81,6 +81,8 @@ def get_client_fn(train_loaders: List[DataLoader], run_config: Config) -> Callab
 	:param train_loaders: the train dataset of the client
 	:param run_config: the run configuration
 	"""
+	strategy = run_config.get_strategy()
+
 	class FlowerClient(fl.client.NumPyClient):
 		# Client does not get evaluation method, that is done at server level over all data at once
 		def __init__(self, cid: int) -> None:
@@ -93,10 +95,11 @@ def get_client_fn(train_loaders: List[DataLoader], run_config: Config) -> Callab
 		def set_parameters(self, parameters: List[npt.NDArray]) -> None:
 			self.parameters = parameters
 
-		def fit(self, parameters: List[npt.NDArray], config: Dict[str, Scalar]) -> Tuple[List[npt.NDArray], int, dict]:
+		def fit(self, parameters: List[npt.NDArray], config: Dict[str, Scalar]) -> Tuple[
+			List[npt.NDArray], int, Dict[str, Scalar]]:
 			self.set_parameters(parameters)
-			new_parameters, data_size = helper.train(parameters, train_loaders[self.cid], run_config)
-			return new_parameters, data_size, {}
+			new_parameters, data_size, config = strategy.train(parameters, train_loaders[self.cid], run_config)
+			return new_parameters, data_size, config
 
 	def client_fn(cid: str) -> fl.client.Client:
 		cid = int(cid)
@@ -120,7 +123,7 @@ def get_evaluate_fn(
 			parameters: fl.common.NDArrays,
 			config: Dict[str, Scalar]
 	) -> Tuple[float, Dict[str, Scalar]]:
-		loss, accuracy, data_size = helper.test(parameters, test_loader, run_config)
+		loss, accuracy, data_size = Strategy.test(parameters, test_loader, run_config)
 		wandb.log({"loss": loss, "accuracy": accuracy})
 		return loss, {"accuracy": accuracy, "data_size": data_size}
 
@@ -149,7 +152,6 @@ def run_simulation(
 	evaluate = get_evaluate_fn(test_loader, config)
 
 	strategy = agg.get_capturing_strategy(
-		strategy=fl.server.strategy.FedAvg,
 		config=config,
 		evaluate_fn=evaluate,
 		is_capturing=is_capturing,

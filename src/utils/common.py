@@ -1,4 +1,16 @@
-from typing import Any, Callable, Tuple
+from functools import reduce
+from typing import Any, Callable, List, Tuple
+
+import numpy as np
+import numpy.typing as npt
+
+
+def compute_weighted_average(values: List[Tuple[List[npt.NDArray], int]]) -> Any:
+	total_count = sum(num_examples for (_, num_examples) in values)
+	values = [[layer * num_examples for layer in weights] for weights, num_examples in values]
+	average = [reduce(np.add, layers) / total_count for layers in zip(*values)]
+	return average
+
 
 
 def find_all_paths(dictionary: dict, key: str, path=None):

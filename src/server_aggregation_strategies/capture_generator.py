@@ -1,17 +1,17 @@
 import os
-from typing import Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import numpy as np
 import numpy.typing as npt
 from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
 
 from src.utils.configs import Config
 
 
 def get_capturing_strategy(
-		strategy: Type[fl.server.strategy.Strategy],
 		config: Config,
 		evaluate_fn: Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]],
 		is_capturing: bool = False
@@ -19,14 +19,14 @@ def get_capturing_strategy(
 	"""
 	Generates a flower learning strategy in which the transmitted parameters
 	are captured in a numpy file in the .captured folder
-	:param strategy: the class of the flower strategy to extend
 	:param config: the loaded yaml config
 	:param evaluate_fn: the evaluation function to use on the server level
 	:param is_capturing: whether to maintain the captured parameters in a numpy file
 	"""
-	class FedCapture(strategy):
+	strategy = config.get_strategy()
+
+	class FedCapture(FedAvg):
 		def __init__(self) -> None:
-			# TODO: Make applicable for way more aggregation strategies than just FedAvg
 			(
 				fraction_evaluate,
 				fraction_fit,
@@ -108,10 +108,9 @@ def get_capturing_strategy(
 				for client_proxy, fit_results in results:
 					cid = int(client_proxy.cid)
 					parameters = parameters_to_ndarrays((fit_results.parameters))
-					# parameters = [parameter.copy() for parameter in parameters_to_ndarrays(fit_results.parameters)]
 					captured_parameters[cid] = parameters
 				self._capture_parameters(captured_parameters)
 
-			return strategy.aggregate_fit(self, server_round, results, failures)
+			return strategy.aggregate_fit(server_round, results, failures)
 
 	return FedCapture()

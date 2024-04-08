@@ -5,7 +5,7 @@ simulation:
   global_rounds: 10
   local_rounds: 20
   optimizer:
-    optimizer_name: SGD
+    optimizer_name: FedAvg
     lr: 0.2
 dataset:
   name: MNIST
