@@ -14,32 +14,38 @@ class Model:
 	A class that represents the model configuration of the experiment.
 	name: The name of the model. This is how the model will be named in your configuration files and in your W&B dashboard.
 	criterion: The name of a criterion function of torch.nn that will be used to compute the loss of the model
+	hub: Either the model is loaded from a repository or the model is user-defined, if loaded use the hub keyword
+	with the arguments of torch.hub.load()
 	layers: The layers of the model as would be described in a Python class. Each layer starts with a type attribute
 	in which the torch.nn function is described, it is followed up by the key word arguments of that layer. For instance:
 	- type: Softmax
 	  dim: -1
 	"""
-	def __init__(self, name: str, criterion: str, layers: List[dict]) -> None:
+
+	def __init__(self, name: str, criterion: str, hub: dict = None, layers: List[dict] = None) -> None:
 		self.name = name
 		self.criterion = getattr(nn, criterion)
 
-		model_layers = []
-		for layer in layers:
-			layer_type = getattr(nn, layer["type"])
-			parameters = {key: value for key, value in list(layer.items())[1:]}
-			layer = layer_type(**parameters)
-			model_layers.append(layer)
+		if layers is not None:
+			model_layers = []
+			for layer in layers:
+				layer_type = getattr(nn, layer["type"])
+				parameters = {key: value for key, value in list(layer.items())[1:]}
+				layer = layer_type(**parameters)
+				model_layers.append(layer)
 
-		class Net(nn.Module):
-			def __init__(self) -> None:
-				super(Net, self).__init__()
-				self.layers = nn.Sequential(*model_layers)
+			class Net(nn.Module):
+				def __init__(self) -> None:
+					super(Net, self).__init__()
+					self.layers = nn.Sequential(*model_layers)
 
-			def forward(self, x: torch.Tensor) -> torch.Tensor:
-				x = self.layers(x)
-				return x
+				def forward(self, x: torch.Tensor) -> torch.Tensor:
+					x = self.layers(x)
+					return x
 
-		self.model = Net
+			self.model = Net
+		elif hub is not None:
+			self.model = lambda: torch.hub.load(**hub)
 
 	def __str__(self) -> str:
 		result = "Model"

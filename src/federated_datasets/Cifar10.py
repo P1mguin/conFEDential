@@ -8,7 +8,7 @@ from src.federated_datasets.Dataset import Dataset
 
 
 class Cifar10(Dataset):
-	class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+	class_names = ['plan', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 	@staticmethod
 	def load_data(
@@ -48,8 +48,8 @@ class Cifar10(Dataset):
 		test_dataset = test_dataset.map(preprocess_fn)
 
 		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
-			image_list=train_dataset["img"],
-			label_list=train_dataset["label"],
+			image_list=train_dataset["x"],
+			label_list=train_dataset["y"],
 			num_clients=client_count,
 			method="dirichlet",
 			alpha=alpha,

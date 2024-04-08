@@ -21,5 +21,8 @@ dataset:
 model:
   name: DenseNet
   criterion: CrossEntropyLoss
-  layers:
+  hub:
+    repo_or_dir: 'pytorch/vision:v0.10.0'
+    model: 'densenet121'
+    pretrained: False
 
