@@ -8,7 +8,7 @@ import torch.nn as nn
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def get_weights_from_model(model: nn.Module) -> List[npt.NDArray]:
+def get_weights(model: nn.Module) -> List[npt.NDArray]:
 	"""
 	Takes a PyTorch model and returns its parameters as a list of NumPy arrays
 	:param model: the PyTorch model

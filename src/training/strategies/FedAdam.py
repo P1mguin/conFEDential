@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -34,10 +34,15 @@ class FedAdam(Strategy):
 		if not results:
 			return None, {}
 
-		delta_results = [
-			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-			for _, fit_res in results
-		]
+		current_weights = parameters_to_ndarrays(self.current_weights)
+
+		# Find the delta of each client
+		new_weights = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
+		delta_results = [[current_weights[i] - layer for i, layer in enumerate(client)] for client in new_weights]
+
+		# Annotate with the amount of data
+		delta_results = [(x, fit_res.num_examples) for x, (_, fit_res) in zip(delta_results, results)]
+
 		deltas_aggregated = utils.common.compute_weighted_average(delta_results)
 		deltas_aggregated = [-layer for layer in deltas_aggregated]
 
@@ -57,8 +62,6 @@ class FedAdam(Strategy):
 			for x, y in zip(self.second_momentum, deltas_aggregated)
 		]
 
-		current_weights = parameters_to_ndarrays(self.current_weights)
-
 		self.current_weights = [
 			x + self.global_lr * y / (np.sqrt(z) + self.eps)
 			for x, y, z in zip(current_weights, self.first_momentum, self.second_momentum)
@@ -74,16 +77,17 @@ class FedAdam(Strategy):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			config: Config
-	) -> Tuple[List[npt.NDArray], int, Dict[str, Scalar]]:
-		net = config.get_model().to(training.DEVICE)
+			run_config: Config,
+			config: Dict[str, Any]
+	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
+		net = run_config.get_model().to(training.DEVICE)
 
 		if parameters is not None:
 			training.set_weights(net, parameters)
 
-		criterion = config.get_criterion()
-		optimizer = config.get_optimizer(net.parameters())
-		local_rounds = config.get_local_rounds()
+		criterion = run_config.get_criterion()
+		optimizer = run_config.get_optimizer(net.parameters())
+		local_rounds = run_config.get_local_rounds()
 
 		for _ in range(local_rounds):
 			for features, labels in train_loader:
@@ -93,10 +97,7 @@ class FedAdam(Strategy):
 				loss.backward()
 				optimizer.step()
 
-		gradient = [
-			old_layer - new_layer for old_layer, new_layer in zip(parameters, training.get_weights_from_model(net))
-		]
-
+		parameters = training.get_weights(net)
 		data_size = len(train_loader.dataset)
 
-		return gradient, data_size, {}
+		return parameters, data_size, {}

@@ -11,7 +11,7 @@ sys.path.append(PROJECT_DIRECTORY)
 
 import argparse
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 from logging import INFO
 
 from flwr.common.logger import log
@@ -95,10 +95,10 @@ def get_client_fn(train_loaders: List[DataLoader], run_config: Config) -> Callab
 		def set_parameters(self, parameters: List[npt.NDArray]) -> None:
 			self.parameters = parameters
 
-		def fit(self, parameters: List[npt.NDArray], config: Dict[str, Scalar]) -> Tuple[
+		def fit(self, parameters: List[npt.NDArray], config: Dict[str, Any]) -> Tuple[
 			List[npt.NDArray], int, Dict[str, Scalar]]:
 			self.set_parameters(parameters)
-			new_parameters, data_size, config = strategy.train(parameters, train_loaders[self.cid], run_config)
+			new_parameters, data_size, config = strategy.train(parameters, train_loaders[self.cid], run_config, config)
 			return new_parameters, data_size, config
 
 	def client_fn(cid: str) -> fl.client.Client:
@@ -153,7 +153,7 @@ def run_simulation(
 	evaluate = get_evaluate_fn(test_loader, config)
 
 	strategy = agg.get_capturing_strategy(
-		config=config,
+		run_config=config,
 		evaluate_fn=evaluate,
 		is_capturing=is_capturing,
 	)

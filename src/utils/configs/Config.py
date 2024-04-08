@@ -94,7 +94,7 @@ class Config:
 	def get_model_name(self) -> str:
 		return self.model.get_name()
 
-	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
+	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self.simulation.get_optimizer_instance(parameters)
 
 	def get_optimizer_name(self) -> str:

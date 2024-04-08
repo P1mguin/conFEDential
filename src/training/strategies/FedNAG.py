@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import torch
@@ -13,9 +14,9 @@ from src.training.strategies.Strategy import Strategy
 from src.utils.configs import Config
 
 
-class FedAvg(Strategy):
+class FedNAG(Strategy):
 	def __init__(self, **kwargs):
-		super(FedAvg, self).__init__(**kwargs)
+		super(FedNAG, self).__init__(**kwargs)
 
 	def aggregate_fit(
 			self,
@@ -30,13 +31,20 @@ class FedAvg(Strategy):
 			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
 			for _, fit_res in results
 		]
+
 		parameters_aggregated = utils.common.compute_weighted_average(parameter_results)
 		parameters_aggregated = ndarrays_to_parameters(parameters_aggregated)
 
-		return parameters_aggregated, {}
+		velocity_results = [
+			(fit_res.metrics["velocity"], fit_res.num_examples)
+			for _, fit_res in results
+		]
+		velocity_aggregated = utils.common.compute_weighted_average(velocity_results)
+
+		return parameters_aggregated, {"velocity": velocity_aggregated}
 
 	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> SGD:
-		return torch.optim.SGD(parameters, **self.kwargs)
+		return torch.optim.SGD(parameters, nesterov=True, **self.kwargs)
 
 	def train(
 			self,
@@ -54,6 +62,13 @@ class FedAvg(Strategy):
 		optimizer = run_config.get_optimizer(net.parameters())
 		local_rounds = run_config.get_local_rounds()
 
+		if config.get("velocity") is not None:
+			state_dict = optimizer.state_dict()
+			state_dict["state"] = OrderedDict(
+				{i: {"momentum_buffer": torch.Tensor(value)} for i, value in enumerate(config.get("velocity"))}
+			)
+			optimizer.load_state_dict(state_dict)
+
 		for _ in range(local_rounds):
 			for features, labels in train_loader:
 				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
@@ -63,6 +78,7 @@ class FedAvg(Strategy):
 				optimizer.step()
 
 		parameters = training.get_weights(net)
-
 		data_size = len(train_loader.dataset)
-		return parameters, data_size, {}
+		velocity = [val["momentum_buffer"].cpu().numpy() for val in optimizer.state.values()]
+
+		return parameters, data_size, {"velocity": velocity}

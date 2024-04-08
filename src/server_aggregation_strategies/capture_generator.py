@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import numpy as np
@@ -12,19 +12,19 @@ from src.utils.configs import Config
 
 
 def get_capturing_strategy(
-		config: Config,
+		run_config: Config,
 		evaluate_fn: Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]],
 		is_capturing: bool = False
 ) -> fl.server.strategy.Strategy:
 	"""
 	Generates a flower learning strategy in which the transmitted parameters
 	are captured in a numpy file in the .captured folder
-	:param config: the loaded yaml config
+	:param run_config: the loaded yaml config
 	:param evaluate_fn: the evaluation function to use on the server level
 	:param is_capturing: whether to maintain the captured parameters in a numpy file
 	"""
-	strategy = config.get_strategy()
-	strategy.set_parameters(config.get_initial_parameters())
+	strategy = run_config.get_strategy()
+	strategy.set_parameters(run_config.get_initial_parameters())
 
 	class FedCapture(FedAvg):
 		def __init__(self) -> None:
@@ -34,9 +34,9 @@ def get_capturing_strategy(
 				min_available_clients,
 				min_evaluate_clients,
 				min_fit_clients
-			) = config.get_client_selection_config()
+			) = run_config.get_client_selection_config()
 
-			initial_parameters = config.get_initial_parameters()
+			initial_parameters = run_config.get_initial_parameters()
 			super(FedCapture, self).__init__(
 				fraction_fit=fraction_fit,
 				fraction_evaluate=fraction_evaluate,
@@ -47,8 +47,10 @@ def get_capturing_strategy(
 				initial_parameters=initial_parameters
 			)
 
-			self.client_count = config.get_client_count()
-			self.output_path = config.get_output_capture_file_path()
+			self.config = {}
+
+			self.client_count = run_config.get_client_count()
+			self.output_path = run_config.get_output_capture_file_path()
 			if is_capturing:
 				self._initialize_directory_path()
 
@@ -112,6 +114,15 @@ def get_capturing_strategy(
 					captured_parameters[cid] = parameters
 				self._capture_parameters(captured_parameters)
 
-			return strategy.aggregate_fit(server_round, results, failures)
+			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures)
+			self.update_config_fn(config)
+
+			return aggregated_parameters, config
+
+		def update_config_fn(self, config: Dict[str, Any]) -> None:
+			def fit_config(server_round: int) -> Dict[str, Any]:
+				return config
+
+			self.on_fit_config_fn = fit_config
 
 	return FedCapture()

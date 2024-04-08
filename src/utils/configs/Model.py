@@ -77,7 +77,7 @@ class Model:
 		return self.criterion()
 
 	def get_initial_parameters(self):
-		return flwr.common.ndarrays_to_parameters(helper.get_weights_from_model(self.get_model_instance()))
+		return flwr.common.ndarrays_to_parameters(helper.get_weights(self.get_model_instance()))
 
 	def get_model_class(self) -> Type[nn.Module]:
 		return self.model

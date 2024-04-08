@@ -49,7 +49,7 @@ class Optimizer:
 	def get_kwargs(self) -> Dict[str, Any]:
 		return self.kwargs
 
-	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
+	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self.get_strategy().get_optimizer_instance(parameters)
 
 
@@ -137,7 +137,7 @@ class Simulation:
 	def get_min_fit_clients(self) -> int:
 		return max(int(self.get_client_count() * self.get_fraction_fit()), 1)
 
-	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
+	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self.optimizer.get_optimizer_instance(parameters)
 
 	def get_optimizer_kwargs(self) -> Dict[str, Any]:

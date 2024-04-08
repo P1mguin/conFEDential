@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Iterator, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
 
 import numpy.typing as npt
 import torch
@@ -18,7 +18,7 @@ class Strategy(ABC):
 		self.current_weights = None
 
 	@abstractmethod
-	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
+	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		"""
 		Returns the optimizer that will be used for this training strategy
 		:param parameters: the parameters that will be used in the optimizer
@@ -30,13 +30,15 @@ class Strategy(ABC):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			config: Config
-	) -> Tuple[List[npt.NDArray], int, Dict[str, Scalar]]:
+			run_config: Config,
+			config: Dict[str, Any]
+	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		"""
 		A method to train a PyTorch model with a given train loader with a method described in a configuration
 		:param parameters: the initial parameters of the model
 		:param train_loader: the data to train with
-		:param config: the configuration that describes the experiment
+		:param run_config: the configuration that describes the experiment
+		:param config: extra parameters used for learning
 		"""
 		pass
 
