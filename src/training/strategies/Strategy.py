@@ -15,6 +15,7 @@ from src.utils.configs import Config
 class Strategy(ABC):
 	def __init__(self, **kwargs):
 		self.kwargs = kwargs
+		self.current_weights = None
 
 	@abstractmethod
 	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> Type[torch.optim.Optimizer]:
@@ -82,3 +83,6 @@ class Strategy(ABC):
 
 		data_size = len(test_loader.dataset)
 		return loss, accuracy, data_size
+
+	def set_parameters(self, parameters: Parameters):
+		self.current_weights = parameters

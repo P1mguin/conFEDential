@@ -3,7 +3,7 @@ import sys
 
 import wandb
 
-from src.training.strategies import Strategy
+from src.training.strategies.Strategy import Strategy
 from src.utils.configs import Config
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))

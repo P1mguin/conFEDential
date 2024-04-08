@@ -131,6 +131,7 @@ class Config:
 			"config": {
 				"dataset": self.get_dataset_name(),
 				"model": self.get_model_name(),
+				"learning_method": self.get_optimizer_name(),
 				"batch_size": self.get_batch_size(),
 				"client_count": self.get_client_count(),
 				"fraction_fit": self.get_client_selection_config()[1],

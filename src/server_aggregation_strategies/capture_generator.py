@@ -24,6 +24,7 @@ def get_capturing_strategy(
 	:param is_capturing: whether to maintain the captured parameters in a numpy file
 	"""
 	strategy = config.get_strategy()
+	strategy.set_parameters(config.get_initial_parameters())
 
 	class FedCapture(FedAvg):
 		def __init__(self) -> None:
