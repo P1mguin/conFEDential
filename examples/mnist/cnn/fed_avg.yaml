@@ -1,12 +1,12 @@
 simulation:
-  batch_size: 10
+  batch_size: 8
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 100
-  local_rounds: 5
+  local_rounds: 20
   optimizer:
     optimizer_name: SGD
-    lr: 0.15
+    lr: 0.25
 dataset:
   name: MNIST
   splitter:
