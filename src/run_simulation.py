@@ -54,6 +54,25 @@ parser.add_argument(
 	help="Number of GPUs to assign to a virtual client"
 )
 
+parser.add_argument(
+	"--run-name",
+	type=str,
+	default=None,
+	help="Name of the run that will be added as tag to the Weights and Biases dashboard"
+)
+
+parser.add_argument(
+	"--logging",
+	action=argparse.BooleanOptionalAction,
+	help="Whether to log to Weights and Biases dashboard during simulation"
+)
+
+parser.add_argument(
+	"--capturing",
+	action=argparse.BooleanOptionalAction,
+	help="Whether to save the messages from client to server"
+)
+
 
 def get_client_fn(train_loaders: List[DataLoader], run_config: Config) -> Callable[[str], fl.client.Client]:
 	"""
@@ -108,12 +127,20 @@ def get_evaluate_fn(
 	return evaluate
 
 
-def run_simulation(config: Config, client_resources: dict, batch_run_name: str = None) -> None:
+def run_simulation(
+		config: Config,
+		client_resources: dict,
+		run_name: str = None,
+		is_online: bool = False,
+		is_capturing: bool = False
+) -> None:
 	"""
 	Runs a federated learning simulation with the rules defined in the config. The results are tracked using W&B.
 	:param config: the experiment configuration
 	:param client_resources: the resource eac client gets
-	:param batch_run_name: an identifier that will be added to the tags to mark it as being part of a batch run
+	:param run_name: an identifier that will be added as tag to the row of the run in the Weights and Biases dashboard
+	:param is_online: Whether to log to the Weights and Biases dashboard whilst simulating
+	:param is_capturing: Whether to capture the messages transmitted from client to server in the .captured directory
 	"""
 	log(INFO, f"\nRunning with {config}")
 
@@ -124,11 +151,12 @@ def run_simulation(config: Config, client_resources: dict, batch_run_name: str =
 	strategy = agg.get_capturing_strategy(
 		strategy=fl.server.strategy.FedAvg,
 		config=config,
-		evaluate_fn=evaluate
+		evaluate_fn=evaluate,
+		is_capturing=is_capturing,
 	)
 
-	wandb_kwargs = config.get_wandb_kwargs()
-	mode = "online" if batch_run_name is None else "offline"
+	wandb_kwargs = config.get_wandb_kwargs(run_name)
+	mode = "online" if is_online else "offline"
 	wandb.init(mode=mode, **wandb_kwargs)
 
 	ray_init_args = {
@@ -161,7 +189,12 @@ def main() -> None:
 	}
 
 	config = Config.from_yaml_file(str(Path(args.yaml_file).resolve()))
-	run_simulation(config, client_resources)
+
+	run_name = args.run_name
+	is_online = args.logging
+	is_capturing = args.capturing
+
+	run_simulation(config, client_resources, run_name, is_online, is_capturing)
 
 
 

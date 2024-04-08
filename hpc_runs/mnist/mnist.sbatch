@@ -14,9 +14,9 @@ module load python/3.10.7
 module load nvidia/nvhpc/23.3
 source venv/bin/activate
 
-srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/cnn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 &
-srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/logistic_regression/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 &
-srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/2nn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 &
+srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/cnn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --no-capturing --run-name MINST-CNN-FEDAVG &
+srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/logistic_regression/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --no-capturing --run-name MINST-LOGISTICREGRESSION-FEDAVG &
+srun python src/batch_run_simulation.py --yaml-file batch_examples/mnist/2nn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --no-capturing --run-name MINST-2NN-FEDAVG &
 wait
 
 wandb sync --sync-all

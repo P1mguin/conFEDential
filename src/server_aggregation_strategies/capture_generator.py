@@ -13,7 +13,8 @@ from src.utils.configs import Config
 def get_capturing_strategy(
 		strategy: Type[fl.server.strategy.Strategy],
 		config: Config,
-		evaluate_fn: Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]
+		evaluate_fn: Callable[[int, List[npt.NDArray], Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]],
+		is_capturing: bool = False
 ) -> fl.server.strategy.Strategy:
 	"""
 	Generates a flower learning strategy in which the transmitted parameters
@@ -21,6 +22,7 @@ def get_capturing_strategy(
 	:param strategy: the class of the flower strategy to extend
 	:param config: the loaded yaml config
 	:param evaluate_fn: the evaluation function to use on the server level
+	:param is_capturing: whether to maintain the captured parameters in a numpy file
 	"""
 	class FedCapture(strategy):
 		def __init__(self) -> None:
@@ -46,7 +48,8 @@ def get_capturing_strategy(
 
 			self.client_count = config.get_client_count()
 			self.output_path = config.get_output_capture_file_path()
-			self._initialize_directory_path()
+			if is_capturing:
+				self._initialize_directory_path()
 
 		def _initialize_directory_path(self) -> None:
 			"""
@@ -100,13 +103,14 @@ def get_capturing_strategy(
 				results: List[Tuple[ClientProxy, FitRes]],
 				failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 		) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-			captured_parameters = {}
-			for client_proxy, fit_results in results:
-				cid = int(client_proxy.cid)
-				parameters = parameters_to_ndarrays((fit_results.parameters))
-				# parameters = [parameter.copy() for parameter in parameters_to_ndarrays(fit_results.parameters)]
-				captured_parameters[cid] = parameters
-			self._capture_parameters(captured_parameters)
+			if is_capturing:
+				captured_parameters = {}
+				for client_proxy, fit_results in results:
+					cid = int(client_proxy.cid)
+					parameters = parameters_to_ndarrays((fit_results.parameters))
+					# parameters = [parameter.copy() for parameter in parameters_to_ndarrays(fit_results.parameters)]
+					captured_parameters[cid] = parameters
+				self._capture_parameters(captured_parameters)
 
 			return strategy.aggregate_fit(self, server_round, results, failures)
 

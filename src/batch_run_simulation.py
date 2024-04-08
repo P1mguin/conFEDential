@@ -1,6 +1,5 @@
 import os
 import sys
-from datetime import datetime
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
@@ -44,6 +43,25 @@ parser.add_argument(
 	help="Number of GPUs to assign to a virtual client"
 )
 
+parser.add_argument(
+	"--run-name",
+	type=str,
+	default=None,
+	help="Name of the run that will be added as tag to the Weights and Biases dashboard"
+)
+
+parser.add_argument(
+	"--logging",
+	action=argparse.BooleanOptionalAction,
+	help="Whether to log to Weights and Biases dashboard during simulation"
+)
+
+parser.add_argument(
+	"--capturing",
+	action=argparse.BooleanOptionalAction,
+	help="Whether to save the messages from client to server"
+)
+
 
 def main() -> None:
 	args = parser.parse_args()
@@ -54,15 +72,14 @@ def main() -> None:
 	}
 
 	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
-	dataset_name = configs[0].get_dataset_name()
-	model_name = configs[0].get_model_name()
-	optimizer = configs[0].get_optimizer_name()
-	start_day = datetime.now().strftime("%Y-%m-%d")
-	batch_run_name = f"{dataset_name}-{model_name}-{optimizer}-{start_day}"
 
-	log(INFO, f"Loaded {len(configs)} configs, running...")
+	run_name = args.run_name
+	is_online = args.logging
+	is_capturing = args.capturing
+
+	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
-		run_simulation(config, client_resources, batch_run_name)
+		run_simulation(config, client_resources, run_name, is_online, is_capturing)
 
 
 if __name__ == '__main__':
