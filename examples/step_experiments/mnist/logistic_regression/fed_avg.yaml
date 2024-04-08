@@ -1,15 +1,15 @@
 simulation:
   batch_size:
-    steps: [1, 2, 3, 4, 5]
+    steps: [ 1, 2, 3, 4, 5 ]
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
   local_rounds:
-    steps: [10, 20, 30, 40, 50]
+    steps: [ 10, 20, 30, 40, 50 ]
   optimizer:
     optimizer_name: SGD
     lr:
-      steps: [0.1, 0.2, 0.3, 0.4, 0.5]
+      steps: [ 0.1, 0.2, 0.3, 0.4, 0.5 ]
 dataset:
   name: MNIST
   splitter:

@@ -118,6 +118,7 @@ def get_evaluate_fn(
 	:param test_loader: the test data the server will test with
 	:param run_config: the run configuration with which rules the server will test
 	"""
+
 	def evaluate(
 			server_round: int,
 			parameters: fl.common.NDArrays,
@@ -197,7 +198,6 @@ def main() -> None:
 	is_capturing = args.capturing
 
 	run_simulation(config, client_resources, run_name, is_online, is_capturing)
-
 
 
 if __name__ == '__main__':

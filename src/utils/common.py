@@ -12,7 +12,6 @@ def compute_weighted_average(values: List[Tuple[List[npt.NDArray], int]]) -> Any
 	return average
 
 
-
 def find_all_paths(dictionary: dict, key: str, path=None):
 	"""
 	Recursive function that finds all path to a given key name in a dictionary
@@ -32,6 +31,7 @@ def find_all_paths(dictionary: dict, key: str, path=None):
 			else:
 				paths.extend(find_all_paths(v, key, new_path))
 	return paths
+
 
 def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	"""

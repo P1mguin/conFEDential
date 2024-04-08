@@ -59,6 +59,7 @@ def _get_stepped_config(config: dict) -> List[dict]:
 
 	return configs
 
+
 def generate_configs_from_yaml_file(file_path: str) -> List[Config]:
 	"""
 	Generates a list of Config from the path to a batch_configuration YAML file.

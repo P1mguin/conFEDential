@@ -40,5 +40,6 @@ class Dataset(ABC):
 		:return: True if the dataset is downloaded, otherwise raise FileNotFoundError
 		"""
 		if not os.path.isdir(f".cache/{dataset}"):
-			raise FileNotFoundError(f"Was unable to open cache for {dataset}, download it using the command:\npython download_dataset.py --dataset {dataset}")
+			raise FileNotFoundError(
+				f"Was unable to open cache for {dataset}, download it using the command:\npython download_dataset.py --dataset {dataset}")
 		return True

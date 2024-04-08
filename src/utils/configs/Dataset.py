@@ -17,6 +17,7 @@ class Dataset:
 	the data using FedArtML.
 	preprocess_fn: a function that is applied to each element before it is returned, represented as a string.
 	"""
+
 	def __init__(self, name: str, splitter: dict, preprocess_fn: str) -> None:
 		self.name = name
 		self.alpha = float(splitter['alpha'])

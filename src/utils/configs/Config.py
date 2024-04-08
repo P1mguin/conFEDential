@@ -23,6 +23,7 @@ class Config:
 	maintainable, readable, and ensures the configuration is valid prior to starting the experiment. See the
 	classes for each parameter of config for a description of which value describes what information.
 	"""
+
 	def __init__(self, simulation, dataset, model) -> None:
 		self.simulation = simulation
 		self.dataset = dataset

@@ -15,6 +15,7 @@ class Optimizer:
 	model parameters
 	kwargs: All key word arguments except the model parameters that are required to summon the optimizer
 	"""
+
 	def __init__(self, optimizer_name: str, **kwargs) -> None:
 		self.optimizer_name = optimizer_name
 		self.kwargs = kwargs
@@ -63,6 +64,7 @@ class Simulation:
 	local_rounds: The amount of times the client will repeat the learning process, i.e. epochs
 	optimizer: A valid configuration for an Optimizer instance
 	"""
+
 	def __init__(
 			self,
 			batch_size: int,
