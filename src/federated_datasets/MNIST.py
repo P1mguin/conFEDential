@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader
 from src.federated_datasets.Dataset import Dataset
 
 
-# Wrap in class to make code more readable
 class MNIST(Dataset):
 	@staticmethod
 	def load_data(

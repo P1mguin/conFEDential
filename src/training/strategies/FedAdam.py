@@ -15,7 +15,7 @@ from src.utils.configs import Config
 
 
 class FedAdam(Strategy):
-	def __init__(self, **kwargs):
+	def __init__(self, **kwargs) -> None:
 		super(FedAdam, self).__init__(**kwargs)
 		self.first_momentum = None
 		self.second_momentum = None
@@ -36,12 +36,10 @@ class FedAdam(Strategy):
 
 		current_weights = parameters_to_ndarrays(self.current_weights)
 
-		# Find the delta of each client
-		new_weights = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
-		delta_results = [[current_weights[i] - layer for i, layer in enumerate(client)] for client in new_weights]
-
-		# Annotate with the amount of data
-		delta_results = [(x, fit_res.num_examples) for x, (_, fit_res) in zip(delta_results, results)]
+		delta_results = [
+			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+			for _, fit_res in results
+		]
 
 		deltas_aggregated = utils.common.compute_weighted_average(delta_results)
 		deltas_aggregated = [-layer for layer in deltas_aggregated]
@@ -63,7 +61,7 @@ class FedAdam(Strategy):
 		]
 
 		self.current_weights = [
-			x + self.global_lr * y / (np.sqrt(z) + self.eps)
+			x + self.global_lr * (y / (np.sqrt(z) + self.eps))
 			for x, y, z in zip(current_weights, self.first_momentum, self.second_momentum)
 		]
 		self.current_weights = ndarrays_to_parameters(self.current_weights)
@@ -97,7 +95,9 @@ class FedAdam(Strategy):
 				loss.backward()
 				optimizer.step()
 
-		parameters = training.get_weights(net)
-		data_size = len(train_loader.dataset)
+		gradient = [
+			old_layer - new_layer for old_layer, new_layer in zip(parameters, training.get_weights(net))
+		]
 
-		return parameters, data_size, {}
+		data_size = len(train_loader.dataset)
+		return gradient, data_size, {}

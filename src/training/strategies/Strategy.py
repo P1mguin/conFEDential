@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy.typing as npt
 import torch
@@ -13,7 +13,7 @@ from src.utils.configs import Config
 
 
 class Strategy(ABC):
-	def __init__(self, **kwargs):
+	def __init__(self, **kwargs) -> None:
 		self.kwargs = kwargs
 		self.current_weights = None
 
@@ -86,5 +86,9 @@ class Strategy(ABC):
 		data_size = len(test_loader.dataset)
 		return loss, accuracy, data_size
 
-	def set_parameters(self, parameters: Parameters):
+	def set_parameters(self, parameters: Parameters) -> None:
+		"""
+		Sets the parameters that the aggregation is working with
+		:param parameters: the new parameters
+		"""
 		self.current_weights = parameters
