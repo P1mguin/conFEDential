@@ -4,7 +4,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 import numpy.typing as npt
 import torch
 import torch.nn as nn
-from flwr.common import FitRes, Parameters, Scalar
+from flwr.common import FitRes, Parameters
 from flwr.server.client_proxy import ClientProxy
 from torch.utils.data import DataLoader
 
@@ -48,12 +48,14 @@ class Strategy(ABC):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-	) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+			run_config: Config
+	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		"""
 		A method to aggregate the results of the client of the global training round
 		:param server_round: an indicator of which global iterations the system is in
 		:param results: the results of the clients
 		:param failures: the clients that failed
+		:param run_config: the configuration that describes the experiment
 		"""
 		pass
 

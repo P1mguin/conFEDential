@@ -114,7 +114,7 @@ def get_capturing_strategy(
 					captured_parameters[cid] = parameters
 				self._capture_parameters(captured_parameters)
 
-			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures)
+			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures, run_config)
 			self.update_config_fn(config)
 
 			return aggregated_parameters, config

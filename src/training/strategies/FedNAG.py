@@ -23,7 +23,8 @@ class FedNAG(Strategy):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-	) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+			run_config: Config
+	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		if not results:
 			return None, {}
 

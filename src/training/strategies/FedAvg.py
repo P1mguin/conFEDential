@@ -1,7 +1,7 @@
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import torch
-from flwr.common import FitRes, ndarrays_to_parameters, Parameters, parameters_to_ndarrays, Scalar
+from flwr.common import FitRes, ndarrays_to_parameters, Parameters, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 from numpy import typing as npt
 from torch import nn as nn
@@ -22,7 +22,8 @@ class FedAvg(Strategy):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-	) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+			run_config: Config
+	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		if not results:
 			return None, {}
 
