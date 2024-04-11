@@ -6,6 +6,11 @@ import numpy.typing as npt
 
 
 def compute_weighted_average(values: List[Tuple[List[npt.NDArray], int]]) -> Any:
+	"""
+	Computes the weighted average of a list of tuple with the first item a list of numpy arrays and the second item
+	the weight of the list
+	:param values: the list of tuples
+	"""
 	total_count = sum(num_examples for (_, num_examples) in values)
 	values = [[layer * num_examples for layer in weights] for weights, num_examples in values]
 	average = [reduce(np.add, layers) / total_count for layers in zip(*values)]

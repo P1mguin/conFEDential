@@ -1,6 +1,7 @@
 import os
 import sys
 
+# Keep at top, so cluster knows which directory to work in
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
 
@@ -26,6 +27,8 @@ import src.server_aggregation_strategies as agg
 import random
 import numpy as np
 
+# Set seeds and set hugging face in offline mode so that cluster nodes do not attempt internet connection
+# which they do not have
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 torch.manual_seed(78)
 random.seed(78)
@@ -151,18 +154,6 @@ def run_simulation(
 	train_loaders, test_loader = config.get_dataloaders()
 	client_fn = get_client_fn(train_loaders, config)
 	evaluate = get_evaluate_fn(test_loader, config)
-
-	# net = config.get_model()
-	# criterion = config.get_criterion()
-	# optimizer = config.get_optimizer(net.parameters())
-	#
-	# def closure(*args, **kwargs):
-	# 	optimizer.zero_grad()
-	# 	features, labels = next(iter(train_loaders[0]))
-	# 	loss = criterion(net(features), labels)
-	# 	return loss
-	#
-	# optimizer.step(closure)
 
 	strategy = agg.get_capturing_strategy(
 		run_config=config,

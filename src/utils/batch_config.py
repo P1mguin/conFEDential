@@ -16,8 +16,10 @@ def _adjust_config_values(config: dict, configs: List[dict], *path: Tuple[str]) 
 	"""
 	# Get the steps that will be taken
 	if config.get("values") is not None:
+		# Values means a list of values are predefined
 		steps = config.get("values")
 	elif config.get("min") is not None:
+		# min indicates an interval sequence, compute the intervals
 		step_value = config.get("min")
 		maximum = config.get("max")
 		step_size = config.get("step_size")
@@ -45,6 +47,9 @@ def _get_stepped_config(config: dict) -> List[dict]:
 	Generates the configurations possible to a stepped experiment
 	:param config: The base config
 	"""
+	# For a step sequence, the configuration contains various item pairs with the steps key. The value for this
+	# is required to be of the same length. All the first items of these values will form the first step, the second
+	# the second, etc.
 	paths = utils.find_all_paths(config, "steps")
 
 	step_values = [utils.get_dict_value_from_path(config, *path) for path in paths]
@@ -80,11 +85,14 @@ def generate_configs_from_batch_config(configs: dict | List[dict], *path: str) -
 	configs into several function calls
 	:param path: a helper variable for the recursion that transfers which path is being checked
 	"""
+	# For simplicity, the method can be called without the config being a list. For recursion this simplifies it a bunch
+	# convert the single item to a list
 	if not isinstance(configs, list):
 		configs = [configs]
 
+	# Get the current subpart of the config we are working with, if the subpath is one value
+	# the recursion is ended
 	config = utils.get_dict_value_from_path(configs[0], *path)
-
 	if not isinstance(config, dict):
 		return configs
 
@@ -95,5 +103,4 @@ def generate_configs_from_batch_config(configs: dict | List[dict], *path: str) -
 	else:
 		for value in config.keys():
 			configs = generate_configs_from_batch_config(configs, *path, value)
-
 	return configs
