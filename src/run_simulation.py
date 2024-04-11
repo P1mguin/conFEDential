@@ -1,13 +1,13 @@
 import os
 import sys
 
+PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
+sys.path.append(PROJECT_DIRECTORY)
+
 import wandb
 
 from src.training.strategies.Strategy import Strategy
 from src.utils.configs import Config
-
-PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
-sys.path.append(PROJECT_DIRECTORY)
 
 import argparse
 from pathlib import Path
@@ -151,6 +151,18 @@ def run_simulation(
 	train_loaders, test_loader = config.get_dataloaders()
 	client_fn = get_client_fn(train_loaders, config)
 	evaluate = get_evaluate_fn(test_loader, config)
+
+	# net = config.get_model()
+	# criterion = config.get_criterion()
+	# optimizer = config.get_optimizer(net.parameters())
+	#
+	# def closure(*args, **kwargs):
+	# 	optimizer.zero_grad()
+	# 	features, labels = next(iter(train_loaders[0]))
+	# 	loss = criterion(net(features), labels)
+	# 	return loss
+	#
+	# optimizer.step(closure)
 
 	strategy = agg.get_capturing_strategy(
 		run_config=config,
