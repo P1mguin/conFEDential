@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -59,8 +59,8 @@ class NewtonOptimizer(Optimizer):
 				gradients = gradients.view(-1)
 				updates = updates.view(-1)
 
-			self.state[parameter]["gradients"] = gradients
-			self.state[parameter]["hessian"] = hessians
+			self.state[parameter]["gradients"] = gradients.detach()
+			self.state[parameter]["hessian"] = hessians.detach()
 			parameter.data.sub_(updates)
 		return loss.item()
 
@@ -79,37 +79,47 @@ class FedNL(Strategy):
 		if not results:
 			return None, {}
 
+		# Aggregate the gradients
 		gradient_results = [
 			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
 			for _, fit_res in results
 		]
 		gradients = utils.common.compute_weighted_average(gradient_results)
 
+		# Aggregate the hessians
 		hessian_results = [
 			(fit_res.metrics["hessian"], fit_res.num_examples)
 			for _, fit_res in results
 		]
 		hessians = utils.common.compute_weighted_average(hessian_results)
 
-		inverse_hessians = [np.zeros_like(layer) for layer in hessians]
-		for i, layer in enumerate(hessians):
-			for j, output in enumerate(layer):
-				try:
-					inverse_hessian = np.linalg.inv(output)
-				except np.linalg.LinAlgError:
-					inverse_hessian = np.zeros_like(output)
-				inverse_hessians[i][j] = inverse_hessian
-
-		# Per parameter compute the update
+		# Per layer calculate the model update
 		updates = []
-		for i, (gradient, inverse_hessian) in enumerate(zip(gradients, inverse_hessians)):
-			updates.append(np.zeros_like(gradient))
-			if inverse_hessian.ndim == 2:
-				updates[i] = gradient @ inverse_hessian
-				continue
+		for hessian, gradient in zip(hessians, gradients):
+			# We assume the layer to want to predict multiple parameters, if it is only for one parameter the gradient is
+			# one dimensional, then expand the gradient.
+			is_unsqueezed = gradient.ndim == 1
+			if is_unsqueezed:
+				gradient = np.expand_dims(gradient, 0)
+				hessian = np.expand_dims(hessian, 0)
 
-			for j, (parameter_gradient, parameter_inverse_hessian) in enumerate(zip(gradient, inverse_hessian)):
-				updates[i][j] = parameter_gradient @ parameter_inverse_hessian
+			# Per parameter compute the update
+			layer_updates = np.zeros_like(gradient)
+			for i, (parameter_hessian, parameter_gradient) in enumerate(zip(hessian, gradient)):
+				# Compute the inverse hessian
+				try:
+					inv_hessian = np.linalg.inv(parameter_hessian)
+				except np.linalg.LinAlgError:
+					inv_hessian = np.ones_like(parameter_hessian)
+
+				# Set the update for the parameter
+				layer_updates[i] = inv_hessian @ parameter_gradient
+
+			# Correct the earlier gradient expansion; Only the layer update is relevant
+			if is_unsqueezed:
+				layer_updates = layer_updates.squeeze(0)
+
+			updates.append(layer_updates)
 
 		current_weights = parameters_to_ndarrays(self.current_weights)
 		self.current_weights = [
@@ -150,8 +160,8 @@ class FedNL(Strategy):
 
 				optimizer.step(closure)
 
-		gradients = [value["gradients"].detach().numpy() for value in optimizer.state_dict()["state"].values()]
-		hessian = [value["hessian"].detach().numpy() for value in optimizer.state_dict()["state"].values()]
+		gradients = [value["gradients"].numpy() for value in optimizer.state_dict()["state"].values()]
+		hessian = [value["hessian"].numpy() for value in optimizer.state_dict()["state"].values()]
 
 		data_size = len(train_loader.dataset)
 
