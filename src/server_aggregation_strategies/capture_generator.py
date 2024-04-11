@@ -23,6 +23,7 @@ def get_capturing_strategy(
 	:param evaluate_fn: the evaluation function to use on the server level
 	:param is_capturing: whether to maintain the captured parameters in a numpy file
 	"""
+	# Get the strategy and set the initial parameters of the strategy model
 	strategy = run_config.get_strategy()
 	strategy.set_parameters(run_config.get_initial_parameters())
 
@@ -36,6 +37,7 @@ def get_capturing_strategy(
 				min_fit_clients
 			) = run_config.get_client_selection_config()
 
+			# Initialize the flower client
 			initial_parameters = run_config.get_initial_parameters()
 			super(FedCapture, self).__init__(
 				fraction_fit=fraction_fit,
@@ -47,8 +49,8 @@ def get_capturing_strategy(
 				initial_parameters=initial_parameters
 			)
 
+			# Set capturing parameters
 			self.config = {}
-
 			self.client_count = run_config.get_client_count()
 			self.output_path = run_config.get_output_capture_file_path()
 			if is_capturing:
@@ -79,6 +81,7 @@ def get_capturing_strategy(
 				for i, layer in enumerate(parameters):
 					captures[i][client, -1] = layer
 
+			# Save the numpy tensor
 			np.savez(self.output_path, *captures)
 
 		def _load_npz_file(self, captured_parameters: Dict[int, List[npt.NDArray]]) -> List[npt.NDArray]:
@@ -94,6 +97,7 @@ def get_capturing_strategy(
 						  list(captured_parameters.values())[0]]
 				np.savez(self.output_path, *shapes)
 
+			# Load in the file and fill the array of previous capture rounds
 			npz_file = np.load(self.output_path)
 			previous_captures = []
 			for file in npz_file.files:
@@ -106,6 +110,8 @@ def get_capturing_strategy(
 				results: List[Tuple[ClientProxy, FitRes]],
 				failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 		) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+			# Hook on to the aggregation at the server, capture the parameters and call the learning strategies
+			# actual learning method
 			if is_capturing:
 				captured_parameters = {}
 				for client_proxy, fit_results in results:
@@ -113,16 +119,16 @@ def get_capturing_strategy(
 					parameters = parameters_to_ndarrays((fit_results.parameters))
 					captured_parameters[cid] = parameters
 				self._capture_parameters(captured_parameters)
-
 			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures, run_config)
-			self.update_config_fn(config)
 
+			# Update config with the configuration values received from the aggregation
+			self.update_config_fn(config)
 			return aggregated_parameters, config
 
 		def update_config_fn(self, config: Dict[str, Any]) -> None:
+			# Method that is used to send additional variables to clients
 			def fit_config(server_round: int) -> Dict[str, Any]:
 				return config
-
 			self.on_fit_config_fn = fit_config
 
 	return FedCapture()
