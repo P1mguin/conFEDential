@@ -31,6 +31,7 @@ class MNIST(Dataset):
 		:param seed: Controls the starting point of the random number generator. Value is passed for reproducibility,
 		use your favourite number.
 		"""
+		# Confirm the dataset is downloaded locally and load in the dataset
 		Dataset.is_data_downloaded("mnist")
 		train_dataset, test_dataset = load_dataset(
 			"mnist",
@@ -39,12 +40,16 @@ class MNIST(Dataset):
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
 		)
+
+		# Convert the pytorch tensor to NumPy such FedArtML can convert the data to non-iid
 		train_dataset.set_format(type="np")
 		test_dataset.set_format(type="np")
 
+		# Apply the received preprocess function
 		train_dataset = train_dataset.map(preprocess_fn)
 		test_dataset = test_dataset.map(preprocess_fn)
 
+		# Split the data non-iid
 		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
 			image_list=train_dataset["x"],
 			label_list=train_dataset["y"],
@@ -55,8 +60,10 @@ class MNIST(Dataset):
 		)
 
 		# Use with class completion so every client has at least one label of each class
+		# Create the train and test loaders and return
 		train_loaders = []
 		for client_data in federated_train_data["with_class_completion"].values():
+			# Batch_size -1 corresponds to infinity
 			if batch_size == -1:
 				batch_size = len(client_data)
 			data_loader = DataLoader(client_data, batch_size=batch_size)
