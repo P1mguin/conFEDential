@@ -67,24 +67,29 @@ class Strategy(ABC):
 		:param test_loader: the data to test with
 		:param config: the configuration that describes the experiment
 		"""
+		# Get and set the testing configuration
 		net = config.get_model().to(training.DEVICE)
-
 		if parameters is not None:
 			training.set_weights(net, parameters)
-
 		criterion = config.get_criterion()
 		correct, total, loss = 0, 0, 0.
 
+		# Disable gradient calculation for testing
 		with torch.no_grad():
 			for data in test_loader:
 				features, labels = data['x'].to(training.DEVICE), data['y'].to(training.DEVICE)
 				outputs = net(features)
+
+				# Accumulate the total loss
 				loss += criterion(outputs, labels).item()
+
+				# Get the amount of correct predictions
 				_, predicted = torch.max(outputs.data, 1)
 				total += labels.size(0)
 				correct += (predicted == labels).sum().item()
-		accuracy = correct / total
 
+		# Compute the accuracy and return the performance
+		accuracy = correct / total
 		data_size = len(test_loader.dataset)
 		return loss, accuracy, data_size
 

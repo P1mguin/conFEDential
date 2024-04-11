@@ -17,25 +17,31 @@ from src.utils.configs import Config
 
 class NewtonOptimizer(Optimizer):
 	def __init__(self, params: Iterator[Parameter]):
+		# Newton method takes no parameters
 		defaults = dict()
 		super(NewtonOptimizer, self).__init__(params, defaults)
 
 	def step(self, closure = None) -> Optional[float]:
+		# The closure function is required to compute the Hessian, if it is not there raise an error
 		if closure is None:
 			raise RuntimeError('closure function must be provided for NewtonOptimizer')
 
+		# Compute the loss gradient based on the loss and current parameters
 		loss = closure()
-		parameters = [value for value in self.param_groups[0]["params"]]
-		loss_gradient = torch.autograd.grad(loss, parameters, create_graph=True)
 		if loss is None:
 			raise RuntimeError('closure function did not return the loss value')
+		parameters = [value for value in self.param_groups[0]["params"]]
+		loss_gradient = torch.autograd.grad(loss, parameters, create_graph=True)
 
+		# Compute the update per layer
 		for parameter, gradients in zip(parameters, loss_gradient):
+			# We assume each layer to work on multiple variables, if that is not the case, expand the gradient
+			# to mimic it working on one variable
 			is_unsqueezed = gradients.ndim == 1
 			if is_unsqueezed:
 				gradients = gradients.unsqueeze(0)
 
-			# Compute the hessian
+			# Compute the hessian per parameter
 			hessians = torch.zeros(*gradients.shape, gradients.shape[-1])
 			for i in range(gradients.size(0)):
 				for j in range(gradients.size(1)):
@@ -54,14 +60,17 @@ class NewtonOptimizer(Optimizer):
 				update = inv_hessian @ gradients[i]
 				updates[i] = update
 
+			# Correct the expansion
 			if is_unsqueezed:
 				hessians = hessians.view(hessians.shape[1:])
 				gradients = gradients.view(-1)
 				updates = updates.view(-1)
 
+			# Set the state with the gradient and hessian, and update the model parameters
 			self.state[parameter]["gradients"] = gradients.detach()
 			self.state[parameter]["hessian"] = hessians.detach()
 			parameter.data.sub_(updates)
+		# Return the loss
 		return loss.item()
 
 
@@ -76,6 +85,7 @@ class FedNL(Strategy):
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 			run_config: Config
 	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
+		# If no results have been received, return noting
 		if not results:
 			return None, {}
 
@@ -121,16 +131,17 @@ class FedNL(Strategy):
 
 			updates.append(layer_updates)
 
+		# Update the model, encode it and return it
 		current_weights = parameters_to_ndarrays(self.current_weights)
 		self.current_weights = [
 			layer - update
 			for layer, update in zip(current_weights, updates)
 		]
 		self.current_weights = ndarrays_to_parameters(self.current_weights)
-
 		return self.current_weights, {}
 
 	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
+		# The newton method makes use of our custom newton optimizer
 		return NewtonOptimizer(parameters)
 
 	def train(
@@ -140,19 +151,20 @@ class FedNL(Strategy):
 			run_config: Config,
 			config: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
+		# Get and set training configuration
 		net = run_config.get_model().to(training.DEVICE)
-
 		if parameters is not None:
 			training.set_weights(net, parameters)
-
 		criterion = run_config.get_criterion()
 		optimizer = run_config.get_optimizer(net.parameters())
 		local_rounds = run_config.get_local_rounds()
 
+		# Do local rounds and epochs
 		for _ in range(local_rounds):
 			for features, labels in train_loader:
 				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
 
+				# Define the closure function that returns the loss of the model
 				def closure(*args, **kwargs):
 					optimizer.zero_grad()
 					loss = criterion(net(features), labels)
@@ -160,9 +172,8 @@ class FedNL(Strategy):
 
 				optimizer.step(closure)
 
+		# Take the gradients and hessian from the optimizer state and transmit the results
 		gradients = [value["gradients"].numpy() for value in optimizer.state_dict()["state"].values()]
 		hessian = [value["hessian"].numpy() for value in optimizer.state_dict()["state"].values()]
-
 		data_size = len(train_loader.dataset)
-
 		return gradients, data_size, {"hessian": hessian}
