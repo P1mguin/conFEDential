@@ -53,6 +53,8 @@ class NewtonOptimizer(Optimizer):
 				# Compute the inverse hessian
 				try:
 					inv_hessian = torch.linalg.inv(hessians[i])
+					# When the elements become infinitesimally small, the inverse sometimes contains nans
+					inv_hessian[inv_hessian.isnan()] = 0.
 				except torch.linalg.LinAlgError:
 					inv_hessian = torch.ones_like(hessians[i])
 
