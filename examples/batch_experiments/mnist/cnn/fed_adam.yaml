@@ -16,8 +16,8 @@ simulation:
       betas:
         - 0.9  #Reddi 2021 Adaptive federated optimization
         - 0.99 #Reddi 2021 Adaptive federated optimization
-      eps:
-      weight_decay:
+      eps: 0.00000001 #Self chosen
+      weight_decay: 0.9999 #Kuo 2023 On noisy evaluation in federated hyperparameter tuning
 dataset:
   name: MNIST
   splitter:
