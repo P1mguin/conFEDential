@@ -24,11 +24,23 @@ dataset:
         "y": element["label"]
       }
 model:
-  name: Logistic Regression
+  name: 2NN
   criterion: CrossEntropyLoss
   layers:
     - type: Linear
       in_features: 784
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
       out_features: 10
     - type: Softmax
       dim: -1
