@@ -9,7 +9,8 @@ simulation:
   optimizer:
     optimizer_name: SCAFFOLD
     local:
-      lr: [ 0.2, 0.25, 0.3 ] #Self chosen
+      lr:
+        values: [ 0.2, 0.25, 0.3 ] #Self chosen
     global:
       lr: 1 # Karimireddy 2021, SCAFFOLD experiment setup
 dataset:
