@@ -2,6 +2,7 @@ import random
 from enum import Enum
 from typing import List
 
+import numpy as np
 from torch.utils.data import DataLoader
 
 
@@ -20,13 +21,13 @@ class Attack:
 	some random client
 	"""
 
-	def __init__(self, access_type: AccessType):
-		self.access_type = access_type
+	def __init__(self, access_type: str):
+		self.access_type = AccessType[access_type.upper()]
 		self.target_member = None
 
 		# In the learning process there is always at least two clients required by the Flower Framework. Therefore,
 		# we can set client 0 as the default attacker
-		if access_type == AccessType.CLIENT:
+		if self.access_type == AccessType.CLIENT:
 			self.attacker_id = 0
 		else:
 			self.attacker_id = None
@@ -46,14 +47,31 @@ class Attack:
 	def from_dict(config: dict):
 		return Attack(**config)
 
+	def get_attacker_participation_rounds(self, capture_output_directory: str) -> List[int]:
+		# Open the parameters file
+		parameters_file = np.load(f"{capture_output_directory}parameters.npz")
+
+		# Get the first layer of the parameters
+		client_layer = parameters_file[parameters_file.files[0]][self.attacker_id]
+
+		# Get the rounds in which the attacker participated
+		client_participation_indices = [i for i, update in enumerate(client_layer) if np.any(update)]
+
+		return client_participation_indices
+
 	def get_target_member(self):
 		return self.target_member
 
-	def get_model_aggregate_indices(self, client_count: int) -> List[int]:
+	def get_model_aggregate_indices(self, client_count: int, capture_output_directory: str = "") -> List[int]:
 		if self.access_type == AccessType.SERVER or self.access_type == AccessType.SERVER_ENCRYPTED:
 			return list(range(client_count))
-		else:
-			return [self.attacker_id]
+
+		# Load in the rounds to which the attacker participated
+		attacker_participation_indices = self.get_attacker_participation_rounds(capture_output_directory)
+
+		# The attacker received the model prior to that round, decrement each idnex
+		attacker_participation_indices = [i - 1 for i in attacker_participation_indices]
+		return attacker_participation_indices
 
 	def get_client_update_indices(self, client_count: int) -> List[int]:
 		if self.access_type == AccessType.SERVER:

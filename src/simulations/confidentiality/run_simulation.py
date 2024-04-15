@@ -8,7 +8,6 @@ import numpy as np
 import torch.autograd
 from flwr.common.logger import log
 
-from src.simulations.performance.run_simulation import run_simulation
 from src.utils.configs import AttackConfig
 
 os.environ["HF_DATASETS_OFFLINE"] = "1"
@@ -57,9 +56,16 @@ parser.add_argument(
 def attack_simulation(
 		config: AttackConfig,
 ) -> None:
-	# TODO: Attack the system
-	pass
+	# Get the information that we can use in the attack
+	simulation_aggregates = config.get_model_aggregates()
+	client_updates = config.get_client_updates()
 
+	# Construct the attacker model based on the config
+
+	# Train the attacker model with the known information
+
+	# Test the model
+	return None
 
 def main():
 	args = parser.parse_args()

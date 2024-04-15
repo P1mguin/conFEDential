@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from typing import List
+import os
+import re
+from typing import Dict, List
 
+import numpy as np
+import numpy.typing as npt
 import yaml
+from flwr.common import parameters_to_ndarrays
 
 import src.utils.configs as configs
 from src.utils.configs import Attack, Dataset, Model, Simulation
@@ -54,11 +59,80 @@ class AttackConfig(Config):
 	def get_target_member(self) -> int:
 		return self.attack.get_target_member()
 
-	def get_model_aggregate_indices(self, client_count: int) -> List[int]:
-		return self.attack.get_model_aggregate_indices(client_count)
+	def get_model_aggregate_indices(self, capture_output_directory: str = "") -> List[int]:
+		return self.attack.get_model_aggregate_indices(self.get_client_count(), capture_output_directory)
+
+	def get_model_aggregates(self) -> Dict[str, List[npt.NDArray]]:
+		output_directory = self.get_output_capture_directory_path()
+		aggregate_directory = f"{output_directory}aggregates/"
+		metric_directory = f"{aggregate_directory}metrics/"
+
+		# Get the files in which the aggregates reside
+		parameter_file = f"{aggregate_directory}parameters.npz"
+		metric_files = [f"{metric_directory}{file}" for file in os.listdir(metric_directory)]
+		file_names = [parameter_file, *metric_files]
+
+		# Get the iterations to which the attacker has access
+		# and shift them such that the initial parameters can be taken into account
+		iterations_access = self.get_model_aggregate_indices(output_directory)
+		iterations_access = [i + 1 for i in iterations_access]
+
+		# Collect the results
+		model_aggregates = {}
+		for file_name in file_names:
+			file = np.load(file_name)
+			match = re.search(r'/([^/]+)\.npz$', file_name)
+			key = match.group(1)
+
+			np_arrays = []
+			for i, np_file in enumerate(file.files):
+				layer = file[np_file]
+
+				# All parameters instead of the model parameters are initialized at zero
+				if key == "parameters":
+					initial_value = parameters_to_ndarrays(self.get_initial_parameters())
+				else:
+					initial_value = np.zeros_like(layer[0])
+
+				# Shift the layer by one such that the initial parameters can be taken into account
+				shifted_layer = np.zeros((layer.shape[0] + 1, *layer.shape[1:]))
+				shifted_layer[1:11] = layer
+				shifted_layer[0] = initial_value[i]
+
+				np_arrays.append(shifted_layer[iterations_access])
+
+			model_aggregates[key] = np_arrays
+		return model_aggregates
 
 	def get_client_update_indices(self, client_count: int) -> List[int]:
 		return self.attack.get_client_update_indices(client_count)
+
+	def get_client_updates(self) -> Dict[str, List[npt.NDArray]]:
+		output_directory = self.get_output_capture_directory_path()
+		metric_directory = f"{output_directory}metrics/"
+
+		# Get the files in which the client updates reside
+		parameter_file = f"{output_directory}parameters.npz"
+		metric_files = [f"{metric_directory}{file}" for file in os.listdir(metric_directory)]
+		file_names = [parameter_file, *metric_files]
+
+		# Get the iterations to which the attacker has access
+		iterations_access = self.get_client_update_indices(self.get_client_count())
+
+		client_updates = {}
+		for file_name in file_names:
+			file = np.load(file_name)
+			match = re.search(r'/([^/]+)\.npz$', file_name)
+			key = match.group(1)
+
+			np_arrays = []
+			for i, np_file in enumerate(file.files):
+				layer = file[np_file]
+				np_arrays.append(layer[iterations_access])
+
+			client_updates[key] = np_arrays
+		return client_updates
+
 
 	def is_target_member(self) -> bool:
 		return self.attack.is_target_member()
