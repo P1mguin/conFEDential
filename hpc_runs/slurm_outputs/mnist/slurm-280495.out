@@ -1,0 +1,42 @@
+ctit084
+2024-04-12 11:15:20.017986: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-04-12 11:15:30.014594: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-12 11:15:56.983008: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-12 11:18:05,942 | batch_run_simulation.py:80 | Loaded 36 configs with name MINST-2NN-FEDADAM, running...
+INFO flwr 2024-04-12 11:18:05,943 | run_simulation.py:153 | 
+Running with Config
+	Simulation
+		batch_size: 8
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 10
+		local_rounds: 10
+		Optimizer: FedAdam
+			local: {'lr': [0.15, 0.2, 0.25]}
+			global: {'lr': 0.05, 'betas': [0.9, 0.99], 'eps': None, 'weight_decay': None}
+	Dataset
+		name: MNIST
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": element["image"].reshape(784) / 255.,
+			    "y": element["label"]
+			  }
+			
+		splitter:
+			alpha: 1.0
+			percent_non_iid: 25.0
+	Model
+		name: Logistic Regression
+		criterion: CrossEntropyLoss()
+		layers:
+			Net(
+			  (layers): Sequential(
+			    (0): Linear(in_features=784, out_features=10, bias=True)
+			    (1): Softmax(dim=-1)
+			  )
+			)
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit084: error: *** STEP 280495.0 ON ctit084 CANCELLED AT 2024-04-12T11:22:30 ***
+slurmstepd-ctit084: error: *** JOB 280495 ON ctit084 CANCELLED AT 2024-04-12T11:22:30 ***
