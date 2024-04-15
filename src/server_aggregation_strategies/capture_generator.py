@@ -52,57 +52,106 @@ def get_capturing_strategy(
 			# Set capturing parameters
 			self.config = {}
 			self.client_count = run_config.get_client_count()
-			self.output_path = run_config.get_output_capture_file_path()
+			self.output_directory = run_config.get_output_capture_directory_path()
 			if is_capturing:
 				self._initialize_directory_path()
 
-		def _initialize_directory_path(self) -> None:
-			"""
-			Ensures all directories to the output file exist by creating them if they do not yet exist
-			"""
-			os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
+		def _capture_aggregates(self, aggregate: List[npt.NDArray], path: str) -> None:
+			# Ensure the path to the file exists
+			if not os.path.exists(path):
+				# Grab some non-zero message as a representation
+				shapes = [layer.shape for layer in aggregate]
+				np.savez(path, *[np.zeros((0, *shape)) for shape in shapes])
 
-		def _capture_parameters(self, captured_parameters: Dict[int, List[npt.NDArray]]) -> None:
-			"""
-			Capture the parameters of the clients transmitted to the server
-			:param captured_parameters: the parameters transmitted to the server
-			"""
-			captures = self._load_npz_file(captured_parameters)
+			# Retrieve the earlier captures of the variable to which this iteration will be appended
+			variables = self._load_npz_file(path)
 
-			# Expand the dimension of each client by one
-			for i in range(len(captures)):
-				shape = captures[i].shape
+			# Expand the dimension of each layer by one such it supports a new iteration of captures
+			for i, (captures, layer) in enumerate(zip(variables, aggregate)):
+				shape = captures.shape
+				expanded_matrix = np.zeros((shape[0] + 1, shape[1], *shape[2:]))
+				expanded_matrix[:-1] = variables[i]
+				expanded_matrix[-1] = layer
+				variables[i] = expanded_matrix
+
+			# Save this variable
+			np.savez(path, *variables)
+
+		def _capture_results(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
+			# Package the results in a dict
+			captured_results = {"parameters": {}, "metrics": {}}
+			for client_proxy, fit_results in results:
+				cid = int(client_proxy.cid)
+				parameters = parameters_to_ndarrays(fit_results.parameters)
+				metrics = fit_results.metrics
+
+				captured_results["parameters"][cid] = parameters
+				for key, value in metrics.items():
+					if not captured_results["metrics"].get(key):
+						captured_results["metrics"][key] = {}
+					captured_results["metrics"][key][cid] = value
+
+			# Capture the parameters
+			parameters_path = f"{self.output_directory}parameters.npz"
+			self._capture_variable(captured_results["parameters"], parameters_path)
+
+			# Capture the variables in the metrics
+			for key, value in captured_results["metrics"].items():
+				self._initialize_directory_path(has_metrics=True)
+				capture_path = f"{self.output_directory}metrics/{key}.npz"
+				self._capture_variable(value, capture_path)
+
+		def _capture_variable(self, messages: Dict[int, List[npt.NDArray]], path: str) -> None:
+			# Ensure the path to the file exists
+			if not os.path.exists(path):
+				# Grab some non-zero message as a representation
+				message = list(messages.values())[0]
+				shapes = [layer.shape for layer in message]
+				self._initialize_empty_npz_file(path, shapes)
+
+			# Retrieve the earlier captures of the variable to which this iteration will be appended
+			variables = self._load_npz_file(path)
+
+			# Expand the dimension of each layer by one such it supports a new iteration of captures
+			for i, layer in enumerate(variables):
+				shape = layer.shape
 				expanded_matrix = np.zeros((shape[0], shape[1] + 1, *shape[2:]))
-				expanded_matrix[:, :-1] = captures[i]
-				captures[i] = expanded_matrix
+				expanded_matrix[:, :-1] = variables[i]
+				variables[i] = expanded_matrix
 
-			# For each client set the value
-			for client, parameters in captured_parameters.items():
-				for i, layer in enumerate(parameters):
-					captures[i][client, -1] = layer
+			# Set the value for each client
+			for cid, message in messages.items():
+				for i, layer in enumerate(message):
+					variables[i][cid, -1] = layer
 
-			# Save the numpy tensor
-			np.savez(self.output_path, *captures)
+			# Save this variable
+			np.savez(path, *variables)
 
-		def _load_npz_file(self, captured_parameters: Dict[int, List[npt.NDArray]]) -> List[npt.NDArray]:
-			"""
-			Loads the already captured parameters, initializes empty npz file as a list of
-			shape (number of layers (including biases), number clients, 0 (number of iterations), layer shape)
-			:param captured_parameters: A list with each element the intercepted layer per client per iterations
-			"""
-			if not os.path.exists(self.output_path):
-				# The shape of captured parameter should account for several clients,
-				# for several iterations with the shape of the layer
-				shapes = [np.zeros((self.client_count, 0, *layer.shape)) for layer in
-						  list(captured_parameters.values())[0]]
-				np.savez(self.output_path, *shapes)
-
-			# Load in the file and fill the array of previous capture rounds
-			npz_file = np.load(self.output_path)
-			previous_captures = []
+		def _load_npz_file(self, path: str) -> List[npt.NDArray]:
+			if not os.path.exists(path):
+				raise FileNotFoundError(f"Path {path} does not exist")
+			npz_file = np.load(path)
+			np_arrays = []
 			for file in npz_file.files:
-				previous_captures.append(npz_file[file])
-			return previous_captures
+				np_arrays.append(npz_file[file])
+			return np_arrays
+
+		def _initialize_directory_path(self, has_metrics: bool = False) -> None:
+			# Ensure all directories to the output file exist by creating them if they do not yet exist
+			if has_metrics:
+				os.makedirs(os.path.dirname(f"{self.output_directory}metrics/"), exist_ok=True)
+				os.makedirs(os.path.dirname(f"{self.output_directory}aggregates/metrics/"), exist_ok=True)
+			else:
+				os.makedirs(os.path.dirname(f"{self.output_directory}"), exist_ok=True)
+				os.makedirs(os.path.dirname(f"{self.output_directory}aggregates/"), exist_ok=True)
+
+		def _initialize_empty_npz_file(self, path: str, shapes: List[Tuple[int, ...]]) -> None:
+			"""
+			Initializes an empty npz file with the given shapes for the amount of clients of the simulation
+			:param path: the path to the npz file
+			:param shapes: the shapes of the layers to be captured
+			"""
+			np.savez(path, *[np.zeros((self.client_count, 0, *shape)) for shape in shapes])
 
 		def aggregate_fit(
 				self,
@@ -110,16 +159,15 @@ def get_capturing_strategy(
 				results: List[Tuple[ClientProxy, FitRes]],
 				failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 		) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-			# Hook on to the aggregation at the server, capture the parameters and call the learning strategies
-			# actual learning method
+			# Hook on to the aggregation at the server, capture the results
+			# and call the learning strategies actual learning method
 			if is_capturing:
-				captured_parameters = {}
-				for client_proxy, fit_results in results:
-					cid = int(client_proxy.cid)
-					parameters = parameters_to_ndarrays((fit_results.parameters))
-					captured_parameters[cid] = parameters
-				self._capture_parameters(captured_parameters)
+				self._capture_results(results)
 			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures, run_config)
+			self._capture_aggregates(parameters_to_ndarrays(aggregated_parameters),
+									 f"{self.output_directory}aggregates/parameters.npz")
+			for key, value in config.items():
+				self._capture_aggregates(value, f"{self.output_directory}aggregates/metrics/{key}.npz")
 
 			# Update config with the configuration values received from the aggregation
 			self.update_config_fn(config)

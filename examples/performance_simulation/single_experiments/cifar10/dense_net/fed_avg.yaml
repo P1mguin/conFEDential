@@ -1,0 +1,28 @@
+simulation:
+  batch_size: 10
+  client_count: 1
+  fraction_fit: 1.0
+  global_rounds: 20
+  local_rounds: 10
+  optimizer:
+    optimizer_name: FedAvg
+    lr: 0.01
+dataset:
+  name: Cifar10
+  splitter:
+    alpha: 1
+    percent_non_iid: 25
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": (element["img"] / 255.) - 0.5,
+        "y": element["label"]
+      }
+model:
+  name: DenseNet
+  criterion: CrossEntropyLoss
+  hub:
+    repo_or_dir: 'pytorch/vision:v0.10.0'
+    model: 'densenet121'
+    pretrained: False
+

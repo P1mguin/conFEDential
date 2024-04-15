@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Tuple, Type
+from typing import Any, Dict, Iterator, List, Tuple
 
 import torch
 import torch.nn as nn
@@ -12,6 +12,7 @@ from flwr.common import Parameters
 from torch.utils.data import DataLoader
 
 import src.utils.configs as configs
+from src.utils.configs import Dataset, Model, Simulation
 
 project_name = "conFEDential"
 
@@ -24,7 +25,7 @@ class Config:
 	classes for each parameter of config for a description of which value describes what information.
 	"""
 
-	def __init__(self, simulation, dataset, model) -> None:
+	def __init__(self, simulation: Simulation, dataset: Dataset, model: Model) -> None:
 		self.simulation = simulation
 		self.dataset = dataset
 		self.model = model
@@ -100,7 +101,7 @@ class Config:
 	def get_optimizer_name(self) -> str:
 		return self.simulation.get_optimizer_name()
 
-	def get_output_capture_file_path(self) -> str:
+	def get_output_capture_directory_path(self) -> str:
 		"""
 		Returns the path in which the information is stored which is transmitted to the server during the training
 		process
@@ -110,7 +111,7 @@ class Config:
 		optimizer = self.simulation.get_optimizer_name()
 		time = datetime.now().strftime("%Y-%m-%d_%H-%M")
 		salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
-		path = f".captured/{dataset}/{model}/{optimizer}/{salt}-{time}.npz"
+		path = f".captured/{dataset}/{model}/{optimizer}/{time}-{salt}/"
 		return path
 
 	def get_strategy(self):

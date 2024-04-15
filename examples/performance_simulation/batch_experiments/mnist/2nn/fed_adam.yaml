@@ -1,0 +1,53 @@
+simulation:
+  batch_size:
+    values: [ 8, 16, 32, 64 ] #Self chosen
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 10
+  local_rounds:
+    values: [ 10, 20, 50 ] #Self chosen
+  optimizer:
+    optimizer_name: FedAdam
+    local:
+      lr:
+        values: [ 0.15, 0.2, 0.25 ] #Self chosen
+    global:
+      lr:
+        values: [ 0.05, 0.1, 0.2 ] #Kuo 2023 On noisy evaluation in federated hyperparameter tuning
+      betas:
+        - 0.9  #Reddi 2021 Adaptive federated optimization
+        - 0.99 #Reddi 2021 Adaptive federated optimization
+      eps: 0.00000001 #Self chosen
+      weight_decay: 0.9999 #Kuo 2023 On noisy evaluation in federated hyperparameter tuning
+dataset:
+  name: MNIST
+  splitter:
+    alpha: 1
+    percent_non_iid: 25
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": element["image"].reshape(784) / 255.,
+        "y": element["label"]
+      }
+model:
+  name: 2NN
+  criterion: CrossEntropyLoss
+  layers:
+    - type: Linear
+      in_features: 784
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 10
+    - type: Softmax
+      dim: -1

@@ -1,0 +1,31 @@
+attack:
+  access_type: server
+simulation:
+  batch_size: 1
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 10
+  local_rounds: 20
+  optimizer:
+    optimizer_name: FedAvg
+    lr: 0.1
+dataset:
+  name: MNIST
+  splitter:
+    alpha: 1
+    percent_non_iid: 25
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": element["image"].reshape(784) / 255.,
+        "y": element["label"]
+      }
+model:
+  name: Logistic Regression
+  criterion: CrossEntropyLoss
+  layers:
+    - type: Linear
+      in_features: 784
+      out_features: 10
+    - type: Softmax
+      dim: -1

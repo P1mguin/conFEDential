@@ -36,7 +36,7 @@ np.random.seed(78)
 torch.autograd.set_detect_anomaly(True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-parser = argparse.ArgumentParser(description="Running conFEDential simulation")
+parser = argparse.ArgumentParser(description="Running conFEDential performance simulation")
 
 parser.add_argument(
 	"--yaml-file",

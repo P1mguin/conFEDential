@@ -1,32 +1,29 @@
-import os
-import sys
-
-PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
-sys.path.append(PROJECT_DIRECTORY)
-
 import argparse
+import os
 import random
-from pathlib import Path
 from logging import INFO
+from pathlib import Path
 
-from flwr.common.logger import log
 import numpy as np
-import torch
-import src.utils.batch_config as batch_config
+import torch.autograd
+from flwr.common.logger import log
 
-from src.run_simulation import run_simulation
+from src.simulations.performance.run_simulation import run_simulation
+from src.utils.configs import AttackConfig
 
+os.environ["HF_DATASETS_OFFLINE"] = "1"
 torch.manual_seed(78)
 random.seed(78)
 np.random.seed(78)
+torch.autograd.set_detect_anomaly(True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-parser = argparse.ArgumentParser(description="Running conFEDential simulation for a variety of configurations")
+parser = argparse.ArgumentParser(description="Running conFEDential simulation")
 
 parser.add_argument(
 	"--yaml-file",
 	type=str,
-	help="Path to the yaml file that contains the general configuration of the simulation"
+	help="Path to the yaml file that contains the configuration of the simulation"
 )
 
 parser.add_argument(
@@ -56,14 +53,15 @@ parser.add_argument(
 	help="Whether to log to Weights and Biases dashboard during simulation"
 )
 
-parser.add_argument(
-	"--capturing",
-	action=argparse.BooleanOptionalAction,
-	help="Whether to save the messages from client to server"
-)
+
+def attack_simulation(
+		config: AttackConfig,
+) -> None:
+	# TODO: Attack the system
+	pass
 
 
-def main() -> None:
+def main():
 	args = parser.parse_args()
 
 	client_resources = {
@@ -71,15 +69,21 @@ def main() -> None:
 		"num_gpus": args.num_gpus
 	}
 
-	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
-
+	config = AttackConfig.from_yaml_file(str(Path(args.yaml_file).resolve()))
 	run_name = args.run_name
 	is_online = args.logging
-	is_capturing = args.capturing
 
-	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
-	for config in configs:
-		run_simulation(config, client_resources, run_name, is_online, is_capturing)
+	log(INFO, "Running attack simulation")
+	run_simulation(
+		config,
+		client_resources,
+		run_name,
+		is_online,
+		is_capturing=True
+	)
+
+	log(INFO, "Finished training, starting attack simulation")
+	attack_simulation(config)
 
 
 if __name__ == '__main__':
