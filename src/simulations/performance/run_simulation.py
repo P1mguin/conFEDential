@@ -169,7 +169,8 @@ def run_simulation(
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
-		}
+		},
+		"_temp_dir": "/local/ray",
 	}
 
 	try:
