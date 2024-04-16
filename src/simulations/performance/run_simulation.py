@@ -170,8 +170,14 @@ def run_simulation(
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
 		},
-		"_temp_dir": "/local/ray",
 	}
+
+	# Cluster admin wants to use local instead of tmp
+	if os.path.exists("/local"):
+		ray_init_args = {
+			**ray_init_args,
+			"_temp_dir": "/local/ray",
+		}
 
 	try:
 		fl.simulation.start_simulation(
