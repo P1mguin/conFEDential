@@ -2,7 +2,7 @@
 #SBATCH --partition=main
 #SBATCH --mail-type=ALL
 #SBATCH --ntasks=1
-#SBATCH --output slurm_outputs/performance_simulation/mnist/learning_method/fed_avg/slurm-%j.out
+#SBATCH --output hpc_runs/slurm_outputs/performance_simulation/mnist/learning_method/fed_avg/slurm-%j.out
 #SBATCH --gpus-per-task 1
 #SBATCH --cpus-per-task 8
 
