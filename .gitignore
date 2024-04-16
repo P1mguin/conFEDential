@@ -258,4 +258,3 @@ fabric.properties
 cache/
 wandb/
 /.captured/
-/hpc_runs/performance_simulation/slurm_outputs/
