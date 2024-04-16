@@ -2,10 +2,10 @@ simulation:
   batch_size: 8
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 100
-  local_rounds: 20
+  global_rounds: 10
+  local_rounds: 10
   optimizer:
-    optimizer_name: Adam
+    optimizer_name: FedAdam
     local:
       lr: 0.2
     global:
@@ -14,7 +14,7 @@ simulation:
         - 0.9
         - 0.999
       eps: 0.000000001
-      weight_decay: 0
+      weight_decay: 0.9999
 dataset:
   name: MNIST
   splitter:

@@ -49,7 +49,6 @@ class FedAdam(Strategy):
 			for _, fit_res in results
 		]
 		deltas_aggregated = utils.common.compute_weighted_average(delta_results)
-		deltas_aggregated = [-layer for layer in deltas_aggregated]
 
 		# In the first round the momenta are unitialized
 		if self.first_momentum is None:
@@ -105,7 +104,7 @@ class FedAdam(Strategy):
 
 		# Compute and return the difference between the initial model and the new model
 		gradient = [
-			old_layer - new_layer for old_layer, new_layer in zip(parameters, training.get_weights(net))
+			new_layer - old_layer for old_layer, new_layer in zip(parameters, training.get_weights(net))
 		]
 		data_size = len(train_loader.dataset)
 		return gradient, data_size, {}
