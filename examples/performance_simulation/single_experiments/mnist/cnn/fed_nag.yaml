@@ -1,13 +1,13 @@
 simulation:
-  batch_size: 8
+  batch_size: 16
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 100
-  local_rounds: 20
+  global_rounds: 10
+  local_rounds: 10
   optimizer:
     optimizer_name: FedNAG
-    lr: 0.25
-    momentum: 0.9
+    lr: 0.2
+    momentum: 0.85
 dataset:
   name: MNIST
   splitter:
