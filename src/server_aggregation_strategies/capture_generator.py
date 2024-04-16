@@ -159,15 +159,16 @@ def get_capturing_strategy(
 				results: List[Tuple[ClientProxy, FitRes]],
 				failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 		) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-			# Hook on to the aggregation at the server, capture the results
-			# and call the learning strategies actual learning method
+			# Call the actual learning method
+			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures, run_config)
+
+			# Capture the results
 			if is_capturing:
 				self._capture_results(results)
-			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures, run_config)
-			self._capture_aggregates(parameters_to_ndarrays(aggregated_parameters),
-									 f"{self.output_directory}aggregates/parameters.npz")
-			for key, value in config.items():
-				self._capture_aggregates(value, f"{self.output_directory}aggregates/metrics/{key}.npz")
+				self._capture_aggregates(parameters_to_ndarrays(aggregated_parameters),
+										 f"{self.output_directory}aggregates/parameters.npz")
+				for key, value in config.items():
+					self._capture_aggregates(value, f"{self.output_directory}aggregates/metrics/{key}.npz")
 
 			# Update config with the configuration values received from the aggregation
 			self.update_config_fn(config)
