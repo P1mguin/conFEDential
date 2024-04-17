@@ -179,8 +179,3 @@ class AttackConfig(Config):
 
 		# Set the target member at the attack object
 		self.attack.set_target_member(train_loaders, test_loader)
-
-
-if __name__ == '__main__':
-	yaml_file_path = "examples/confidentiality_simulation/single_experiments/mnist/logistic_regression/fed_avg.yaml"
-	attack_config = AttackConfig.from_yaml_file(yaml_file_path)
