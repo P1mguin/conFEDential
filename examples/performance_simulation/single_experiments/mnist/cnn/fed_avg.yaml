@@ -2,11 +2,11 @@ simulation:
   batch_size: 8
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 100
+  global_rounds: 10
   local_rounds: 20
   optimizer:
     optimizer_name: FedAvg
-    lr: 0.25
+    lr: 0.2
 dataset:
   name: MNIST
   splitter:
