@@ -6,7 +6,12 @@ import numpy as np
 from torch.utils.data import DataLoader
 
 
-class AccessType(Enum):
+class DataAccessType(Enum):
+	CLIENT = 1
+	ALL = 2
+
+
+class UpdateAccessType(Enum):
 	SERVER = 1
 	SERVER_ENCRYPTED = 2
 	CLIENT = 3
@@ -21,13 +26,15 @@ class Attack:
 	some random client
 	"""
 
-	def __init__(self, access_type: str):
-		self.access_type = AccessType[access_type.upper()]
+	def __init__(self, data_access_type: str, update_access_type: str, shadow_model_amount: int):
+		self.data_access_type = DataAccessType[data_access_type.upper()]
+		self.update_access_type = UpdateAccessType[update_access_type.upper()]
+		self.shadow_model_amount = shadow_model_amount
 		self.target_member = None
 
 		# In the learning process there is always at least two clients required by the Flower Framework. Therefore,
 		# we can set client 0 as the default attacker
-		if self.access_type == AccessType.CLIENT:
+		if self.update_access_type == UpdateAccessType.CLIENT or self.data_access_type == DataAccessType.CLIENT:
 			self.attacker_id = 0
 		else:
 			self.attacker_id = None
@@ -37,11 +44,18 @@ class Attack:
 
 	def __str__(self):
 		result = "Attack"
-		result += f"\n\taccess_type: {self.access_type}"
+		result += f"\n\tdata_access_type: {self.data_access_type}"
+		result += f"\n\tupdate_access_type: {self.update_access_type}"
+		result += f"\n\tshadow_model_amount: {self.shadow_model_amount}"
 		return result
 
 	def __repr__(self):
-		return f"Attack(access_type={self.access_type})"
+		result = "Attack("
+		result += f"data_access_type={self.data_access_type}, "
+		result += f"update_access_type={self.update_access_type}, "
+		result += f"shadow_model_amount={self.shadow_model_amount}"
+		result += ")"
+		return result
 
 	@staticmethod
 	def from_dict(config: dict):
@@ -63,7 +77,8 @@ class Attack:
 		return self.target_member
 
 	def get_model_aggregate_indices(self, client_count: int, capture_output_directory: str = "") -> List[int]:
-		if self.access_type == AccessType.SERVER or self.access_type == AccessType.SERVER_ENCRYPTED:
+		if (self.update_access_type == UpdateAccessType.SERVER
+				or self.update_access_type == UpdateAccessType.SERVER_ENCRYPTED):
 			return list(range(client_count))
 
 		# Load in the rounds to which the attacker participated
@@ -74,15 +89,26 @@ class Attack:
 		return attacker_participation_indices
 
 	def get_client_update_indices(self, client_count: int) -> List[int]:
-		if self.access_type == AccessType.SERVER:
+		if self.update_access_type == UpdateAccessType.SERVER:
 			return list(range(client_count))
-		elif self.access_type == AccessType.SERVER_ENCRYPTED:
+		elif self.update_access_type == UpdateAccessType.SERVER_ENCRYPTED:
 			return []
 		else:
 			return [self.attacker_id]
 
+	def get_attack_data_indices(self, client_count: int) -> List[int]:
+		if self.data_access_type == DataAccessType.ALL:
+			return list(range(client_count))
+		elif self.data_access_type == DataAccessType.CLIENT:
+			return [self.attacker_id]
+		else:
+			return []
+
 	def is_target_member(self):
 		return self.is_member
+
+	def get_shadow_model_amount(self):
+		return self.shadow_model_amount
 
 	def set_target_member(self, train_loaders: List[DataLoader], test_loader: DataLoader):
 		if self.is_member:

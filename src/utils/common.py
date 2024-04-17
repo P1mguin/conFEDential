@@ -1,8 +1,9 @@
 from functools import reduce
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, Iterator, List, Tuple
 
 import numpy as np
 import numpy.typing as npt
+from torch.utils.data import ConcatDataset, DataLoader, random_split
 
 
 def compute_weighted_average(values: List[Tuple[List[npt.NDArray], int]]) -> Any:
@@ -49,6 +50,27 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 		value = value[key]
 	return value
 
+
+def k_fold_dataset(dataset, k: int, batch_size: int) -> Iterator[Tuple[DataLoader, DataLoader]]:
+	"""
+	Combines a dataset into a list of train and validation loaders by k-folding the data
+	:param dataset: the dataset to k-fold
+	:param k: the amount of splits that should be made, the size of the generator will be equal to k
+	:param batch_size: the batch size of the dataloaders
+	"""
+	fold_size = len(dataset) // k
+
+	# Create k subsets
+	subsets = random_split(dataset, [fold_size] * (k - 1) + [len(dataset) - fold_size * (k - 1)])
+
+	# For each fold, create a DataLoader for the training set and the validation set
+	for i in range(k):
+		validation_set = subsets[i]
+		training_sets = subsets[:i] + subsets[i + 1:]
+		training_set = ConcatDataset(training_sets)
+
+		yield (DataLoader(training_set, batch_size=batch_size, shuffle=True),
+			   DataLoader(validation_set, batch_size=batch_size))
 
 def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
 	"""

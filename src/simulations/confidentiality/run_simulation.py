@@ -63,6 +63,7 @@ def attack_simulation(
 	# Construct the attacker model based on the config
 
 	# Train the attacker model with the known information
+	data_loaders = config.get_attack_data_loaders()
 
 	# Test the model
 	return None

@@ -1,5 +1,7 @@
 attack:
-  access_type: server
+  data_access_type: client
+  update_access_type: server
+  shadow_model_amount: 2
 simulation:
   batch_size: 1
   client_count: 100

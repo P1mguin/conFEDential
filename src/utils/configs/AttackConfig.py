@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import numpy.typing as npt
 import yaml
 from flwr.common import parameters_to_ndarrays
+from torch.utils.data import ConcatDataset, DataLoader
 
 import src.utils.configs as configs
+from src.utils import k_fold_dataset
 from src.utils.configs import Attack, Dataset, Model, Simulation
 from src.utils.configs.Config import Config
 
@@ -55,6 +57,40 @@ class AttackConfig(Config):
 		"""
 		kwargs = {key: getattr(configs, key.capitalize()).from_dict(value) for key, value in config.items()}
 		return AttackConfig(**kwargs)
+
+	def get_attack_data_loaders(
+			self,
+			train_loaders: Optional[List[DataLoader]] = None
+	) -> List[Tuple[DataLoader, DataLoader]]:
+		"""
+		Creates a list of train and test loaders that can be used to train as many shadow models as the list is long
+		:param train_loaders: the train loaders from which the new train and test loaders should be created
+		"""
+		# Ideally the train loaders do not have to be re-fetched since some operations are not cached
+		if train_loaders is None:
+			train_loaders, _ = self.get_dataloaders()
+
+		# Get the train_loaders to which the attacker has access
+		data_indices = self.get_attack_data_indices()
+		train_loaders = np.array(train_loaders)
+		train_loaders = train_loaders[data_indices]
+
+		# Combine the train_loaders into one dataset
+		datasets = [dataloader.dataset for dataloader in train_loaders]
+		combined_dataset = ConcatDataset(datasets)
+
+		# K-fold the combined dataset into multiple train and test loaders
+		k = self.get_shadow_model_amount()
+		batch_size = self.get_batch_size()
+		k_folds = k_fold_dataset(combined_dataset, k, batch_size)
+		return list(k_folds)
+
+	def get_attack_data_indices(self) -> List[int]:
+		client_count = self.get_client_count()
+		return self.attack.get_attack_data_indices(client_count)
+
+	def get_shadow_model_amount(self):
+		return self.attack.get_shadow_model_amount()
 
 	def get_target_member(self) -> int:
 		return self.attack.get_target_member()
