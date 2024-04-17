@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import torch
@@ -70,9 +69,8 @@ class FedNAG(Strategy):
 		if config.get("velocity") is not None:
 			# Get the state of the optimizer and overwrite the current momentum
 			state_dict = optimizer.state_dict()
-			state_dict["state"] = OrderedDict(
-				{i: {"momentum_buffer": torch.Tensor(value)} for i, value in enumerate(config.get("velocity"))}
-			)
+			state_dict["state"] = {i: {"momentum_buffer": torch.Tensor(value.copy())} for i, value in
+								   enumerate(config.get("velocity"))}
 			optimizer.load_state_dict(state_dict)
 
 		# Do local rounds and epochs
