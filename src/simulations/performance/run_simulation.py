@@ -169,6 +169,7 @@ def run_simulation(
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
+			"excludes": [f"{PROJECT_DIRECTORY}/.git/", f"{PROJECT_DIRECTORY}/hpc_runs/"]
 		},
 	}
 
