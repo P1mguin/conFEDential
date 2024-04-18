@@ -5,6 +5,9 @@ from typing import List
 import numpy as np
 from torch.utils.data import DataLoader
 
+from src.utils.configs.AttackConfig import AttackConfig
+from src.utils.configs.AttackModel import AttackModel
+
 
 class DataAccessType(Enum):
 	CLIENT = 1
@@ -26,11 +29,12 @@ class Attack:
 	some random client
 	"""
 
-	def __init__(self, data_access_type: str, update_access_type: str, shadow_model_amount: int):
+	def __init__(self, data_access_type: str, update_access_type: str, shadow_model_amount: int, attack_model: AttackModel):
 		self.data_access_type = DataAccessType[data_access_type.upper()]
 		self.update_access_type = UpdateAccessType[update_access_type.upper()]
 		self.shadow_model_amount = shadow_model_amount
 		self.target_member = None
+		self.attack_model = attack_model
 
 		# In the learning process there is always at least two clients required by the Flower Framework. Therefore,
 		# we can set client 0 as the default attacker
@@ -59,7 +63,11 @@ class Attack:
 
 	@staticmethod
 	def from_dict(config: dict):
-		return Attack(**config)
+		attack_model = AttackModel.from_dict(config.pop("attack_model"))
+		return Attack(attack_model=attack_model, **config)
+
+	def get_attack_model(self, run_config: AttackConfig):
+		return self.attack_model.get_attack_model(run_config)
 
 	def get_attacker_participation_rounds(self, capture_output_directory: str) -> List[int]:
 		# Open the parameters file

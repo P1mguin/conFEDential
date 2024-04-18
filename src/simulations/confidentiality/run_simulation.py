@@ -8,6 +8,7 @@ import numpy as np
 import torch.autograd
 from flwr.common.logger import log
 
+from src.simulations.performance.run_simulation import run_simulation
 from src.utils.configs import AttackConfig
 
 os.environ["HF_DATASETS_OFFLINE"] = "1"
@@ -61,6 +62,7 @@ def attack_simulation(
 	client_updates = config.get_client_updates()
 
 	# Construct the attacker model based on the config
+	attack_model = config.get_attack_model()
 
 	# Train the attacker model with the known information
 	data_loaders = config.get_attack_data_loaders()

@@ -89,6 +89,9 @@ class AttackConfig(Config):
 		client_count = self.get_client_count()
 		return self.attack.get_attack_data_indices(client_count)
 
+	def get_attack_model(self):
+		return self.attack.get_attack_model(self)
+
 	def get_shadow_model_amount(self):
 		return self.attack.get_shadow_model_amount()
 

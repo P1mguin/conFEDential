@@ -63,6 +63,9 @@ class Config:
 	def get_batch_size(self) -> int:
 		return self.simulation.get_batch_size()
 
+	def get_class_count(self) -> int:
+		return self.model.get_class_count()
+
 	def get_client_count(self) -> int:
 		return self.simulation.get_client_count()
 

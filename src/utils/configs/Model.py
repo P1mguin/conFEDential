@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import List, Type
+from typing import Callable, List, Type
 
 import flwr.common
 import torch
 import torch.nn as nn
 
 from src.training import helper
+from src.utils import get_net_class_from_layers
 
 
 class Model:
@@ -33,17 +34,7 @@ class Model:
 				parameters = {key: value for key, value in list(layer.items())[1:]}
 				layer = layer_type(**parameters)
 				model_layers.append(layer)
-
-			class Net(nn.Module):
-				def __init__(self) -> None:
-					super(Net, self).__init__()
-					self.layers = nn.Sequential(*model_layers)
-
-				def forward(self, x: torch.Tensor) -> torch.Tensor:
-					x = self.layers(x)
-					return x
-
-			self.model = Net
+			self.model = get_net_class_from_layers(model_layers)
 		elif hub is not None:
 			self.model = lambda: torch.hub.load(**hub)
 
@@ -70,6 +61,17 @@ class Model:
 		"""
 		return Model(**config)
 
+	def get_class_count(self) -> int:
+		"""
+		Gets the amount of classes that the model can predict
+		"""
+		# Get the last linear layer and take that return their amount of output features
+		model = self.get_model_instance()
+		layers = model.layers
+		for layer in reversed(layers):
+			if hasattr(layer, "out_features"):
+				return layer.out_features
+
 	def get_criterion_class(self) -> Type[nn.Module]:
 		return self.criterion
 
@@ -79,7 +81,7 @@ class Model:
 	def get_initial_parameters(self):
 		return flwr.common.ndarrays_to_parameters(helper.get_weights(self.get_model_instance()))
 
-	def get_model_class(self) -> Type[nn.Module]:
+	def get_model_class(self) -> Callable[[], nn.Module]:
 		return self.model
 
 	def get_model_instance(self) -> nn.Module:
