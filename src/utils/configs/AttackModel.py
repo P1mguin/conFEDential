@@ -1,10 +1,14 @@
 import copy
+import itertools
 import operator
 from functools import reduce
 from typing import List, Type
 
+import numpy.typing as npt
+import torch
 import torch.nn as nn
 
+from src import training
 from src.utils import compute_convolution_output_size, get_model_layer_shapes, get_net_class_from_layers
 from src.utils.configs import Config
 
@@ -14,7 +18,7 @@ class TransformUnsqueeze(nn.Module):
 		super(TransformUnsqueeze, self).__init__()
 
 	def forward(self, x):
-		return x.T.unsqueeze(0)
+		return x.unsqueeze(0)
 
 
 class AttackModel:
@@ -46,8 +50,70 @@ class AttackModel:
 		if self.encoder_component is None:
 			self.encoder_component = self.get_encoder_component()
 
-		# TODO: Create the attack model
-		return None
+		activation_components = self.activation_components
+		label_component = self.label_component
+		loss_component = self.loss_component
+		gradient_components = self.gradient_components
+		encoder_component = self.encoder_component
+
+		class Net(nn.Module):
+			def __init__(self) -> None:
+				super(Net, self).__init__()
+				self.activation_components = [component() for component in activation_components]
+				self.label_component = label_component()
+				self.loss_component = loss_component()
+				self.gradient_components = [component() for component in gradient_components]
+				self.encoder_component = encoder_component()
+
+			def forward(self, parameters: List[npt.NDArray], x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+				# The label value for the attack model
+				label_value = self.label_component(y.float())
+
+				# Get the prediction and loss of the target model
+				model = run_config.get_model()
+				if parameters is not None:
+					training.set_weights(model, parameters)
+				criterion = run_config.get_criterion()
+				optimizer = run_config.get_optimizer(model.parameters())
+				prediction = model(x)
+
+				# Before finding the gradient get the value of each layer function
+				layer_values = []
+				for layer in model.layers:
+					x = layer(x)
+					layer_values.append(x)
+
+				# The activation values for the attack model
+				activation_values = [activation_component(layer_value) for activation_component, layer_value in
+									 zip(self.activation_components, layer_values)]
+
+				# Get the gradients of the input
+				loss = criterion(prediction, y[0])
+
+				# The loss value for the attack model
+				loss_value = self.loss_component(loss.unsqueeze(0))
+
+				loss.backward()
+				optimizer.step()
+				gradients = list(
+					itertools.chain.from_iterable(
+						[param.grad for param in param_group["params"]] for param_group in optimizer.param_groups
+					)
+				)
+
+				# The gradient values for the attack model
+				gradient_values = []
+				for gradient_component, gradient in zip(self.gradient_components, gradients):
+					if gradient.ndim == 1:
+						gradient = gradient.unsqueeze(0)
+					gradient_values.append(gradient_component(gradient))
+
+				# Append the outputs and put in the encoder
+				encoder_input_values = torch.cat([*activation_values, label_value, loss_value, *gradient_values], dim=0)
+				result = self.encoder_component(encoder_input_values)
+				return result
+
+		return Net
 
 	def get_fcn_layers(self, input_size: int) -> List[Type[nn.Module]]:
 		"""
@@ -118,8 +184,7 @@ class AttackModel:
 		will be put in, and the output is dependent on the configuration of the experiment.
 		:param run_config: the configuration of the experiment
 		"""
-		class_count = run_config.get_class_count()
-		layers = self.get_fcn_layers(class_count)
+		layers = self.get_fcn_layers(1)
 		label_component = get_net_class_from_layers(layers)
 		return label_component
 
@@ -131,8 +196,7 @@ class AttackModel:
 		of the experiment.
 		:param run_config: the configuration of the experiment
 		"""
-		class_count = run_config.get_class_count()
-		layers = self.get_fcn_layers(class_count)
+		layers = self.get_fcn_layers(1)
 		loss_component = get_net_class_from_layers(layers)
 		return loss_component
 
@@ -177,6 +241,9 @@ class AttackModel:
 				break
 
 			gradient_shape = (*output_shape, *input_shape)
+			if len(gradient_shape) == 1:
+				gradient_shape = (1, *gradient_shape)
+
 			convolution_output_size = compute_convolution_output_size(
 				gradient_shape,
 				out_channels,

@@ -107,11 +107,11 @@ def get_model_layer_shapes(model: nn.Module, run_config) -> List[Tuple[Tuple[int
 			input_shape = output_shape
 
 		# The output size of the layer is either indicated by the layer itself,
-		# or the layer does not change the shape of the data, which makes it equal to the input shape of the layer
+		# or if it does not indicate this, the layer will be one dimensional
 		if hasattr(layer, "out_features"):
 			output_shape = (layer.out_features,)
 		else:
-			output_shape = input_shape
+			output_shape = ()
 
 		# TODO: Fix size of convolutional components
 
