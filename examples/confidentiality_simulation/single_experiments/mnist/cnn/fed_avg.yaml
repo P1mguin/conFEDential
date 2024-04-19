@@ -57,7 +57,7 @@ simulation:
   local_rounds: 20
   optimizer:
     optimizer_name: FedAvg
-    lr: 0.25
+    lr: 0.2
 dataset:
   name: MNIST
   splitter:
