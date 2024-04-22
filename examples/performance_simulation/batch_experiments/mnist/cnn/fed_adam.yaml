@@ -1,19 +1,17 @@
 simulation:
   batch_size:
-    values: [ 8, 16, 32, 64 ] #Self chosen
+    values: [ 8, 16, 32 ] #Self chosen
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  local_rounds:
-    values: [ 10, 20, 50 ] #Self chosen
+  local_rounds: 10 #Empirical, Self chosen
   optimizer:
     optimizer_name: FedAdam
     local:
       lr:
-        values: [ 0.2, 0.25, 0.3 ] #Self chosen
+        values: [ 0.1, 0.15, 0.2 ] #Self chosen
     global:
-      lr:
-        values: [ 0.1, 0.01, 0.001, 0.0001, 0.00001 ] #Kuo 2023 On noisy evaluation in federated hyperparameter tuning
+      lr: 0.01 #Empirical, Kuo 2023 On noisy evaluation in federated hyperparameter tuning
       betas:
         - 0.9  #Reddi 2021 Adaptive federated optimization
         - 0.99 #Reddi 2021 Adaptive federated optimization

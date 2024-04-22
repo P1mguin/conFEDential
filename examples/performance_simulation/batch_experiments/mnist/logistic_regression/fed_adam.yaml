@@ -5,15 +5,14 @@ simulation:
   fraction_fit: 0.1
   global_rounds: 10
   local_rounds:
-    values: [ 1, 5, 10, 20 ] #Self chosen
+    values: [ 10, 20 ] #Self chosen
   optimizer:
     optimizer_name: FedAdam
     local:
       lr:
         values: [ 0.05, 0.1, 0.2 ] #Self chosen
     global:
-      lr:
-        values: [ 0.1, 0.01, 0.001, 0.0001, 0.00001 ] #Kuo 2023 On noisy evaluation in federated hyperparameter tuning
+      lr: 0.01 #Empirical, Kuo 2023 On noisy evaluation in federated hyperparameter tuning
       betas:
         - 0.9  #Reddi 2021 Adaptive federated optimization
         - 0.99 #Reddi 2021 Adaptive federated optimization
