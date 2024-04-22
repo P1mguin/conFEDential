@@ -3500,3 +3500,12 @@ INFO flwr 2024-04-19 16:32:53,201 | app.py:178 | Starting Flower simulation, con
 2024-04-19 16:33:21,190	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
 2024-04-19 16:33:22,234	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_d38c73ec4bc6b26f.zip' (0.18MiB) to Ray cluster...
 2024-04-19 16:33:22,237	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_d38c73ec4bc6b26f.zip'.
+slurmstepd-ctit088: error: *** STEP 281922.0 ON ctit088 CANCELLED AT 2024-04-22T10:21:18 ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+*** SIGTERM received at time=1713774078 on cpu 62 ***
+PC: @     0x7f3b2a4aa35c  (unknown)  recv
+    @     0x7f3b2a3cd090  (unknown)  (unknown)
+[2024-04-22 10:21:18,337 E 1028030 1028030] logging.cc:361: *** SIGTERM received at time=1713774078 on cpu 62 ***
+[2024-04-22 10:21:18,338 E 1028030 1028030] logging.cc:361: PC: @     0x7f3b2a4aa35c  (unknown)  recv
+[2024-04-22 10:21:18,338 E 1028030 1028030] logging.cc:361:     @     0x7f3b2a3cd090  (unknown)  (unknown)
+slurmstepd-ctit088: error: *** JOB 281922 ON ctit088 CANCELLED AT 2024-04-22T10:21:18 ***
