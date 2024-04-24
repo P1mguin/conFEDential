@@ -1,3 +1,5 @@
+import os
+import pickle
 from typing import Callable, List, Tuple
 
 from datasets import load_dataset
@@ -15,7 +17,8 @@ class MNIST(Dataset):
 			preprocess_fn: Callable[[dict], dict],
 			alpha: float = 1.,
 			percent_non_iid: float = 0.,
-			seed: int = 78
+			seed: int = 78,
+			function_hash: str = "",
 	) -> Tuple[List[DataLoader], DataLoader]:
 		"""
 		Load data is called for all datasets such that the train data loaders and test data loader is returned.
@@ -30,8 +33,15 @@ class MNIST(Dataset):
 		:param percent_non_iid: Percentage (between 0 and 100) desired of non-IID-ness for the labels of the federated data
 		:param seed: Controls the starting point of the random number generator. Value is passed for reproducibility,
 		use your favourite number.
+		:param function_hash: The hash of the function that is used to cache the preprocessed data for this function
 		"""
-		# Confirm the dataset is downloaded locally and load in the dataset
+		# See if the information has been cached before and if so load from cache
+		cache_file = f".cache/preprocessed/mnist/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
+		if os.path.exists(cache_file):
+			# Load the data from the cache
+			with open(cache_file, "rb") as f:
+				return pickle.load(f)
+
 		Dataset.is_data_downloaded("mnist")
 		train_dataset, test_dataset = load_dataset(
 			"mnist",
@@ -69,4 +79,10 @@ class MNIST(Dataset):
 			data_loader = DataLoader(client_data, batch_size=batch_size)
 			train_loaders.append(data_loader)
 		test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
+
+		# Cache (train_loaders, test_loader) to the cache file
+		os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+		with open(cache_file, "wb") as f:
+			pickle.dump((train_loaders, test_loader), f)
+
 		return train_loaders, test_loader

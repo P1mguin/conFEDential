@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from typing import List, Tuple
 
 from torch.utils.data import DataLoader
@@ -49,7 +50,22 @@ class Dataset:
 
 	def get_dataloaders(self, client_count: int, batch_size: int) -> Tuple[List[DataLoader], DataLoader]:
 		dataclass = getattr(federated_datasets, self.name)
-		return dataclass.load_data(client_count, batch_size, self.preprocess_fn, self.alpha, self.percent_non_iid)
+
+		raw_preprocess_fn = self.get_raw_preprocess_fn()
+		hash_object = hashlib.sha256(raw_preprocess_fn.encode())
+		function_hash = hash_object.hexdigest()
+
+		return dataclass.load_data(
+			client_count=client_count,
+			batch_size=batch_size,
+			preprocess_fn=self.preprocess_fn,
+			alpha=self.alpha,
+			percent_non_iid=self.percent_non_iid,
+			function_hash=function_hash
+		)
 
 	def get_name(self) -> str:
 		return self.name
+
+	def get_raw_preprocess_fn(self):
+		return self.raw_preprocess_fn
