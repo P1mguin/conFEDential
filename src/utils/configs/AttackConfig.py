@@ -23,9 +23,8 @@ class AttackConfig(Config):
 	"""
 
 	def __init__(self, attack: Attack, simulation: Simulation, dataset: Dataset, model: Model) -> None:
-		super().__init__(simulation, dataset, model)
+		super(AttackConfig, self).__init__(simulation, dataset, model)
 		self.attack = attack
-
 		self.set_target_member()
 
 	def __repr__(self) -> str:

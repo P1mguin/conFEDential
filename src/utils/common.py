@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Any, Callable, Iterator, List, Tuple, Type
+from typing import Any, Callable, Iterator, List, Set, Tuple, Type
 
 import numpy as np
 import numpy.typing as npt
@@ -24,13 +24,13 @@ def compute_convolution_output_size(
 	:param padding: the size of the padding
 	"""
 	# Convert all ints to tuples
-	if kernel_size is int:
+	if isinstance(kernel_size, int):
 		kernel_size = (kernel_size,) * len(input_size)
 
-	if stride is int:
+	if isinstance(stride, int):
 		stride = (stride,) * len(input_size)
 
-	if padding is int:
+	if isinstance(padding, int):
 		padding = (padding,) * len(input_size)
 
 	# Compute the output size for each dimension separately
@@ -87,37 +87,45 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	return value
 
 
-def get_model_layer_shapes(model: nn.Module, run_config) -> List[Tuple[Tuple[int, ...], Tuple[int, ...]]]:
+def get_layer_shapes(model: nn.Module, run_config) -> List[Tuple[int, ...]]:
 	"""
-	Returns the input and output shape of each layer in the model
+	Returns a list that contains the input size of the model and then the output size of each layer
 	:param model: the model to get the layer shapes from
 	:param run_config: the configuration of the experiment
 	"""
-	sizes = []
-	input_shape, output_shape = None, None
+	layer_output_shapes = []
+	layer_shape = get_config_input_shape(run_config)
+
+	layer_output_shapes.append(layer_shape)
 	for layer in model.layers:
-		# The input size of the layer is either indicated by the layer itself,
-		# or it is the input size of the previous layer. If no previous layer has indicated a previous shape,
-		# the data is not transformed and so it is the output shape of the previous layer
-		if hasattr(layer, "in_features"):
-			input_shape = (layer.in_features,)
-		elif input_shape is None:
-			input_shape = get_config_input_shape(run_config)
-		else:
-			input_shape = output_shape
+		if hasattr(layer, "kernel_size"):
+			# MaxPoolLayer does not have the out channels attribute fall back to the input amount of channels
+			out_channels = getattr(layer, "out_channels", layer_shape[0])
+			layer_shape = compute_convolution_output_size(
+				layer_shape[1:],  # Remove the out channels dimension of the previous layer
+				out_channels,
+				layer.kernel_size,
+				layer.stride,
+				layer.padding
+			)
+		elif isinstance(layer, nn.Linear):
+			layer_shape = (layer.out_features,)
+		layer_output_shapes.append(layer_shape)
+	return layer_output_shapes
 
-		# The output size of the layer is either indicated by the layer itself,
-		# or if it does not indicate this, the layer will be one dimensional
-		if hasattr(layer, "out_features"):
-			output_shape = (layer.out_features,)
-		else:
-			output_shape = ()
+def get_gradient_shapes(model: nn.Module) -> List[Tuple[torch.Size, torch.Size]]:
+	# Get the shapes of the weights and the biases and then join them together in tuples
+	gradient_shapes = [param.shape for name, param in model.named_parameters()]
+	gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
+	return gradient_shapes
 
-		# TODO: Fix size of convolutional components
 
-		sizes.append((input_shape, output_shape))
-	return sizes
-
+def get_trainable_layers_indices(model: nn.Module) -> Set[int]:
+	"""
+	Returns the indices of the trainable layers
+	:param model: the model to get the trainable layers from
+	"""
+	return set(int(name.split(".")[1]) for name, param in model.named_parameters() if param.requires_grad)
 
 def get_config_input_shape(run_config) -> Tuple[int, ...]:
 	"""
