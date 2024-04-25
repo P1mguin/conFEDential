@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import random
-import string
-from datetime import datetime
+import hashlib
 from typing import Any, Dict, Iterator, List, Tuple
 
 import torch
@@ -112,9 +110,9 @@ class Config:
 		dataset = self.get_dataset_name()
 		model = self.get_model_name()
 		optimizer = self.simulation.get_optimizer_name()
-		time = datetime.now().strftime("%Y-%m-%d_%H-%M")
-		salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
-		path = f".captured/{dataset}/{model}/{optimizer}/{time}-{salt}/"
+		configuration_string = f"{self.simulation}\n{self.dataset}\n{self.model}"
+		config_hash = hashlib.sha256(configuration_string.encode()).hexdigest()
+		path = f".captured/{dataset}/{model}/{optimizer}/{config_hash}/"
 		return path
 
 	def get_strategy(self):
