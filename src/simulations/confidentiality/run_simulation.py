@@ -81,14 +81,16 @@ def main():
 	run_name = args.run_name
 	is_online = args.logging
 
-	log(INFO, "Running attack simulation")
-	run_simulation(
-		config,
-		client_resources,
-		run_name,
-		is_online,
-		is_capturing=True
-	)
+	capture_output_path = config.get_output_capture_directory_path()
+	if not os.path.exists(capture_output_path):
+		log(INFO, f"Captured parameters not found, running training simulation")
+		run_simulation(
+			config,
+			client_resources,
+			run_name,
+			is_online,
+			is_capturing=True
+		)
 
 	log(INFO, "Finished training, starting attack simulation")
 	attack_simulation(config)
