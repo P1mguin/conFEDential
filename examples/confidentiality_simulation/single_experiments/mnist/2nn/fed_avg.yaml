@@ -1,7 +1,7 @@
 attack:
-  data_access_type: client
+  data_access_type: all
   update_access_type: server
-  shadow_model_amount: 2
+  shadow_model_amount: 128 # Carlini 2022 Membership Inference Attacks from First Principles
   attack_model:
     fcn:
       - type: Dropout
@@ -49,6 +49,11 @@ attack:
           - 1
         stride: 1
       - type: ReLU
+      - type: Sigmoid
+  simulation:
+    batch_size: 64
+    optimizer:
+      optimizer_name: RMSprop
 simulation:
   batch_size: 8
   client_count: 100
