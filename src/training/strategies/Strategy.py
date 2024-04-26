@@ -60,7 +60,7 @@ class Strategy(ABC):
 		pass
 
 	@staticmethod
-	def test(parameters: List[npt.NDArray], test_loader: DataLoader, config: Config) -> Tuple[float, float, int]:
+	def test(parameters: List[npt.NDArray] | None, test_loader: DataLoader, config: Config) -> Tuple[float, float, int]:
 		"""
 		A helper method to test a PyTorch model on a given test loader via criteria described in a configuration
 		:param parameters: the initial parameters of the model

@@ -1,12 +1,15 @@
 import random
 from enum import Enum
-from typing import List
+from typing import Iterator, List
 
 import numpy as np
+import torch.nn as nn
+import torch.optim
 from torch.utils.data import DataLoader
 
 from src.utils.configs.AttackConfig import AttackConfig
 from src.utils.configs.AttackModel import AttackModel
+from src.utils.configs.Simulation import Simulation
 
 
 class DataAccessType(Enum):
@@ -29,12 +32,20 @@ class Attack:
 	some random client
 	"""
 
-	def __init__(self, data_access_type: str, update_access_type: str, shadow_model_amount: int, attack_model: AttackModel):
+	def __init__(
+			self,
+			data_access_type: str,
+			update_access_type: str,
+			shadow_model_amount: int,
+			attack_model: AttackModel,
+			simulation: Simulation
+	):
 		self.data_access_type = DataAccessType[data_access_type.upper()]
 		self.update_access_type = UpdateAccessType[update_access_type.upper()]
 		self.shadow_model_amount = shadow_model_amount
 		self.target_member = None
 		self.attack_model = attack_model
+		self.simulation = simulation
 
 		# In the learning process there is always at least two clients required by the Flower Framework. Therefore,
 		# we can set client 0 as the default attacker
@@ -51,6 +62,7 @@ class Attack:
 		result += f"\n\tdata_access_type: {self.data_access_type}"
 		result += f"\n\tupdate_access_type: {self.update_access_type}"
 		result += f"\n\tshadow_model_amount: {self.shadow_model_amount}"
+		result += "\n\t{}".format('\n\t'.join(str(self.simulation).split('\n')))
 		return result
 
 	def __repr__(self):
@@ -58,16 +70,24 @@ class Attack:
 		result += f"data_access_type={self.data_access_type}, "
 		result += f"update_access_type={self.update_access_type}, "
 		result += f"shadow_model_amount={self.shadow_model_amount}"
+		result += f"{repr(self.simulation)}, "
 		result += ")"
 		return result
 
 	@staticmethod
 	def from_dict(config: dict):
 		attack_model = AttackModel.from_dict(config.pop("attack_model"))
-		return Attack(attack_model=attack_model, **config)
+		simulation = Simulation.from_dict(config.pop("simulation"))
+		return Attack(attack_model=attack_model, simulation=simulation, **config)
+
+	def get_attack_batch_size(self) -> int:
+		return self.simulation.get_batch_size()
 
 	def get_attack_model(self, run_config: AttackConfig):
 		return self.attack_model.get_attack_model(run_config)
+
+	def get_attack_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
+		return self.simulation.get_optimizer_instance(parameters)
 
 	def get_attacker_participation_rounds(self, capture_output_directory: str) -> List[int]:
 		# Open the parameters file
@@ -84,10 +104,10 @@ class Attack:
 	def get_target_member(self):
 		return self.target_member
 
-	def get_model_aggregate_indices(self, client_count: int, capture_output_directory: str = "") -> List[int]:
+	def get_model_aggregate_indices(self, global_rounds: int, capture_output_directory: str = "") -> List[int]:
 		if (self.update_access_type == UpdateAccessType.SERVER
 				or self.update_access_type == UpdateAccessType.SERVER_ENCRYPTED):
-			return list(range(client_count))
+			return list(range(-1, global_rounds, 1))
 
 		# Load in the rounds to which the attacker participated
 		attacker_participation_indices = self.get_attacker_participation_rounds(capture_output_directory)

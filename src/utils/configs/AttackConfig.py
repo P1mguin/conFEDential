@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import math
 import os
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
 import numpy as np
 import numpy.typing as npt
+import torch.nn as nn
+import torch.optim
 import yaml
 from flwr.common import parameters_to_ndarrays
 from torch.utils.data import ConcatDataset, DataLoader
 
 import src.utils.configs as configs
-from src.utils import k_fold_dataset
+from src.utils import split_dataloader
 from src.utils.configs import Attack, Dataset, Model, Simulation
 from src.utils.configs.Config import Config
 
@@ -23,9 +26,8 @@ class AttackConfig(Config):
 	"""
 
 	def __init__(self, attack: Attack, simulation: Simulation, dataset: Dataset, model: Model) -> None:
-		super().__init__(simulation, dataset, model)
+		super(AttackConfig, self).__init__(simulation, dataset, model)
 		self.attack = attack
-
 		self.set_target_member()
 
 	def __repr__(self) -> str:
@@ -58,32 +60,47 @@ class AttackConfig(Config):
 		kwargs = {key: getattr(configs, key.capitalize()).from_dict(value) for key, value in config.items()}
 		return AttackConfig(**kwargs)
 
+	def get_attack_batch_size(self) -> int:
+		return self.attack.get_attack_batch_size()
+
 	def get_attack_data_loaders(
 			self,
-			train_loaders: Optional[List[DataLoader]] = None
+			all_train_loaders: Optional[List[DataLoader]] = None
 	) -> List[Tuple[DataLoader, DataLoader]]:
 		"""
 		Creates a list of train and test loaders that can be used to train as many shadow models as the list is long
-		:param train_loaders: the train loaders from which the new train and test loaders should be created
+		:param all_train_loaders: the train loaders from which the new train and test loaders should be created
 		"""
-		# Ideally the train loaders do not have to be re-fetched since some operations are not cached
-		if train_loaders is None:
-			train_loaders, _ = self.get_dataloaders()
+		if all_train_loaders is None:
+			all_train_loaders, _ = self.get_dataloaders()
 
 		# Get the train_loaders to which the attacker has access
 		data_indices = self.get_attack_data_indices()
-		train_loaders = np.array(train_loaders)
-		train_loaders = train_loaders[data_indices]
+		all_train_loaders = np.array(all_train_loaders)
+		train_loaders = all_train_loaders[data_indices]
 
-		# Combine the train_loaders into one dataset
+		# Combine the train_loaders into one dataloader
 		datasets = [dataloader.dataset for dataloader in train_loaders]
 		combined_dataset = ConcatDataset(datasets)
 
-		# K-fold the combined dataset into multiple train and test loaders
-		k = self.get_shadow_model_amount()
-		batch_size = self.get_batch_size()
-		k_folds = k_fold_dataset(combined_dataset, k, batch_size)
-		return list(k_folds)
+		# Scale the batch size to be relatively equal size to the proportion of the client
+		combined_length = len(combined_dataset)
+		average_client_length = combined_length / len(all_train_loaders)
+
+		# Scale and round to nearest power of 2
+		client_batch_size = self.get_batch_size()
+		batch_size = client_batch_size * int(combined_length / 2 / average_client_length)
+		batch_size = pow(2, round(math.log2(abs(batch_size))))
+
+		combined_dataloader = DataLoader(combined_dataset, batch_size=batch_size, shuffle=True)
+
+		# TODO: Split based on whether the attack is online or offline
+		n = self.get_shadow_model_amount()
+		data_loaders = []
+		for _ in range(n):
+			train_loader, test_loader = split_dataloader(combined_dataloader, 0.5)
+			data_loaders.append((train_loader, test_loader))
+		return data_loaders
 
 	def get_attack_data_indices(self) -> List[int]:
 		client_count = self.get_client_count()
@@ -92,6 +109,9 @@ class AttackConfig(Config):
 	def get_attack_model(self):
 		return self.attack.get_attack_model(self)
 
+	def get_attack_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
+		return self.attack.get_attack_optimizer(parameters)
+
 	def get_shadow_model_amount(self):
 		return self.attack.get_shadow_model_amount()
 
@@ -99,7 +119,7 @@ class AttackConfig(Config):
 		return self.attack.get_target_member()
 
 	def get_model_aggregate_indices(self, capture_output_directory: str = "") -> List[int]:
-		return self.attack.get_model_aggregate_indices(self.get_client_count(), capture_output_directory)
+		return self.attack.get_model_aggregate_indices(self.get_global_rounds(), capture_output_directory)
 
 	def get_model_aggregates(self) -> Dict[str, List[npt.NDArray]]:
 		output_directory = self.get_output_capture_directory_path()
@@ -108,8 +128,11 @@ class AttackConfig(Config):
 
 		# Get the files in which the aggregates reside
 		parameter_file = f"{aggregate_directory}parameters.npz"
-		metric_files = [f"{metric_directory}{file}" for file in os.listdir(metric_directory)]
-		file_names = [parameter_file, *metric_files]
+		if os.path.exists(metric_directory):
+			metric_files = [f"{metric_directory}{file}" for file in os.listdir(metric_directory)]
+			file_names = [parameter_file, *metric_files]
+		else:
+			file_names = [parameter_file]
 
 		# Get the iterations to which the attacker has access
 		# and shift them such that the initial parameters can be taken into account
@@ -152,8 +175,11 @@ class AttackConfig(Config):
 
 		# Get the files in which the client updates reside
 		parameter_file = f"{output_directory}parameters.npz"
-		metric_files = [f"{metric_directory}{file}" for file in os.listdir(metric_directory)]
-		file_names = [parameter_file, *metric_files]
+		if os.path.exists(metric_directory):
+			metric_files = [f"{metric_directory}{file}" for file in os.listdir(metric_directory)]
+			file_names = [parameter_file, *metric_files]
+		else:
+			file_names = [parameter_file]
 
 		# Get the iterations to which the attacker has access
 		iterations_access = self.get_client_update_indices(self.get_client_count())

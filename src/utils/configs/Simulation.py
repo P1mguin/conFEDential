@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterator, Tuple, Type
+from typing import Any, Dict, Iterator, Tuple
 
 import torch
 import torch.nn as nn
@@ -67,12 +67,12 @@ class Simulation:
 
 	def __init__(
 			self,
+			optimizer: Optimizer,
 			batch_size: int,
-			client_count: int,
-			fraction_fit: float,
-			global_rounds: int,
-			local_rounds: int,
-			optimizer: Optimizer
+			client_count: int = 100,
+			fraction_fit: float = 0.1,
+			global_rounds: int = 1,
+			local_rounds: int = 20,
 	) -> None:
 		self.batch_size = batch_size
 		self.client_count = client_count

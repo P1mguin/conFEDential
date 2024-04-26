@@ -53,7 +53,11 @@ def get_capturing_strategy(
 			self.config = {}
 			self.client_count = run_config.get_client_count()
 			self.output_directory = run_config.get_output_capture_directory_path()
-			if is_capturing:
+
+			# If the output directory, this config has been captured already, so skip the capturing
+			self.is_capturing = is_capturing and not os.path.exists(self.output_directory)
+
+			if self.is_capturing:
 				self._initialize_directory_path()
 
 		def _capture_aggregates(self, aggregate: List[npt.NDArray], path: str) -> None:
@@ -163,7 +167,7 @@ def get_capturing_strategy(
 			aggregated_parameters, config = strategy.aggregate_fit(server_round, results, failures, run_config)
 
 			# Capture the results
-			if is_capturing:
+			if self.is_capturing:
 				self._capture_results(results)
 				self._capture_aggregates(parameters_to_ndarrays(aggregated_parameters),
 										 f"{self.output_directory}aggregates/parameters.npz")

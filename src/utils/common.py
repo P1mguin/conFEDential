@@ -1,11 +1,11 @@
 from functools import reduce
-from typing import Any, Callable, Iterator, List, Tuple, Type
+from typing import Any, Callable, List, Set, Tuple, Type
 
 import numpy as np
 import numpy.typing as npt
 import torch
 import torch.nn as nn
-from torch.utils.data import ConcatDataset, DataLoader, random_split
+from torch.utils.data import DataLoader
 
 
 def compute_convolution_output_size(
@@ -24,13 +24,13 @@ def compute_convolution_output_size(
 	:param padding: the size of the padding
 	"""
 	# Convert all ints to tuples
-	if kernel_size is int:
+	if isinstance(kernel_size, int):
 		kernel_size = (kernel_size,) * len(input_size)
 
-	if stride is int:
+	if isinstance(stride, int):
 		stride = (stride,) * len(input_size)
 
-	if padding is int:
+	if isinstance(padding, int):
 		padding = (padding,) * len(input_size)
 
 	# Compute the output size for each dimension separately
@@ -87,37 +87,45 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	return value
 
 
-def get_model_layer_shapes(model: nn.Module, run_config) -> List[Tuple[Tuple[int, ...], Tuple[int, ...]]]:
+def get_layer_shapes(model: nn.Module, run_config) -> List[Tuple[int, ...]]:
 	"""
-	Returns the input and output shape of each layer in the model
+	Returns a list that contains the input size of the model and then the output size of each layer
 	:param model: the model to get the layer shapes from
 	:param run_config: the configuration of the experiment
 	"""
-	sizes = []
-	input_shape, output_shape = None, None
+	layer_output_shapes = []
+	layer_shape = get_config_input_shape(run_config)
+
+	layer_output_shapes.append(layer_shape)
 	for layer in model.layers:
-		# The input size of the layer is either indicated by the layer itself,
-		# or it is the input size of the previous layer. If no previous layer has indicated a previous shape,
-		# the data is not transformed and so it is the output shape of the previous layer
-		if hasattr(layer, "in_features"):
-			input_shape = (layer.in_features,)
-		elif input_shape is None:
-			input_shape = get_config_input_shape(run_config)
-		else:
-			input_shape = output_shape
+		if hasattr(layer, "kernel_size"):
+			# MaxPoolLayer does not have the out channels attribute fall back to the input amount of channels
+			out_channels = getattr(layer, "out_channels", layer_shape[0])
+			layer_shape = compute_convolution_output_size(
+				layer_shape[1:],  # Remove the out channels dimension of the previous layer
+				out_channels,
+				layer.kernel_size,
+				layer.stride,
+				layer.padding
+			)
+		elif isinstance(layer, nn.Linear):
+			layer_shape = (layer.out_features,)
+		layer_output_shapes.append(layer_shape)
+	return layer_output_shapes
 
-		# The output size of the layer is either indicated by the layer itself,
-		# or the layer does not change the shape of the data, which makes it equal to the input shape of the layer
-		if hasattr(layer, "out_features"):
-			output_shape = (layer.out_features,)
-		else:
-			output_shape = input_shape
+def get_gradient_shapes(model: nn.Module) -> List[Tuple[torch.Size, torch.Size]]:
+	# Get the shapes of the weights and the biases and then join them together in tuples
+	gradient_shapes = [param.shape for name, param in model.named_parameters()]
+	gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
+	return gradient_shapes
 
-		# TODO: Fix size of convolutional components
 
-		sizes.append((input_shape, output_shape))
-	return sizes
-
+def get_trainable_layers_indices(model: nn.Module) -> Set[int]:
+	"""
+	Returns the indices of the trainable layers
+	:param model: the model to get the trainable layers from
+	"""
+	return set(int(name.split(".")[1]) for name, param in model.named_parameters() if param.requires_grad)
 
 def get_config_input_shape(run_config) -> Tuple[int, ...]:
 	"""
@@ -127,27 +135,6 @@ def get_config_input_shape(run_config) -> Tuple[int, ...]:
 	_, test_loader = run_config.get_dataloaders()
 	input_shape = tuple(next(iter(test_loader))["x"].shape[1:])
 	return input_shape
-
-def k_fold_dataset(dataset, k: int, batch_size: int) -> Iterator[Tuple[DataLoader, DataLoader]]:
-	"""
-	Combines a dataset into a list of train and validation loaders by k-folding the data
-	:param dataset: the dataset to k-fold
-	:param k: the amount of splits that should be made, the size of the generator will be equal to k
-	:param batch_size: the batch size of the dataloaders
-	"""
-	fold_size = len(dataset) // k
-
-	# Create k subsets
-	subsets = random_split(dataset, [fold_size] * (k - 1) + [len(dataset) - fold_size * (k - 1)])
-
-	# For each fold, create a DataLoader for the training set and the validation set
-	for i in range(k):
-		validation_set = subsets[i]
-		training_sets = subsets[:i] + subsets[i + 1:]
-		training_set = ConcatDataset(training_sets)
-
-		yield (DataLoader(training_set, batch_size=batch_size, shuffle=True),
-			   DataLoader(validation_set, batch_size=batch_size))
 
 def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
 	"""
@@ -189,3 +176,20 @@ def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]
 
 	dictionary[path[-1]] = new_value
 	return dictionary
+
+def split_dataloader(dataloader: DataLoader, percentage: float) -> Tuple[DataLoader, DataLoader]:
+	"""
+	Splits a dataloader into two dataloaders based on a given percentage
+	:param dataloader: the dataloder to split
+	:param percentage: the percentage the first dataloader will receive
+	"""
+	dataset = dataloader.dataset
+	batch_size = dataloader.batch_size
+	total_length = len(dataset)
+	first_length = int(total_length * percentage)
+	second_length = total_length - first_length
+
+	first_dataset, second_dataset = torch.utils.data.random_split(dataset, [first_length, second_length])
+	first_loader = DataLoader(first_dataset, batch_size=batch_size, shuffle=True)
+	second_loader = DataLoader(second_dataset, batch_size=batch_size, shuffle=True)
+	return first_loader, second_loader

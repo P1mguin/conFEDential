@@ -14,7 +14,8 @@ class Dataset(ABC):
 			preprocess_fn: Callable[[dict], dict],
 			alpha: float = 1.,
 			percent_non_iid: float = 0.,
-			seed: int = 78
+			seed: int = 78,
+			function_hash: str = "",
 	) -> Tuple[List[DataLoader], DataLoader]:
 		"""
 		Load data is called for all datasets such that the train data loaders and test data loader is returned.
@@ -29,6 +30,7 @@ class Dataset(ABC):
 		:param percent_non_iid: Percentage (between 0 and 100) desired of non-IID-ness for the labels of the federated data
 		:param seed: Controls the starting point of the random number generator. Value is passed for reproducibility,
 		use your favourite number.
+		:param function_hash: The hash of the function that is used to cache the preprocessed data for this function
 		"""
 		pass
 
