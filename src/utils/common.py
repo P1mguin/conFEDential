@@ -113,6 +113,7 @@ def get_layer_shapes(model: nn.Module, run_config) -> List[Tuple[int, ...]]:
 		layer_output_shapes.append(layer_shape)
 	return layer_output_shapes
 
+
 def get_gradient_shapes(model: nn.Module) -> List[Tuple[torch.Size, torch.Size]]:
 	# Get the shapes of the weights and the biases and then join them together in tuples
 	gradient_shapes = [param.shape for name, param in model.named_parameters()]
@@ -127,6 +128,7 @@ def get_trainable_layers_indices(model: nn.Module) -> Set[int]:
 	"""
 	return set(int(name.split(".")[1]) for name, param in model.named_parameters() if param.requires_grad)
 
+
 def get_config_input_shape(run_config) -> Tuple[int, ...]:
 	"""
 	Returns the input shape of the model from the configuration
@@ -135,6 +137,7 @@ def get_config_input_shape(run_config) -> Tuple[int, ...]:
 	_, test_loader = run_config.get_dataloaders()
 	input_shape = tuple(next(iter(test_loader))["x"].shape[1:])
 	return input_shape
+
 
 def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
 	"""
@@ -152,6 +155,7 @@ def get_net_class_from_layers(layers: List[Type[nn.Module]]) -> Type[nn.Module]:
 	Constructs a model class from a list of layers
 	:param layers: the layers that should be included in the model
 	"""
+
 	class Net(nn.Module):
 		def __init__(self) -> None:
 			super(Net, self).__init__()
@@ -162,6 +166,7 @@ def get_net_class_from_layers(layers: List[Type[nn.Module]]) -> Type[nn.Module]:
 			return x
 
 	return Net
+
 
 def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]) -> dict:
 	"""
@@ -176,6 +181,7 @@ def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]
 
 	dictionary[path[-1]] = new_value
 	return dictionary
+
 
 def split_dataloader(dataloader: DataLoader, percentage: float) -> Tuple[DataLoader, DataLoader]:
 	"""

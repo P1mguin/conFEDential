@@ -1,5 +1,4 @@
 import argparse
-import copy
 import os
 import pickle
 import random
@@ -200,6 +199,7 @@ def train_shadow_model(run_config: AttackConfig, train_loader: DataLoader):
 
 	# TODO: Also attack using config
 	return parameters
+
 
 def main():
 	args = parser.parse_args()

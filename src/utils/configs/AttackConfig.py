@@ -198,7 +198,6 @@ class AttackConfig(Config):
 			client_updates[key] = np_arrays
 		return client_updates
 
-
 	def is_target_member(self) -> bool:
 		return self.attack.is_target_member()
 
