@@ -1,4 +1,5 @@
 import argparse
+import copy
 import os
 import pickle
 import random
@@ -9,9 +10,11 @@ from typing import Tuple
 import numpy as np
 import torch.autograd
 import torch.nn as nn
+import wandb
 from flwr.common.logger import log
 from torch.utils.data import DataLoader
 
+from src import training
 from src.simulations.performance.run_simulation import run_simulation
 from src.utils import split_dataloader
 from src.utils.configs import AttackConfig
@@ -58,10 +61,9 @@ parser.add_argument(
 )
 
 
-def attack_simulation(
-		config: AttackConfig,
-) -> None:
+def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	# Get the information that we can use in the attack
+	# TODO: Use in attack
 	simulation_aggregates = config.get_model_aggregates()
 	client_updates = config.get_client_updates()
 
@@ -73,13 +75,54 @@ def attack_simulation(
 	train_loader, validation_loader = split_dataloader(train_loader, 0.9)
 
 	# Take the model, BCELoss since we work with one probability, and the optimizer
-	attack_model = config.get_attack_model()
+	attack_model = config.get_attack_model().to(training.DEVICE)
 	criterion = torch.nn.BCELoss()
 	optimizer = config.get_attack_optimizer(attack_model.parameters())
 
+	wandb_kwargs = config.get_wandb_kwargs(f"attack_{args.run_name}")
+	mode = "online" if args.logging else "offline"
+	wandb.init(mode=mode, **wandb_kwargs)
+
 	# Train the attack model until convergence
-	parameters = None
-	loss, accuracy = test_attack_model(criterion, attack_model, validation_loader)
+	# previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+	previous_loss, previous_accuracy = 0.775, 0.506
+	try:
+		while True:
+			correct, total, train_loss = 0, 0, 0.
+			for parameters, data, target, is_member in train_loader:
+				data, target, is_member = data.to(device), target.to(device), is_member.to(device)
+				optimizer.zero_grad()
+				output = attack_model(parameters, data, target)
+				loss = criterion(output, is_member.float())
+				loss.backward()
+				optimizer.step()
+
+				train_loss += loss.item()
+				total += is_member.size()[0]
+				correct += (output.round() == is_member).sum().item()
+
+			train_loss /= total
+			train_accuracy = correct / total
+			validation_loss, validation_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+			test_loss, test_accuracy = test_attack_model(criterion, attack_model, test_loader)
+
+			wandb.log({
+				"train_loss": train_loss,
+				"train_accuracy": train_accuracy,
+				"validation_loss": validation_loss,
+				"validation_accuracy": validation_accuracy,
+				"test_loss": test_loss,
+				"test_accuracy": test_accuracy
+			})
+
+			if validation_loss > previous_loss and validation_accuracy < previous_accuracy:
+				break
+
+			previous_loss, previous_accuracy = validation_loss, validation_accuracy
+	except Exception as _:
+		wandb.finish(exit_code=1)
+
+	wandb.finish()
 
 	# Test the model
 	return None
@@ -88,17 +131,15 @@ def attack_simulation(
 def test_attack_model(criterion: nn.Module, attack_model: nn.Module, data_loader: DataLoader) -> Tuple[float, float]:
 	attack_model.eval()
 	correct, total, loss = 0, 0, 0.
-
-	for model, data, target, is_train in data_loader:
-		model = [layer[0] for layer in model]
-		data, target, is_train = data[0], target[0], is_train[0]
-		output = attack_model(model, data, target)[0]
+	for parameters, data, target, is_member in data_loader:
+		data, target, is_member = data.to(device), target.to(device), is_member.to(device)
+		output = attack_model(parameters, data, target).round()
 
 		with torch.no_grad():
-			loss += criterion(output, is_train.float()).item()
+			loss += criterion(output, is_member.float()).item()
 
-		total += 1
-		correct += (output == target).sum().item()
+		total += is_member.size()[0]
+		correct += (output == is_member).sum().item()
 
 	accuracy = correct / total
 	loss /= total
@@ -118,8 +159,8 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 		# Train all the shadow models for the dataloaders
 		shadow_models = []
 		for train_loader, test_loader in data_loaders:
-			model = train_shadow_model(config, train_loader)
-			shadow_models.append((model, train_loader, test_loader))
+			parameters = train_shadow_model(config, train_loader)
+			shadow_models.append((parameters, train_loader, test_loader))
 
 		# Cache the results for the shadow models so that we can more easily tune the attack model
 		os.makedirs("/".join(cache_file.split("/")[:-1]), exist_ok=True)
@@ -128,12 +169,12 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 
 	# Generate the dataset on which to train the attack model
 	dataset = []
-	for model, train_loader, test_loader in shadow_models:
+	for parameters, train_loader, test_loader in shadow_models:
 		for data, target in train_loader.dataset:
-			dataset.append((model, data, target, 1))
+			dataset.append((parameters, data, target, 1))
 
 		for data, target in test_loader.dataset:
-			dataset.append((model, data, target, 0))
+			dataset.append((parameters, data, target, 0))
 
 	batch_size = config.get_attack_batch_size()
 	return DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -176,7 +217,7 @@ def main():
 		)
 
 	log(INFO, "Finished training, starting attack simulation")
-	attack_simulation(config)
+	attack_simulation(config, args)
 
 
 if __name__ == '__main__':
