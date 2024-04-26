@@ -1,10 +1,8 @@
 import copy
-import itertools
 import operator
 from functools import reduce
 from typing import List, Set, Tuple, Type
 
-import numpy.typing as npt
 import torch
 import torch.nn as nn
 from torch.nn import Module
@@ -25,6 +23,143 @@ class Expand(nn.Module):
 		return x
 
 
+class AttackNet(nn.Module):
+	def __init__(
+			self,
+			activation_components: List[Type[nn.Module] | None],
+			gradient_components: List[Tuple[Type[nn.Module], Type[nn.Module]] | None],
+			loss_component: Type[nn.Module],
+			label_component: Type[nn.Module],
+			encoder_component: Type[nn.Module],
+			run_config: Config
+	) -> None:
+		super(AttackNet, self).__init__()
+		self.activation_components = [
+			component() if component is not None else None for component in activation_components
+		]
+		self.gradient_components = [
+			[component() for component in components] if components is not None else None
+			for components in gradient_components
+		]
+		self.label_component = label_component()
+		self.loss_component = loss_component()
+		self.encoder_component = encoder_component()
+		self.run_config = run_config
+
+	def get_label_value(self, y: torch.Tensor) -> torch.Tensor:
+		y = y.unsqueeze(1).float()
+		return self.label_component(y)
+
+	def get_models(self, parameters: List[torch.Tensor]) -> List[nn.Module]:
+		"""
+		Creates a list of models from a list of parameters
+		:param parameters: the parameters of the model, where each index in the parameter are the parameters of the
+		model layer. The element at that index may be batched
+		"""
+		# Create all the models
+		template_model = self.run_config.get_model()
+		batch_size = parameters[0].shape[0]
+		models = []
+		for i in range(batch_size):
+			model = copy.deepcopy(template_model)
+			new_state_dict = {key: parameter[i] for key, parameter in zip(model.state_dict().keys(), parameters)}
+			model.load_state_dict(new_state_dict)
+			# Get the models to where the computer assumes it is
+			models.append(model.to(training.DEVICE))
+		return models
+
+	def get_activation_values(self, models: List[nn.Module], x: torch.Tensor) -> torch.Tensor:
+		"""
+		Passes the input through the models and gets the activation values
+		:param models: A list of models to pass the input through
+		:param x: The input, may be batched in that case the batch size must equal length of models
+		"""
+		activation_values = []
+		for i, model in enumerate(models):
+			value = x[i]
+			activation_value = []
+			# Pass each value through the layer
+			for j, layer in enumerate(model.layers):
+				value = layer(value)
+
+				if self.activation_components[j] is None:
+					# No need to append nothing as these values are to be concatenated into the encoder
+					continue
+
+				component_value = self.activation_components[j](value)
+				activation_value.append(component_value)
+			activation_value = torch.cat(activation_value, dim=0)
+			activation_values.append(activation_value)
+		activation_values = torch.stack(activation_values)
+		return activation_values
+
+	def get_loss_value(
+			self,
+			models: List[nn.Module],
+			x: torch.Tensor,
+			y: torch.Tensor
+	) -> Tuple[torch.Tensor, torch.Tensor]:
+		"""
+		Calculates the loss and the value of the loss component
+		:param models: list of models to compute the loss for
+		:param x: the input to compute the loss for, may be batched in that case the batch size must equal length of models
+		:param y: the expected output(s)
+		"""
+		criterion = self.run_config.get_criterion()
+		criterion.reduction = "none"
+		predictions = torch.stack([model(value) for model, value in zip(models, x)])
+		loss = criterion(predictions, y)
+		loss_value = self.loss_component(loss.unsqueeze(1))
+		return loss, loss_value
+
+	def get_gradients_values(self, losses: torch.Tensor, models: List[nn.Module]) -> torch.Tensor:
+		"""
+		Calculates the gradient values for the models
+		:param losses: the losses of the models for the value that was put in
+		:param models: the models for which to compute the gradient component values
+		"""
+		# Do a backwards step for each model
+		optimizers = [self.run_config.get_optimizer(model.parameters()) for model in models]
+		# Retain graph is needed to calculate the gradients for all models
+		[loss.backward(retain_graph=True) for loss in losses]
+
+		# Get the gradients of all the model for all the layers
+		params = [param_group["params"] for optimizer in optimizers for param_group in optimizer.param_groups]
+		gradients = [[param.grad for param in model] for model in params]
+
+		# Get the gradient values for each model and layer
+		gradient_values = torch.stack([
+			torch.cat(
+				[
+					torch.cat(
+						[gradient_component[0](gradient[0]), gradient_component[1](gradient[1])]
+					) for gradient_component in self.gradient_components if gradient_component is not None
+				]
+			) for gradient in gradients
+		])
+		return gradient_values
+
+	def forward(self, parameters: List[torch.Tensor], x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+		is_batched = x.ndim == 4 or x.ndim == 2
+		if not is_batched:
+			x = x.unsqueeze(0)
+			parameters = [parameter.unsqueeze(0) for parameter in parameters]
+
+		models = self.get_models(parameters)
+
+		label_value = self.get_label_value(y)
+		activation_values = self.get_activation_values(models, x)
+		loss, loss_value = self.get_loss_value(models, x, y)
+		gradient_values = self.get_gradients_values(loss, models)
+
+		encoder_input_values = torch.cat([activation_values, loss_value, label_value, gradient_values], dim=1)
+		result = self.encoder_component(encoder_input_values)
+		result = result.view(-1)
+		if not is_batched:
+			result = result.squeeze(0)
+		return result
+
+
 class AttackModel:
 	def __init__(self, fcn, encoder, cnn):
 		self.raw_fcn = fcn
@@ -42,6 +177,10 @@ class AttackModel:
 		return AttackModel(**config)
 
 	def get_attack_model(self, run_config: Config):
+		"""
+		Constructs the attack model based on the configuration
+		:param run_config: Configuration of the experiment
+		"""
 		self.initialize_components(run_config)
 
 		activation_components = self.activation_components
@@ -50,83 +189,14 @@ class AttackModel:
 		gradient_components = self.gradient_components
 		encoder_component = self.encoder_component
 
-		# Merge the activation components and gradient components into a single layer
-		layer_components = [
-			(activation,) if gradient is None else gradient
-			for activation, gradient in zip(activation_components, gradient_components)
-		]
-		trainable_layers_indices = get_trainable_layers_indices(run_config.get_model())
-
-		class Net(nn.Module):
-			def __init__(self) -> None:
-				super(Net, self).__init__()
-				self.layer_components = [[component() for component in components] for components in layer_components]
-				self.label_component = label_component()
-				self.loss_component = loss_component()
-				self.encoder_component = encoder_component()
-
-			def forward(self, parameters: List[npt.NDArray], x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-				# In case the tensor is unbatched, f.e. 3dim, expand
-				is_unbatched = x.ndim == 3 or x.ndim == 1
-				if not is_unbatched:
-					raise NotImplementedError("This model does not support any batched inputs")
-
-				x = x.unsqueeze(0)
-				y = y.unsqueeze(0)
-
-				# The label value for the attack model
-				label_value = self.label_component(y.float())
-
-				# Get the prediction and loss of the target model
-				model = run_config.get_model()
-				if parameters is not None:
-					training.set_weights(model, parameters)
-				criterion = run_config.get_criterion()
-				optimizer = run_config.get_optimizer(model.parameters())
-				prediction = model(x)
-
-				# Before finding the gradient get the value of each activation function
-				activation_values = []
-				for i, layer in enumerate(model.layers):
-					x = layer(x)
-					if i in trainable_layers_indices:
-						continue
-					activation_values.append(x.squeeze(0))
-
-				# The loss value for the attack model, unsqueeze to make it a tensor
-				loss = criterion(prediction, y)
-				loss_value = self.loss_component(loss.unsqueeze(0))
-
-				# Get the gradients of the input
-				loss.backward()
-				optimizer.step()
-				gradients = list(
-					itertools.chain.from_iterable(
-						[param.grad for param in param_group["params"]] for param_group in optimizer.param_groups
-					)
-				)
-
-				# Combine the gradients to be a list of tuples (weights, biases)
-				gradients = list(zip(gradients[::2], gradients[1::2]))
-
-				# Get the layer_component values
-				layer_values = []
-				for layer_component in self.layer_components:
-					if len(layer_component) == 2:
-						weight_component, bias_component = layer_component
-						weight, bias = gradients.pop(0)
-						layer_values.append(weight_component(weight))
-						layer_values.append(bias_component(bias))
-					else:
-						value = activation_values.pop(0)
-						layer_values.append(layer_component[0](value))
-
-				# Append the outputs and put in the encoder
-				encoder_input_values = torch.cat([*layer_values, loss_value, label_value], dim=0)
-				result = self.encoder_component(encoder_input_values)
-				return result
-
-		return Net()
+		return AttackNet(
+			activation_components,
+			gradient_components,
+			loss_component,
+			label_component,
+			encoder_component,
+			run_config
+		)
 
 	def initialize_components(self, run_config: Config) -> None:
 		"""
