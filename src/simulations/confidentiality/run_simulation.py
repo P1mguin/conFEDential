@@ -74,6 +74,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	client_updates = config.get_client_updates()
 
 	# Construct the attacker model based on the config
+	log(INFO, "Constructing attacker model dataset")
 	attack_loader = get_attack_dataset(config)
 
 	# 80 percent train, 10 percent test, 10 percent validation
@@ -90,6 +91,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	wandb.init(mode=mode, **wandb_kwargs)
 
 	# Train the attack model until convergence
+	log(INFO, "Constructed dataset, starting training")
 	previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
 
 	i = -1
@@ -172,7 +174,8 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 	else:
 		# Train all the shadow models for the dataloaders
 		shadow_models = []
-		for train_loader, test_loader in data_loaders:
+		for i, (train_loader, test_loader) in enumerate(data_loaders):
+			log(INFO, f"Training shadow model {i}")
 			parameters = train_shadow_model(config, train_loader)
 			shadow_models.append((parameters, train_loader, test_loader))
 
