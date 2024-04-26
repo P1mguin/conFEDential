@@ -68,8 +68,11 @@ class AttackModel:
 			def forward(self, parameters: List[npt.NDArray], x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 				# In case the tensor is unbatched, f.e. 3dim, expand
 				is_unbatched = x.ndim == 3 or x.ndim == 1
-				if is_unbatched:
-					x = x.unsqueeze(0)
+				if not is_unbatched:
+					raise NotImplementedError("This model does not support any batched inputs")
+
+				x = x.unsqueeze(0)
+				y = y.unsqueeze(0)
 
 				# The label value for the attack model
 				label_value = self.label_component(y.float())
@@ -88,10 +91,7 @@ class AttackModel:
 					x = layer(x)
 					if i in trainable_layers_indices:
 						continue
-					if is_unbatched:
-						activation_values.append(x.squeeze(0))
-					else:
-						activation_values.append(x)
+					activation_values.append(x.squeeze(0))
 
 				# The loss value for the attack model, unsqueeze to make it a tensor
 				loss = criterion(prediction, y)
@@ -126,7 +126,7 @@ class AttackModel:
 				result = self.encoder_component(encoder_input_values)
 				return result
 
-		return Net
+		return Net()
 
 	def initialize_components(self, run_config: Config) -> None:
 		"""

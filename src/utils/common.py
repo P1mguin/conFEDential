@@ -1,11 +1,11 @@
 from functools import reduce
-from typing import Any, Callable, Iterator, List, Set, Tuple, Type
+from typing import Any, Callable, List, Set, Tuple, Type
 
 import numpy as np
 import numpy.typing as npt
 import torch
 import torch.nn as nn
-from torch.utils.data import ConcatDataset, DataLoader, random_split
+from torch.utils.data import DataLoader
 
 
 def compute_convolution_output_size(
@@ -136,27 +136,6 @@ def get_config_input_shape(run_config) -> Tuple[int, ...]:
 	input_shape = tuple(next(iter(test_loader))["x"].shape[1:])
 	return input_shape
 
-def k_fold_dataset(dataset, k: int, batch_size: int) -> Iterator[Tuple[DataLoader, DataLoader]]:
-	"""
-	Combines a dataset into a list of train and validation loaders by k-folding the data
-	:param dataset: the dataset to k-fold
-	:param k: the amount of splits that should be made, the size of the generator will be equal to k
-	:param batch_size: the batch size of the dataloaders
-	"""
-	fold_size = len(dataset) // k
-
-	# Create k subsets
-	subsets = random_split(dataset, [fold_size] * (k - 1) + [len(dataset) - fold_size * (k - 1)])
-
-	# For each fold, create a DataLoader for the training set and the validation set
-	for i in range(k):
-		validation_set = subsets[i]
-		training_sets = subsets[:i] + subsets[i + 1:]
-		training_set = ConcatDataset(training_sets)
-
-		yield (DataLoader(training_set, batch_size=batch_size, shuffle=True),
-			   DataLoader(validation_set, batch_size=batch_size))
-
 def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
 	"""
 	Loads and parses a python function described as string
@@ -197,3 +176,20 @@ def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]
 
 	dictionary[path[-1]] = new_value
 	return dictionary
+
+def split_dataloader(dataloader: DataLoader, percentage: float) -> Tuple[DataLoader, DataLoader]:
+	"""
+	Splits a dataloader into two dataloaders based on a given percentage
+	:param dataloader: the dataloder to split
+	:param percentage: the percentage the first dataloader will receive
+	"""
+	dataset = dataloader.dataset
+	batch_size = dataloader.batch_size
+	total_length = len(dataset)
+	first_length = int(total_length * percentage)
+	second_length = total_length - first_length
+
+	first_dataset, second_dataset = torch.utils.data.random_split(dataset, [first_length, second_length])
+	first_loader = DataLoader(first_dataset, batch_size=batch_size, shuffle=True)
+	second_loader = DataLoader(second_dataset, batch_size=batch_size, shuffle=True)
+	return first_loader, second_loader

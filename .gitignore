@@ -258,3 +258,4 @@ fabric.properties
 cache/
 wandb/
 /.captured/
+/.shadow_models/
