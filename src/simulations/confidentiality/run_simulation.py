@@ -84,10 +84,12 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	wandb.init(mode=mode, **wandb_kwargs)
 
 	# Train the attack model until convergence
-	# previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
-	previous_loss, previous_accuracy = 0.775, 0.506
+	previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+
+	i = -1
 	try:
 		while True:
+			i += 1
 			correct, total, train_loss = 0, 0, 0.
 			for parameters, data, target, is_member in train_loader:
 				data, target, is_member = data.to(device), target.to(device), is_member.to(device)
@@ -105,6 +107,12 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 			train_accuracy = correct / total
 			validation_loss, validation_accuracy = test_attack_model(criterion, attack_model, validation_loader)
 			test_loss, test_accuracy = test_attack_model(criterion, attack_model, test_loader)
+
+			log_string = f"Finished epoch {i}:\n"
+			log_string += f"Train loss: {train_loss}, Train accuracy: {train_accuracy}\n"
+			log_string += f"Validation loss: {validation_loss}, Validation accuracy: {validation_accuracy}\n"
+			log_string += f"Test loss: {test_loss}, Test accuracy: {test_accuracy}"
+			log(INFO, log_string)
 
 			wandb.log({
 				"train_loss": train_loss,
