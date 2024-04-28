@@ -35,15 +35,15 @@ class AttackNet(nn.Module):
 	) -> None:
 		super(AttackNet, self).__init__()
 		self.activation_components = [
-			component() if component is not None else None for component in activation_components
+			component().to(training.DEVICE) if component is not None else None for component in activation_components
 		]
 		self.gradient_components = [
-			[component() for component in components] if components is not None else None
+			[component().to(training.DEVICE) for component in components] if components is not None else None
 			for components in gradient_components
 		]
-		self.label_component = label_component()
-		self.loss_component = loss_component()
-		self.encoder_component = encoder_component()
+		self.label_component = label_component().to(training.DEVICE)
+		self.loss_component = loss_component().to(training.DEVICE)
+		self.encoder_component = encoder_component().to(training.DEVICE)
 		self.run_config = run_config
 
 	def get_label_value(self, y: torch.Tensor) -> torch.Tensor:
