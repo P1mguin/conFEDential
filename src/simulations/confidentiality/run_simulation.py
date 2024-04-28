@@ -93,6 +93,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	# Train the attack model until convergence
 	log(INFO, "Constructed dataset, starting training")
 	previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+	log(INFO, "Initial test performance: Loss: {previous_loss}, Accuracy: {previous_accuracy}")
 
 	i = -1
 	try:

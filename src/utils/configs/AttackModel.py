@@ -127,13 +127,17 @@ class AttackNet(nn.Module):
 		params = [param_group["params"] for optimizer in optimizers for param_group in optimizer.param_groups]
 		gradients = [[param.grad for param in model] for model in params]
 
+		# Pair the tuples and align None values with gradient components
+		gradients = [list(zip(gradient[::2], gradient[1::2])) for gradient in gradients]
+		gradients = [[gradients[i].pop(0) if component is not None else None for component in self.gradient_components] for i in range(len(gradients))]
+
 		# Get the gradient values for each model and layer
 		gradient_values = torch.stack([
 			torch.cat(
 				[
 					torch.cat(
-						[gradient_component[0](gradient[0]), gradient_component[1](gradient[1])]
-					) for gradient_component in self.gradient_components if gradient_component is not None
+						[gradient_component[0](layer[0]), gradient_component[1](layer[1])]
+					) for layer, gradient_component in zip(gradient, self.gradient_components) if layer is not None
 				]
 			) for gradient in gradients
 		])
