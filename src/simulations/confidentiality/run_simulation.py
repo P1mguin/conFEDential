@@ -204,7 +204,6 @@ def train_shadow_model(run_config: AttackConfig, train_loader: DataLoader):
 	config = {}
 	for i in range(global_rounds):
 		# TODO: Maintain intermediate state
-		print("Starting round", i)
 		parameters, _, config = strategy.train(parameters, train_loader, run_config, config)
 
 	# TODO: Also attack using config
