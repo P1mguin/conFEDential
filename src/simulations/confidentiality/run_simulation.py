@@ -167,11 +167,11 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 	# Get the data split to train the several models
 	data_loaders = config.get_attack_data_loaders()
 
-	cache_file = f".shadow_models/{'/'.join(config.get_output_capture_directory_path().split('/')[1:])[:-1]}.pkl"
+	cache_file = config.get_attack_dataset_path()
 	if os.path.exists(cache_file):
 		# Load the data from the cache
 		with open(cache_file, "rb") as f:
-			shadow_models = pickle.load(f)
+			dataloader = pickle.load(f)
 	else:
 		# Train all the shadow models for the dataloaders
 		shadow_models = []
@@ -180,22 +180,24 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 			parameters = train_shadow_model(config, train_loader)
 			shadow_models.append((parameters, train_loader, test_loader))
 
-		# Cache the results for the shadow models so that we can more easily tune the attack model
+		# Generate the dataset on which to train the attack model
+		dataset = []
+		for parameters, train_loader, test_loader in shadow_models:
+			for data, target in train_loader.dataset:
+				dataset.append((parameters, data, target, 1))
+
+			for data, target in test_loader.dataset:
+				dataset.append((parameters, data, target, 0))
+
+		# Create and cache the dataloader
+		batch_size = config.get_attack_batch_size()
+		dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
 		os.makedirs("/".join(cache_file.split("/")[:-1]), exist_ok=True)
 		with open(cache_file, "wb") as file:
-			pickle.dump(shadow_models, file)
+			pickle.dump(dataloader, file)
 
-	# Generate the dataset on which to train the attack model
-	dataset = []
-	for parameters, train_loader, test_loader in shadow_models:
-		for data, target in train_loader.dataset:
-			dataset.append((parameters, data, target, 1))
-
-		for data, target in test_loader.dataset:
-			dataset.append((parameters, data, target, 0))
-
-	batch_size = config.get_attack_batch_size()
-	return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+	return dataloader
 
 
 def train_shadow_model(run_config: AttackConfig, train_loader: DataLoader):

@@ -51,7 +51,7 @@ attack:
       - type: ReLU
       - type: Sigmoid
   simulation:
-    batch_size: 1024
+    batch_size: 8196
     optimizer:
       optimizer_name: RMSprop
 simulation:

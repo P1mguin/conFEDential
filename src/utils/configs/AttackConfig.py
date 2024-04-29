@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import math
 import os
 import re
@@ -102,6 +103,15 @@ class AttackConfig(Config):
 			data_loaders.append((train_loader, test_loader))
 		return data_loaders
 
+	def get_attack_dataset_path(self) -> str:
+		dataset = self.get_dataset_name()
+		model = self.get_model_name()
+		optimizer = self.get_optimizer_name()
+		configuration_string = f"{self.simulation}\n{self.dataset}\n{self.model}\n{self.attack}"
+		config_hash = hashlib.sha256(configuration_string.encode()).hexdigest()
+		path = f".attack_dataset/{dataset}/{model}/{optimizer}/{config_hash}.pkl"
+		return path
+
 	def get_attack_data_indices(self) -> List[int]:
 		client_count = self.get_client_count()
 		return self.attack.get_attack_data_indices(client_count)
@@ -111,6 +121,9 @@ class AttackConfig(Config):
 
 	def get_attack_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self.attack.get_attack_optimizer(parameters)
+
+	def get_attack_optimizer_name(self) -> str:
+		return self.attack.get_attack_optimizer_name()
 
 	def get_shadow_model_amount(self):
 		return self.attack.get_shadow_model_amount()

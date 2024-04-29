@@ -89,6 +89,9 @@ class Attack:
 	def get_attack_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self.simulation.get_optimizer_instance(parameters)
 
+	def get_attack_optimizer_name(self) -> str:
+		return self.simulation.get_optimizer_name()
+
 	def get_attacker_participation_rounds(self, capture_output_directory: str) -> List[int]:
 		# Open the parameters file
 		parameters_file = np.load(f"{capture_output_directory}parameters.npz")
