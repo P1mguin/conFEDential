@@ -1,6 +1,6 @@
 simulation:
   batch_size:
-    values: [ 8, 16, 32 ] #Self chosen
+    values: [ 4, 8 ] #Self chosen
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
@@ -9,7 +9,7 @@ simulation:
     optimizer_name: FedAdam
     local:
       lr:
-        values: [ 0.1, 0.15, 0.2 ] #Self chosen
+        values: [ 0.05, 0.1, 0.2 ] #Self chosen
     global:
       lr: 0.01 #Empirical, Kuo 2023 On noisy evaluation in federated hyperparameter tuning
       betas:
