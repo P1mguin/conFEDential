@@ -1,6 +1,8 @@
 import os
 import sys
 
+from tqdm import tqdm
+
 # Keep at top, so cluster knows which directory to work in
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
@@ -167,11 +169,19 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 	# Get the data split to train the several models
 	data_loaders = config.get_attack_data_loaders()
 
-	cache_file = config.get_attack_dataset_path()
-	if os.path.exists(cache_file):
-		# Load the data from the cache
-		with open(cache_file, "rb") as f:
+	# Construct and cache the shadow model and attacking dataset separately as their configuration do not relate
+	attack_dataset_cache = config.get_attack_dataset_path()
+	if os.path.exists(attack_dataset_cache):
+		with open(attack_dataset_cache, "rb") as f:
 			dataloader = pickle.load(f)
+		return dataloader
+
+	shadow_model_amount = config.get_shadow_model_amount()
+	shadow_models_cache = f".shadow_models/{'/'.join(config.get_output_capture_directory_path().split('/')[1:])[:-1]}/{shadow_model_amount}.pkl"
+	if os.path.exists(shadow_models_cache):
+		# Load the data from the cache
+		with open(shadow_models_cache, "rb") as f:
+			shadow_models = pickle.load(f)
 	else:
 		# Train all the shadow models for the dataloaders
 		shadow_models = []
@@ -180,22 +190,27 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 			parameters = train_shadow_model(config, train_loader)
 			shadow_models.append((parameters, train_loader, test_loader))
 
-		# Generate the dataset on which to train the attack model
-		dataset = []
-		for parameters, train_loader, test_loader in shadow_models:
-			for data, target in train_loader.dataset:
-				dataset.append((parameters, data, target, 1))
+		# Cache the results for the shadow models so that we can more easily tune the attack model
+		os.makedirs("/".join(shadow_models_cache.split("/")[:-1]), exist_ok=True)
+		with open(shadow_models_cache, "wb") as file:
+			pickle.dump(shadow_models, file)
 
-			for data, target in test_loader.dataset:
-				dataset.append((parameters, data, target, 0))
+	# Generate the dataset on which to train the attack model
+	dataset = []
+	for parameters, train_loader, test_loader in tqdm(shadow_models):
+		for data, target in train_loader.dataset:
+			dataset.append((parameters, data, target, 1))
 
-		# Create and cache the dataloader
-		batch_size = config.get_attack_batch_size()
-		dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+		for data, target in test_loader.dataset:
+			dataset.append((parameters, data, target, 0))
 
-		os.makedirs("/".join(cache_file.split("/")[:-1]), exist_ok=True)
-		with open(cache_file, "wb") as file:
-			pickle.dump(dataloader, file)
+	# Create and cache the dataloader
+	batch_size = config.get_attack_batch_size()
+	dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+	os.makedirs("/".join(attack_dataset_cache.split("/")[:-1]), exist_ok=True)
+	with open(attack_dataset_cache, "wb") as file:
+		pickle.dump(dataloader, file)
 
 	return dataloader
 
