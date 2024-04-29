@@ -7,9 +7,9 @@ simulation:
   local_rounds: 50 #Self chosen
   optimizer:
     optimizer_name: FedNAG
-    lr: 0.01 #Self chosen
-    momentum:
-      values: [ 0.85, 0.95 ] #Yang 2022 Federated Learning with Nesterov accelerated gradient
+    lr:
+      values: [0.001, 0.005, 0.01] #Self chosen
+    momentum: 0.85 #Yang 2022 Federated Learning with Nesterov accelerated gradient
 dataset:
   name: MNIST
   splitter:

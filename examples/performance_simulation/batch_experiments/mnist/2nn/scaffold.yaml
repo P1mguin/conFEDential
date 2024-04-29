@@ -1,6 +1,6 @@
 simulation:
   batch_size:
-    values: [ 32, 64, 128 ] #Self chosen
+    values: [ 128, 256, -1 ] #Self chosen
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
@@ -9,9 +9,10 @@ simulation:
     optimizer_name: SCAFFOLD
     local:
       lr:
-        values: [ 0.1, 0.2, 0.3 ] #Self chosen
+        values: [ 0.2, 0.3, 0.4 ] #Self chosen
     global:
-      lr: 0.9 # Karimireddy 2021, SCAFFOLD experiment setup
+      lr:
+        values: [0.8, 0.9] # Karimireddy 2021, SCAFFOLD experiment setup
 dataset:
   name: MNIST
   splitter:
