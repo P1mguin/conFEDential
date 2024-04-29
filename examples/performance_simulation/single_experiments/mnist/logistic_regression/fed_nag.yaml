@@ -1,5 +1,5 @@
 simulation:
-  batch_size: 1
+  batch_size: 2
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
@@ -7,7 +7,7 @@ simulation:
   optimizer:
     optimizer_name: FedNAG
     lr: 0.1
-    momentum: 0.9
+    momentum: 0.85
 dataset:
   name: MNIST
   splitter:
