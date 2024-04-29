@@ -1,0 +1,13 @@
+ctit083
+2024-04-28 19:25:37.894133: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-28 19:25:39.522258: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-28 19:25:47,403 | run_simulation.py:237 | Finished training, starting attack simulation
+INFO flwr 2024-04-28 19:26:06,023 | run_simulation.py:77 | Constructing attacker model dataset
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-28 19:26:35,315 | run_simulation.py:94 | Constructed dataset, starting training
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit083: error: *** STEP 283001.0 ON ctit083 CANCELLED AT 2024-04-28T22:11:54 ***
+slurmstepd-ctit083: error: *** JOB 283001 ON ctit083 CANCELLED AT 2024-04-28T22:11:54 ***
