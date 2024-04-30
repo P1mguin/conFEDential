@@ -152,13 +152,13 @@ def test_attack_model(criterion: nn.Module, attack_model: nn.Module, data_loader
 	correct, total, loss = 0, 0, 0.
 	for parameters, data, target, is_member in data_loader:
 		data, target, is_member = data.to(device), target.to(device), is_member.to(device)
-		output = attack_model(parameters, data, target).round()
+		output = attack_model(parameters, data, target)
 
 		with torch.no_grad():
 			loss += criterion(output, is_member.float()).item()
 
 		total += is_member.size()[0]
-		correct += (output == is_member).sum().item()
+		correct += (output.round() == is_member).sum().item()
 
 	accuracy = correct / total
 	loss /= total
