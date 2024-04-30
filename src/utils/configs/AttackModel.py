@@ -48,11 +48,7 @@ class AttackModel:
 		"""
 		self.initialize_components(run_config)
 
-		model = run_config.get_model()
-		trainable_indices = get_trainable_layers_indices(model)
-		activation_components = copy.deepcopy(self.activation_components)
-		activation_components = [activation_components.pop(0) if i in trainable_indices else None for i in range(len(model.layers))]
-
+		activation_components = self.activation_components
 		label_component = self.label_component
 		loss_component = self.loss_component
 		gradient_components = self.gradient_components

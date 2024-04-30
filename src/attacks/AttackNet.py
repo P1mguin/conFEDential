@@ -6,27 +6,24 @@ import torch
 import torch.nn as nn
 
 from src import training
+from src.utils import get_trainable_layers_indices
 from src.utils.configs import AttackConfig
 
 
 class AttackNet(nn.Module):
 	def __init__(
 			self,
-			activation_components: List[Type[nn.Module] | None],
-			gradient_components: List[Tuple[Type[nn.Module], Type[nn.Module]] | None],
+			activation_components: List[Type[nn.Module]],
+			gradient_components: List[Tuple[Type[nn.Module], Type[nn.Module]]],
 			loss_component: Type[nn.Module],
 			label_component: Type[nn.Module],
 			encoder_component: Type[nn.Module],
 			run_config: AttackConfig
 	) -> None:
 		super(AttackNet, self).__init__()
-		self.activation_components = [
-			component().to(training.DEVICE) if component is not None else None for component in activation_components
-		]
+		self.activation_components = [component().to(training.DEVICE) for component in activation_components]
 		self.gradient_components = [
-			component().to(training.DEVICE)
-			for components in gradient_components if components is not None
-			for component in components
+			component().to(training.DEVICE) for components in gradient_components for component in components
 		]
 		self.label_component = label_component().to(training.DEVICE)
 		self.loss_component = loss_component().to(training.DEVICE)
@@ -61,24 +58,25 @@ class AttackNet(nn.Module):
 		:param models: A list of models to pass the input through
 		:param x: The input, may be batched in that case the batch size must equal length of models
 		"""
-		activation_values = []
-		for i, model in enumerate(models):
-			value = x[i]
-			activation_value = []
-			# Pass each value through the layer
-			for j, layer in enumerate(model.layers):
-				value = layer(value)
+		model = self.run_config.get_model()
+		trainable_indices = get_trainable_layers_indices(model)
+		layer_count = len(model.layers)
 
-				if self.activation_components[j] is None:
-					# No need to append nothing as these values are to be concatenated into the encoder
-					continue
+		def get_activation_values():
+			value = x
+			for i in range(layer_count):
+				value = torch.stack([model.layers[i](value[j]) for j, model in enumerate(models)])
+				if i not in trainable_indices:
+					yield value
 
-				component_value = self.activation_components[j](value)
-				activation_value.append(component_value)
-			activation_value = torch.cat(activation_value, dim=0)
-			activation_values.append(activation_value)
-		activation_values = torch.stack(activation_values)
-		return activation_values
+		activation_values = list(get_activation_values())
+
+		activation_component_values = torch.cat(
+			[component(activation_value) for activation_value, component in
+			 zip(activation_values, self.activation_components)],
+			dim=1
+		)
+		return activation_component_values
 
 	def get_loss_value(
 			self,
@@ -124,7 +122,7 @@ class AttackNet(nn.Module):
 
 		# Get the gradient values for each model and layer
 		gradient_values = torch.cat(
-			[self.gradient_components[i](gradients[i]) for i in range(trainable_layer_count)],
+			[component(gradient) for (gradient, component) in zip(gradients, self.gradient_components)],
 			dim=1
 		)
 		return gradient_values
