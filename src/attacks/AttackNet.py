@@ -100,7 +100,7 @@ class AttackNet(nn.Module):
 		:param models: the models for which to compute the gradient component values
 		"""
 		# Get the gradients of all the model for all the layers
-		losses.sum().backward()
+		losses.sum().backward(retain_graph=self.training)
 		trainable_layer_count = len(list(models[0].parameters()))
 
 		def get_gradients():

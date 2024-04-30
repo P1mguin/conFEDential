@@ -95,11 +95,12 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	# Train the attack model until convergence
 	log(INFO, "Constructed dataset, starting training")
 	previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
-	log(INFO, "Initial test performance: Loss: {previous_loss}, Accuracy: {previous_accuracy}")
+	log(INFO, f"Initial test performance: Loss: {previous_loss}, Accuracy: {previous_accuracy}")
 
 	i = -1
 	try:
 		while True:
+			attack_model.train()
 			i += 1
 			correct, total, train_loss = 0, 0, 0.
 			for parameters, data, target, is_member in tqdm(train_loader):
