@@ -52,7 +52,7 @@ attack:
       - type: ReLU
       - type: Sigmoid
   simulation:
-    batch_size: 8196
+    batch_size: 64 # 64 and 128 are most efficient
     optimizer:
       optimizer_name: RMSprop
 simulation:
