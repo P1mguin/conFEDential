@@ -139,7 +139,8 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 				break
 
 			previous_loss, previous_accuracy = validation_loss, validation_accuracy
-	except Exception as _:
+	except Exception as e:
+		print(e)
 		wandb.finish(exit_code=1)
 
 	wandb.finish()

@@ -39,6 +39,7 @@ attack:
         in_features: 64
         out_features: 1
       - type: ReLU
+      - type: Sigmoid
     cnn:
       - type: Dropout
         p: 0.2
@@ -50,7 +51,6 @@ attack:
           - 1
         stride: 1
       - type: ReLU
-      - type: Sigmoid
   simulation:
     batch_size: 64 # 64 and 128 are most efficient
     optimizer:
