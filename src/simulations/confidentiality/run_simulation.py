@@ -102,7 +102,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 		while True:
 			i += 1
 			correct, total, train_loss = 0, 0, 0.
-			for parameters, data, target, is_member in train_loader:
+			for parameters, data, target, is_member in tqdm(train_loader):
 				data, target, is_member = data.to(device), target.to(device), is_member.to(device)
 				optimizer.zero_grad()
 				output = attack_model(parameters, data, target)
@@ -150,7 +150,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 def test_attack_model(criterion: nn.Module, attack_model: nn.Module, data_loader: DataLoader) -> Tuple[float, float]:
 	attack_model.eval()
 	correct, total, loss = 0, 0, 0.
-	for parameters, data, target, is_member in data_loader:
+	for parameters, data, target, is_member in tqdm(data_loader):
 		data, target, is_member = data.to(device), target.to(device), is_member.to(device)
 		output = attack_model(parameters, data, target)
 
