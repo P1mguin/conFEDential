@@ -48,7 +48,11 @@ class AttackModel:
 		"""
 		self.initialize_components(run_config)
 
-		activation_components = self.activation_components
+		model = run_config.get_model()
+		trainable_indices = get_trainable_layers_indices(model)
+		activation_components = copy.deepcopy(self.activation_components)
+		activation_components = [activation_components.pop(0) if i in trainable_indices else None for i in range(len(model.layers))]
+
 		label_component = self.label_component
 		loss_component = self.loss_component
 		gradient_components = self.gradient_components
@@ -116,12 +120,8 @@ class AttackModel:
 			parameters = {key: value for key, value in list(layer.items())[1:]}
 
 			# The kernel of the first convolution layer is as wide as the width/breadth of the input shape
-			if not dynamic_parameters_set and layer_type is nn.Conv2d:
-				# The convolution layer is either for the weights or bias, so length of 4 or 2, or length of 1
-				if len(input_shape) == 4:
-					parameters["in_channels"] = input_shape[1]
-				else:
-					parameters["in_channels"] = 1
+			if not dynamic_parameters_set and layer_type is nn.Conv2d or layer_type is nn.Conv3d:
+				parameters["in_channels"] = input_shape[1]
 				parameters["kernel_size"].append(input_shape[-1])
 				dynamic_parameters_set = True
 
@@ -144,7 +144,6 @@ class AttackModel:
 		for i in range(len(model.layers)):
 			# Trainable layers are accounted for in the gradients components
 			if i in trainable_layers_indices:
-				activation_components.append(None)
 				continue
 
 			layer_output_shape = layer_output_shapes[i + 1]
@@ -191,6 +190,8 @@ class AttackModel:
 		get the information of the grid-like data. When the gradient comes from a fcn, the width of the kernel is set
 		to the input size of the layer so that the output of the convolutional component is a vector. That vector is
 		then put into the fcn component. The output of the fcn component is used as input for the attack encoder.
+		We assume that the gradients are given some input channels by default. Besides, we assume them to be
+		batched
 		:param trainable_layers_indices: the indices of the trainable layers of the target model
 		:param run_config: the configuration of the experiment
 		"""
@@ -201,48 +202,43 @@ class AttackModel:
 		for i in range(len(model.layers)):
 			# Non-trainable layers are accounted for in the activation components
 			if i not in trainable_layers_indices:
-				gradient_components.append(None)
 				continue
 
 			weights_shape, bias_shape = gradient_shapes.pop(0)
 
-			weights_convolution_component = []
+			# Based on the assumption that the input will always be 3dimensional:
+			bias_shape = bias_shape + (1,)
+			while len(weights_shape) < 4:
+				weights_shape = (1,) + weights_shape
+			while len(bias_shape) < 4:
+				bias_shape = (1,) + bias_shape
 
-			# We unsqueeze the weights of a FCL since it does not have any channels by default
-			is_fcl = len(weights_shape) == 2
-			if is_fcl:
-				weights_convolution_component.append(Expand(1))
+			# Assume the input to be batched
+			weights_shape = (1,) + weights_shape
+			bias_shape = (1,) + bias_shape
 
-			weights_convolution_component.extend(self.get_convolution_layers(weights_shape))
+			weights_convolution_component = self.get_convolution_layers(weights_shape)
+			bias_convolution_component = self.get_convolution_layers(bias_shape)
 
-			# The bias is first unsqueezed and then put into the convolutional component
-			bias_convolution_component = [Expand(2)]
-			bias_convolution_component.extend(self.get_convolution_layers(bias_shape))
+			# Flatten both outputs to be a (batched) vector
+			weights_convolution_component.append(nn.Flatten(1))
+			bias_convolution_component.append(nn.Flatten(1))
 
-			if is_fcl:
-				weights_convolution_component.append(nn.Flatten(-2))
-			else:
-				weights_convolution_component.append(nn.Flatten(-3))
-			bias_convolution_component.append(nn.Flatten(-3))
+			# Get the output channels of the last convolutional component of the attacker model
+			out_channels = next(layer.out_channels for layer in reversed(bias_convolution_component) if hasattr(layer, "out_channels"))
 
-			# Get the output size of both convolutional components
-			bias_net = get_net_class_from_layers(bias_convolution_component)()
-			out_channels = [param.shape for _, param in bias_net.named_parameters()][0][0]
+			# The convolutional components will have reduced the last dimension of the gradient to 1, the rest will be
+			# flattened
+			weight_size = reduce(operator.mul, [out_channels, *weights_shape[2:-1], 1])
+			bias_size = reduce(operator.mul, [out_channels, *bias_shape[2:-1], 1])
 
-			if is_fcl:
-				weights_size = weights_shape[-2]
-			else:
-				weights_size = weights_shape[-2] * out_channels
-			bias_size = out_channels
-
+			# The weights are equal to (in_channels, out_channels, vertical kernel size/input features)
+			# Where it is the vertical kernel size for a convolutional layer and input features for a fcl
 			# Create the linear components and append
-			weights_convolution_component.extend(self.get_fcn_layers(weights_size))
+			weights_convolution_component.extend(self.get_fcn_layers(weight_size))
 			bias_convolution_component.extend(self.get_fcn_layers(bias_size))
 
 			# Flatten the output of the fcn components
-			weights_convolution_component.append(nn.Flatten(0))
-			bias_convolution_component.append(nn.Flatten(0))
-
 			weight_net = get_net_class_from_layers(weights_convolution_component)
 			bias_net = get_net_class_from_layers(bias_convolution_component)
 			gradient_components.append((weight_net, bias_net))
@@ -258,50 +254,33 @@ class AttackModel:
 		model = run_config.get_model()
 		# First go over the activation and gradient components
 		# The gradient components will add the bias and weights in one sweep
-		layer_components = [
-			activation if gradient is None else gradient[0]
-			for activation, gradient in zip(self.activation_components, self.gradient_components)
-		]
 		trainable_indices = get_trainable_layers_indices(run_config.get_model())
+		activation_components = copy.deepcopy(self.activation_components)
+		gradient_components = copy.deepcopy(self.gradient_components)
+
+		layer_components = (gradient_components.pop(0) if i in trainable_indices else (activation_components.pop(0),) for i in range(len(model.layers)))
+
+		gradient_shapes = get_gradient_shapes(model)
 
 		# Get the output size of each component
 		input_size = 0
-		for i, component in enumerate(layer_components):
-			net = component()
+		for i, layer in enumerate(layer_components):
+			nets = tuple(component() for component in layer)
 
-			# An FCL component will start by expanding, we need this distinction to know the output shape of the training
-			# Component
 			is_training = i in trainable_indices
-			is_fcl = is_training and isinstance(net.layers[0], Expand)
-
-			# For non-training layers return the amount of output features, as their input is one dimensional
-			out_features = None
-			for layer in reversed(net.layers):
-				if hasattr(layer, "out_features"):
-					out_features = layer.out_features
-					break
+			out_features = [next(layer.out_features for layer in reversed(net.layers) if hasattr(layer, "out_features")) for net in nets]
 			if not is_training:
-				input_size += out_features
+				input_size += sum(out_features)
 				continue
 
-			# For an FCL the extra channels are the amount of output kernels of the last convolution layer,
-			# for a convolutional layer the extra channels are the amount of output channels of the convolution layer
-			convolution_out_features = None
-			for layer in reversed(net.layers):
-				if hasattr(layer, "out_channels"):
-					convolution_out_features = layer.out_channels
-					break
-
-			if is_fcl:
-				input_size += out_features * convolution_out_features
-			else:
-				input_size += out_features * model.layers[i].out_channels
-
-			# Also add for the bias
-			input_size += out_features
+			# The gradient is flattened at the end, after the FCN, it will be a batched tensor where the batch size
+			# is the amount of channels of the gradient
+			gradient_shape = gradient_shapes.pop(0)
+			in_channels = [shape[-4] if len(shape) >= 4 else 1 for shape in gradient_shape]
+			input_size += sum(out_feature * in_channel for out_feature, in_channel in zip(out_features, in_channels))
 
 		# Add the out features two times for the loss and label component
-		input_size += out_features * 2
+		input_size += sum(out_features) * 2
 
 		layers = []
 		in_features_set = False

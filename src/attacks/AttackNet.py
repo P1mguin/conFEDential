@@ -1,11 +1,12 @@
 import copy
+import itertools
 from typing import List, Tuple, Type
 
 import torch
 import torch.nn as nn
 
 from src import training
-from src.utils.configs import Config
+from src.utils.configs import AttackConfig
 
 
 class AttackNet(nn.Module):
@@ -16,15 +17,16 @@ class AttackNet(nn.Module):
 			loss_component: Type[nn.Module],
 			label_component: Type[nn.Module],
 			encoder_component: Type[nn.Module],
-			run_config: Config
+			run_config: AttackConfig
 	) -> None:
 		super(AttackNet, self).__init__()
 		self.activation_components = [
 			component().to(training.DEVICE) if component is not None else None for component in activation_components
 		]
 		self.gradient_components = [
-			[component().to(training.DEVICE) for component in components] if components is not None else None
-			for components in gradient_components
+			component().to(training.DEVICE)
+			for components in gradient_components if components is not None
+			for component in components
 		]
 		self.label_component = label_component().to(training.DEVICE)
 		self.loss_component = loss_component().to(training.DEVICE)
@@ -103,30 +105,28 @@ class AttackNet(nn.Module):
 		:param losses: the losses of the models for the value that was put in
 		:param models: the models for which to compute the gradient component values
 		"""
-		# Do a backwards step for each model
-		optimizers = [self.run_config.get_optimizer(model.parameters()) for model in models]
-		# Retain graph is needed to calculate the gradients for all models
-		[loss.backward(retain_graph=True) for loss in losses]
-
 		# Get the gradients of all the model for all the layers
-		params = [param_group["params"] for optimizer in optimizers for param_group in optimizer.param_groups]
-		gradients = [[param.grad for param in model] for model in params]
+		losses.sum().backward()
+		trainable_layer_count = len(list(models[0].parameters()))
 
-		# Pair the tuples and align None values with gradient components
-		gradients = [list(zip(gradient[::2], gradient[1::2])) for gradient in gradients]
-		gradients = [[gradients[i].pop(0) if component is not None else None for component in self.gradient_components]
-					 for i in range(len(gradients))]
+		def get_gradients():
+			for i in range(trainable_layer_count):
+				def reshape_to_4d(input_tensor: torch.Tensor) -> torch.Tensor:
+					while input_tensor.ndim < 4:
+						input_tensor = input_tensor.unsqueeze(0)
+					return input_tensor
+
+				layer_gradients = torch.stack(
+					list(reshape_to_4d(next(itertools.islice(model.parameters(), i, None)).grad) for model in models))
+				yield layer_gradients
+
+		gradients = list(get_gradients())
 
 		# Get the gradient values for each model and layer
-		gradient_values = torch.stack([
-			torch.cat(
-				[
-					torch.cat(
-						[gradient_component[0](layer[0]), gradient_component[1](layer[1])]
-					) for layer, gradient_component in zip(gradient, self.gradient_components) if layer is not None
-				]
-			) for gradient in gradients
-		])
+		gradient_values = torch.cat(
+			[self.gradient_components[i](gradients[i]) for i in range(trainable_layer_count)],
+			dim=1
+		)
 		return gradient_values
 
 	def forward(self, parameters: List[torch.Tensor], x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
