@@ -42,23 +42,23 @@ attack:
     cnn:
       - type: Dropout
         p: 0.2
-      - type: Conv2d
-        in_channels: 1
+      - type: Conv3d
         out_channels: 1000
         kernel_size:
+          - 1
           - 1
         stride: 1
       - type: ReLU
       - type: Sigmoid
   simulation:
-    batch_size: 64
+    batch_size: 64 # 64 and 128 are most efficient
     optimizer:
       optimizer_name: RMSprop
 simulation:
   batch_size: 1
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 1
+  global_rounds: 10
   local_rounds: 20
   optimizer:
     optimizer_name: FedAvg

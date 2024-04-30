@@ -1,0 +1,163 @@
+ctit083
+2024-04-28 18:21:38.381817: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-28 18:21:55.138770: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-28 18:22:52,527 | run_simulation.py:236 | Finished training, starting attack simulation
+INFO flwr 2024-04-28 18:23:14,176 | run_simulation.py:77 | Constructing attacker model dataset
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-28 18:23:51,913 | run_simulation.py:94 | Constructed dataset, starting training
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 241, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 237, in main
+    attack_simulation(config, args)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 95, in attack_simulation
+    previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 152, in test_attack_model
+    output = attack_model(parameters, data, target).round()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 153, in forward
+    gradient_values = self.get_gradients_values(loss, models)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 131, in get_gradients_values
+    gradient_values = torch.stack([
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 133, in <listcomp>
+    [
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 135, in <listcomp>
+    [gradient_component[0](gradient[0]), gradient_component[1](gradient[1])]
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/src/utils/common.py", line 165, in forward
+    x = self.layers(x)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (1000x117000 and 200x128)
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 241, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 237, in main
+    attack_simulation(config, args)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 95, in attack_simulation
+    previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 152, in test_attack_model
+    output = attack_model(parameters, data, target).round()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 153, in forward
+    gradient_values = self.get_gradients_values(loss, models)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 131, in get_gradients_values
+    gradient_values = torch.stack([
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 133, in <listcomp>
+    [
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 135, in <listcomp>
+    [gradient_component[0](gradient[0]), gradient_component[1](gradient[1])]
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/src/utils/common.py", line 165, in forward
+    x = self.layers(x)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (1000x117000 and 200x128)
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240428_182351-gucpsljx
+wandb: Find logs at: ./wandb/offline-run-20240428_182351-gucpsljx/logs
+srun: error: ctit083: task 0: Exited with exit code 1
+2024-04-28 18:24:39.015656: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-28 18:24:40.447269: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-28 18:24:46,803 | run_simulation.py:236 | Finished training, starting attack simulation
+INFO flwr 2024-04-28 18:26:36,776 | run_simulation.py:77 | Constructing attacker model dataset
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-04-28 18:27:12,792 | run_simulation.py:94 | Constructed dataset, starting training
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 241, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 237, in main
+    attack_simulation(config, args)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 95, in attack_simulation
+    previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 152, in test_attack_model
+    output = attack_model(parameters, data, target).round()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 151, in forward
+    activation_values = self.get_activation_values(models, x)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 83, in get_activation_values
+    value = layer(value)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (64x49 and 3136x512)
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 241, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 237, in main
+    attack_simulation(config, args)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 95, in attack_simulation
+    previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+  File "/home/s2240084/conFEDential/src/simulations/confidentiality/run_simulation.py", line 152, in test_attack_model
+    output = attack_model(parameters, data, target).round()
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 151, in forward
+    activation_values = self.get_activation_values(models, x)
+  File "/home/s2240084/conFEDential/src/utils/configs/AttackModel.py", line 83, in get_activation_values
+    value = layer(value)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (64x49 and 3136x512)
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240428_182712-a5z9nkpf
+wandb: Find logs at: ./wandb/offline-run-20240428_182712-a5z9nkpf/logs
+srun: error: ctit083: task 0: Exited with exit code 1
+2024-04-28 18:27:28.946034: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-28 18:27:30.328737: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-28 18:27:34,846 | run_simulation.py:236 | Finished training, starting attack simulation
+INFO flwr 2024-04-28 18:27:35,425 | run_simulation.py:77 | Constructing attacker model dataset
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit083: error: *** JOB 282987 ON ctit083 CANCELLED AT 2024-04-28T18:27:44 ***
+slurmstepd-ctit083: error: *** STEP 282987.2 ON ctit083 CANCELLED AT 2024-04-28T18:27:44 ***

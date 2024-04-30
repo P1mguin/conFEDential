@@ -21,7 +21,7 @@ class NewtonOptimizer(Optimizer):
 		defaults = dict()
 		super(NewtonOptimizer, self).__init__(params, defaults)
 
-	def step(self, closure = None) -> Optional[float]:
+	def step(self, closure=None) -> Optional[float]:
 		# The closure function is required to compute the Hessian, if it is not there raise an error
 		if closure is None:
 			raise RuntimeError('closure function must be provided for NewtonOptimizer')

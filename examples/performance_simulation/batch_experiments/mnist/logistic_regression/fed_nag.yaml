@@ -1,6 +1,6 @@
 simulation:
   batch_size:
-    values: [ 32, 64, 128 ] #Self chosen
+    values: [ 1, 2, 4 ] #Self chosen
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10

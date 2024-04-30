@@ -182,6 +182,7 @@ def get_capturing_strategy(
 			# Method that is used to send additional variables to clients
 			def fit_config(server_round: int) -> Dict[str, Any]:
 				return config
+
 			self.on_fit_config_fn = fit_config
 
 	return FedCapture()

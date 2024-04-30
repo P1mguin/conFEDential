@@ -5,27 +5,24 @@ import sys
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
 
-import wandb
-
-from src.training.strategies.Strategy import Strategy
-from src.utils.configs import Config
-
 import argparse
+import random
+from logging import INFO
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
-from logging import INFO
-
-from flwr.common.logger import log
 
 import flwr as fl
+import numpy as np
 import numpy.typing as npt
 import torch
+import wandb
 from flwr.common import Scalar
+from flwr.common.logger import log
 from torch.utils.data import DataLoader
 
 import src.server_aggregation_strategies as agg
-import random
-import numpy as np
+from src.training.strategies.Strategy import Strategy
+from src.utils.configs import Config
 
 # Set seeds and set hugging face in offline mode so that cluster nodes do not attempt internet connection
 # which they do not have

@@ -259,3 +259,4 @@ cache/
 wandb/
 /.captured/
 /.shadow_models/
+/.attack_dataset/

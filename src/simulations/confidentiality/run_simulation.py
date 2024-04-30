@@ -1,5 +1,13 @@
+import os
+import sys
+
+from tqdm import tqdm
+
+# Keep at top, so cluster knows which directory to work in
+PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
+sys.path.append(PROJECT_DIRECTORY)
+
 import argparse
-import copy
 import os
 import pickle
 import random
@@ -68,6 +76,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	client_updates = config.get_client_updates()
 
 	# Construct the attacker model based on the config
+	log(INFO, "Constructing attacker model dataset")
 	attack_loader = get_attack_dataset(config)
 
 	# 80 percent train, 10 percent test, 10 percent validation
@@ -84,10 +93,14 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	wandb.init(mode=mode, **wandb_kwargs)
 
 	# Train the attack model until convergence
-	# previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
-	previous_loss, previous_accuracy = 0.775, 0.506
+	log(INFO, "Constructed dataset, starting training")
+	previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
+	log(INFO, "Initial test performance: Loss: {previous_loss}, Accuracy: {previous_accuracy}")
+
+	i = -1
 	try:
 		while True:
+			i += 1
 			correct, total, train_loss = 0, 0, 0.
 			for parameters, data, target, is_member in train_loader:
 				data, target, is_member = data.to(device), target.to(device), is_member.to(device)
@@ -105,6 +118,12 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 			train_accuracy = correct / total
 			validation_loss, validation_accuracy = test_attack_model(criterion, attack_model, validation_loader)
 			test_loss, test_accuracy = test_attack_model(criterion, attack_model, test_loader)
+
+			log_string = f"Finished epoch {i}:\n"
+			log_string += f"Train loss: {train_loss}, Train accuracy: {train_accuracy}\n"
+			log_string += f"Validation loss: {validation_loss}, Validation accuracy: {validation_accuracy}\n"
+			log_string += f"Test loss: {test_loss}, Test accuracy: {test_accuracy}"
+			log(INFO, log_string)
 
 			wandb.log({
 				"train_loss": train_loss,
@@ -133,13 +152,13 @@ def test_attack_model(criterion: nn.Module, attack_model: nn.Module, data_loader
 	correct, total, loss = 0, 0, 0.
 	for parameters, data, target, is_member in data_loader:
 		data, target, is_member = data.to(device), target.to(device), is_member.to(device)
-		output = attack_model(parameters, data, target).round()
+		output = attack_model(parameters, data, target)
 
 		with torch.no_grad():
 			loss += criterion(output, is_member.float()).item()
 
 		total += is_member.size()[0]
-		correct += (output == is_member).sum().item()
+		correct += (output.round() == is_member).sum().item()
 
 	accuracy = correct / total
 	loss /= total
@@ -150,34 +169,50 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 	# Get the data split to train the several models
 	data_loaders = config.get_attack_data_loaders()
 
-	cache_file = f".shadow_models/{'/'.join(config.get_output_capture_directory_path().split('/')[1:])[:-1]}.pkl"
-	if os.path.exists(cache_file):
+	# Construct and cache the shadow model and attacking dataset separately as their configuration do not relate
+	attack_dataset_cache = config.get_attack_dataset_path()
+	if os.path.exists(attack_dataset_cache):
+		with open(attack_dataset_cache, "rb") as f:
+			dataloader = pickle.load(f)
+		return dataloader
+
+	shadow_model_amount = config.get_shadow_model_amount()
+	shadow_models_cache = f".shadow_models/{'/'.join(config.get_output_capture_directory_path().split('/')[1:])[:-1]}/{shadow_model_amount}.pkl"
+	if os.path.exists(shadow_models_cache):
 		# Load the data from the cache
-		with open(cache_file, "rb") as f:
+		with open(shadow_models_cache, "rb") as f:
 			shadow_models = pickle.load(f)
 	else:
 		# Train all the shadow models for the dataloaders
 		shadow_models = []
-		for train_loader, test_loader in data_loaders:
+		for i, (train_loader, test_loader) in enumerate(data_loaders):
+			log(INFO, f"Training shadow model {i}")
 			parameters = train_shadow_model(config, train_loader)
 			shadow_models.append((parameters, train_loader, test_loader))
 
 		# Cache the results for the shadow models so that we can more easily tune the attack model
-		os.makedirs("/".join(cache_file.split("/")[:-1]), exist_ok=True)
-		with open(cache_file, "wb") as file:
+		os.makedirs("/".join(shadow_models_cache.split("/")[:-1]), exist_ok=True)
+		with open(shadow_models_cache, "wb") as file:
 			pickle.dump(shadow_models, file)
 
 	# Generate the dataset on which to train the attack model
 	dataset = []
-	for parameters, train_loader, test_loader in shadow_models:
+	for parameters, train_loader, test_loader in tqdm(shadow_models):
 		for data, target in train_loader.dataset:
 			dataset.append((parameters, data, target, 1))
 
 		for data, target in test_loader.dataset:
 			dataset.append((parameters, data, target, 0))
 
+	# Create and cache the dataloader
 	batch_size = config.get_attack_batch_size()
-	return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+	dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+	os.makedirs("/".join(attack_dataset_cache.split("/")[:-1]), exist_ok=True)
+	with open(attack_dataset_cache, "wb") as file:
+		pickle.dump(dataloader, file)
+
+	return dataloader
 
 
 def train_shadow_model(run_config: AttackConfig, train_loader: DataLoader):
@@ -187,11 +222,11 @@ def train_shadow_model(run_config: AttackConfig, train_loader: DataLoader):
 	config = {}
 	for i in range(global_rounds):
 		# TODO: Maintain intermediate state
-		print("Starting round", i)
 		parameters, _, config = strategy.train(parameters, train_loader, run_config, config)
 
 	# TODO: Also attack using config
 	return parameters
+
 
 def main():
 	args = parser.parse_args()

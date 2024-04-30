@@ -1,18 +1,18 @@
 simulation:
   batch_size:
-    values: [ 32, 64, 128 ] #Self chosen
+    values: [ 128, 256, -1 ] #Self chosen
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  local_rounds:
-    values: [ 20, 50 ] #Self chosen (Partially Karimireddy SCAFFOLD 2021, scaffold becomes better than centralized sgd with more local rounds)
+  local_rounds: 50 #Self chosen (Partially Karimireddy SCAFFOLD 2021, scaffold becomes better than centralized sgd with more local rounds)
   optimizer:
     optimizer_name: SCAFFOLD
     local:
       lr:
-        values: [ 0.05, 0.01, 0.005 ] #Self chosen
+        values: [ 0.2, 0.3, 0.4 ] #Self chosen
     global:
-      lr: 1 # Karimireddy 2021, SCAFFOLD experiment setup
+      lr:
+        values: [0.8, 0.9] # Karimireddy 2021, SCAFFOLD experiment setup
 dataset:
   name: MNIST
   splitter:
