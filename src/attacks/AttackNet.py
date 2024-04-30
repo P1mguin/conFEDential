@@ -1,5 +1,6 @@
 import copy
 import itertools
+import time
 from typing import List, Tuple, Type
 
 import torch
@@ -52,7 +53,7 @@ class AttackNet(nn.Module):
 			models.append(model.to(training.DEVICE))
 		return models
 
-	def get_activation_values(self, models: List[nn.Module], x: torch.Tensor) -> torch.Tensor:
+	def get_activation_values(self, models: List[nn.Module], x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
 		"""
 		Passes the input through the models and gets the activation values
 		:param models: A list of models to pass the input through
@@ -76,23 +77,20 @@ class AttackNet(nn.Module):
 			 zip(activation_values, self.activation_components)],
 			dim=1
 		)
-		return activation_component_values
+		return activation_component_values, activation_values[-1]
 
 	def get_loss_value(
 			self,
-			models: List[nn.Module],
-			x: torch.Tensor,
+			predictions: torch.Tensor,
 			y: torch.Tensor
 	) -> Tuple[torch.Tensor, torch.Tensor]:
 		"""
 		Calculates the loss and the value of the loss component
-		:param models: list of models to compute the loss for
-		:param x: the input to compute the loss for, may be batched in that case the batch size must equal length of models
+		:param predictions: the predictions to compute the loss for size must be equal to that of y
 		:param y: the expected output(s)
 		"""
 		criterion = self.run_config.get_criterion()
 		criterion.reduction = "none"
-		predictions = torch.stack([model(value) for model, value in zip(models, x)])
 		loss = criterion(predictions, y)
 		loss_value = self.loss_component(loss.unsqueeze(1))
 		return loss, loss_value
@@ -133,16 +131,47 @@ class AttackNet(nn.Module):
 			x = x.unsqueeze(0)
 			parameters = [parameter.unsqueeze(0) for parameter in parameters]
 
+		start_time = time.time()
 		models = self.get_models(parameters)
+		end_time = time.time()
+		print(f"Models: {(end_time - start_time) * 1000}ms")
 
+		start_time = time.time()
 		label_value = self.get_label_value(y)
-		activation_values = self.get_activation_values(models, x)
-		loss, loss_value = self.get_loss_value(models, x, y)
-		gradient_values = self.get_gradients_values(loss, models)
+		end_time = time.time()
+		print(f"Label: {(end_time - start_time) * 1000}ms")
 
+		start_time = time.time()
+		activation_values, predictions = self.get_activation_values(models, x)
+		end_time = time.time()
+		print(f"Activation: {(end_time - start_time) * 1000}ms")
+
+		start_time = time.time()
+		loss, loss_value = self.get_loss_value(predictions, y)
+		end_time = time.time()
+		print(f"Loss: {(end_time - start_time) * 1000}ms")
+
+		start_time = time.time()
+		gradient_values = self.get_gradients_values(loss, models)
+		end_time = time.time()
+		print(f"Gradient: {(end_time - start_time) * 1000}ms")
+
+		start_time = time.time()
 		encoder_input_values = torch.cat([activation_values, loss_value, label_value, gradient_values], dim=1)
+		end_time = time.time()
+		print(f"Concatenation: {(end_time - start_time) * 1000}ms")
+
+		start_time = time.time()
 		result = self.encoder_component(encoder_input_values)
+		end_time = time.time()
+		print(f"Encoding: {(end_time - start_time) * 1000}ms")
+
+		start_time = time.time()
 		result = result.view(-1)
 		if not is_batched:
 			result = result.squeeze(0)
+		end_time = time.time()
+		print(f"Reshaping: {(end_time - start_time) * 1000}ms")
+
+		# raise Exception("Paniek!")
 		return result
