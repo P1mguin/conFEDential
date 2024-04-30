@@ -1,6 +1,4 @@
-import copy
 import itertools
-import time
 from typing import List, Tuple, Type
 
 import torch
@@ -42,15 +40,15 @@ class AttackNet(nn.Module):
 		model layer. The element at that index may be batched
 		"""
 		# Create all the models
-		template_model = self.run_config.get_model()
 		batch_size = parameters[0].shape[0]
 		models = []
 		for i in range(batch_size):
-			model = copy.deepcopy(template_model)
+			model = self.run_config.get_model()
 			new_state_dict = {key: parameter[i] for key, parameter in zip(model.state_dict().keys(), parameters)}
 			model.load_state_dict(new_state_dict)
 			# Get the models to where the computer assumes it is
 			models.append(model.to(training.DEVICE))
+
 		return models
 
 	def get_activation_values(self, models: List[nn.Module], x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -131,47 +129,15 @@ class AttackNet(nn.Module):
 			x = x.unsqueeze(0)
 			parameters = [parameter.unsqueeze(0) for parameter in parameters]
 
-		start_time = time.time()
 		models = self.get_models(parameters)
-		end_time = time.time()
-		print(f"Models: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		label_value = self.get_label_value(y)
-		end_time = time.time()
-		print(f"Label: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		activation_values, predictions = self.get_activation_values(models, x)
-		end_time = time.time()
-		print(f"Activation: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		loss, loss_value = self.get_loss_value(predictions, y)
-		end_time = time.time()
-		print(f"Loss: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		gradient_values = self.get_gradients_values(loss, models)
-		end_time = time.time()
-		print(f"Gradient: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		encoder_input_values = torch.cat([activation_values, loss_value, label_value, gradient_values], dim=1)
-		end_time = time.time()
-		print(f"Concatenation: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		result = self.encoder_component(encoder_input_values)
-		end_time = time.time()
-		print(f"Encoding: {(end_time - start_time) * 1000}ms")
-
-		start_time = time.time()
 		result = result.view(-1)
 		if not is_batched:
 			result = result.squeeze(0)
-		end_time = time.time()
-		print(f"Reshaping: {(end_time - start_time) * 1000}ms")
 
-		# raise Exception("Paniek!")
 		return result
