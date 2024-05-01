@@ -1,3 +1,4 @@
+# Optimal 0.9799
 simulation:
   batch_size: 32 # Yang et al Federated Learning with Nesterov Accelerated Gradient
   client_count: 100

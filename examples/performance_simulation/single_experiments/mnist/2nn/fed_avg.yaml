@@ -1,3 +1,4 @@
+# Optimal: 0.9453
 simulation:
   batch_size: 8
   client_count: 100
