@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader, random_split
 from src.federated_datasets.Dataset import Dataset
 
 
-class MNIST(Dataset):
+class Cifar10(Dataset):
+	class_names = ['plan', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
 	@staticmethod
 	def load_data(
 			client_count: int,
@@ -36,16 +38,17 @@ class MNIST(Dataset):
 		:param function_hash: The hash of the function that is used to cache the preprocessed data for this function
 		"""
 		# See if the information has been cached before and if so load from cache
-		cache_file = f".cache/preprocessed/mnist/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
-		# if os.path.exists(cache_file):
-		# 	# Load the data from the cache
-		# 	with open(cache_file, "rb") as f:
-		# 		return pickle.load(f)
+		cache_file = f".cache/preprocessed/cifar10/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
+		if os.path.exists(cache_file):
+			# Load the data from the cache
+			with open(cache_file, "rb") as f:
+				return pickle.load(f)
 
-		Dataset.is_data_downloaded("mnist")
+		# Confirm the dataset is downloaded locally and load in the dataset
+		Dataset.is_data_downloaded("cifar10")
 		train_dataset, test_dataset = load_dataset(
-			"mnist",
-			name="mnist",
+			"cifar10",
+			name="plain_text",
 			cache_dir=".cache",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"

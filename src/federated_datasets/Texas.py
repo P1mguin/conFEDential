@@ -16,9 +16,8 @@ class Texas(Dataset):
 			client_count: int,
 			batch_size: int,
 			preprocess_fn: Callable[[dict], dict],
-			alpha: float = 1.,
-
-			percent_non_iid: float = 0.,
+			alpha: float | None = None,
+			percent_non_iid: float | None = None,
 			seed: int = 78,
 			function_hash: str = ""
 	) -> Tuple[List[DataLoader], DataLoader]:
@@ -40,19 +39,27 @@ class Texas(Dataset):
 
 		train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
-			image_list=features[train_dataset.indices],
-			label_list=labels[train_dataset.indices],
-			num_clients=client_count,
-			method="dirichlet",
-			alpha=alpha,
-			percent_noniid=percent_non_iid,
-		)
+		# If filled, split the data non-iid
+		if alpha is not None and percent_non_iid is not None:
+			federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
+				image_list=features[train_dataset.indices],
+				label_list=labels[train_dataset.indices],
+				num_clients=client_count,
+				method="dirichlet",
+				alpha=alpha,
+				percent_noniid=percent_non_iid
+			)
+			clients = federated_train_data["with_class_completion"].values()
+		else:
+			lengths = [len(train_dataset) // client_count] * client_count
+			lengths[0] += len(train_dataset) % client_count
+			subsets = random_split(train_dataset, lengths)
+			clients = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
 
 		# Use with class completion so every client has at least one label of each class
 		# Create the train and test loaders and return
 		train_loaders = []
-		for client_data in federated_train_data["with_class_completion"].values():
+		for client_data in clients:
 			# Batch_size -1 corresponds to infinity
 			if batch_size == -1:
 				batch_size = len(client_data)

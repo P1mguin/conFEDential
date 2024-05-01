@@ -12,9 +12,6 @@ simulation:
       steps: [ 0.25, 0.2, 0.1 ]
 dataset:
   name: MNIST
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn:
     steps:
       - >

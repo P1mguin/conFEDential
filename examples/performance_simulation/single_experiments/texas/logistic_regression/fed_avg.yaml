@@ -9,9 +9,6 @@ simulation:
     lr: 0.1
 dataset:
   name: Texas
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn: |
     def preprocess_fn(element):
       return element

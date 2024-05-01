@@ -21,9 +21,6 @@ simulation:
       weight_decay: 0.9999 #Kuo 2023 On noisy evaluation in federated hyperparameter tuning
 dataset:
   name: MNIST
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn: |
     def preprocess_fn(element):
       return {

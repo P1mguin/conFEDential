@@ -14,9 +14,6 @@ simulation:
       step_size: 0.05
 dataset:
   name: MNIST
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn: |
     def preprocess_fn(element):
       return {

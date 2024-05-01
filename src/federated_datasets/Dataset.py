@@ -12,8 +12,8 @@ class Dataset(ABC):
 			client_count: int,
 			batch_size: int,
 			preprocess_fn: Callable[[dict], dict],
-			alpha: float = 1.,
-			percent_non_iid: float = 0.,
+			alpha: float | None = None,
+			percent_non_iid: float | None = None,
 			seed: int = 78,
 			function_hash: str = "",
 	) -> Tuple[List[DataLoader], DataLoader]:
