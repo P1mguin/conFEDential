@@ -4,6 +4,7 @@
 #SBATCH --output hpc_runs/slurm_outputs/performance_simulation/mnist/slurm-%j.out
 #SBATCH --gres=gpu:1
 #SBATCH -c 8
+#SBATCH --mem=16G
 
 # Show node in output file
 hostname
