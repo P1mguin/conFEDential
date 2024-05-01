@@ -8,18 +8,18 @@ simulation:
     optimizer_name: FedAvg
     lr: 0.2
 dataset:
-  name: CIFAR10
+  name: ImageNet
   preprocess_fn: |
     def preprocess_fn(element):
       return {
-        "x": element["image"].reshape(1, 28, 28) / 255.,
+        "x": element["image"] / 255.,
         "y": element["label"]
       }
 model:
-  name: ResNet18
+  name: ResNet50
   criterion: CrossEntropyLoss
   hub:
     repo_or_dir: 'pytorch/vision:v0.10.0'
-    model: 'resnet18'
+    model: 'resnet50'
     pretrained: False
 

@@ -5,14 +5,11 @@ from typing import Callable, List, Tuple
 from datasets import load_dataset
 from fedartml import SplitAsFederatedData
 from torch.utils.data import DataLoader, random_split
-from tqdm import tqdm
 
 from src.federated_datasets.Dataset import Dataset
 
 
-class CIFAR10(Dataset):
-	class_names = ['plan', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-
+class ImageNet(Dataset):
 	@staticmethod
 	def load_data(
 			client_count: int,
@@ -39,19 +36,19 @@ class CIFAR10(Dataset):
 		:param function_hash: The hash of the function that is used to cache the preprocessed data for this function
 		"""
 		# See if the information has been cached before and if so load from cache
-		cache_file = f".cache/preprocessed/cifar10/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
+		cache_file = f".cache/preprocessed/imagenet/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
 		if os.path.exists(cache_file):
 			# Load the data from the cache
 			with open(cache_file, "rb") as f:
 				return pickle.load(f)
 
 		# Confirm the dataset is downloaded locally and load in the dataset
-		Dataset.is_data_downloaded("cifar10")
+		Dataset.is_data_downloaded("zh-plus___tiny-imagenet")
 		train_dataset, test_dataset = load_dataset(
-			"cifar10",
-			name="plain_text",
+			"zh-plus/tiny-imagenet",
+			name="default",
 			cache_dir=".cache",
-			split=["train", "test"],
+			split=["train", "valid"],
 			download_mode="reuse_dataset_if_exists"
 		)
 

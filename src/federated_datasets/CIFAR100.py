@@ -4,21 +4,32 @@ from typing import Callable, List, Tuple
 
 from datasets import load_dataset
 from fedartml import SplitAsFederatedData
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 from src.federated_datasets.Dataset import Dataset
 
 
-class Cifar10(Dataset):
-	class_names = ['plan', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+class CIFAR100(Dataset):
+	class_names = [
+		"apple", "aquarium_fish", "baby", "bear", "beaver", "bed", "bee", "beetle", "bicycle", "bottle",
+		"bowl", "boy", "bridge", "bus", "butterfly", "camel", "can", "castle", "caterpillar", "cattle",
+		"chair", "chimpanzee", "clock", "cloud", "cockroach", "couch", "crab", "crocodile", "cup", "dinosaur",
+		"dolphin", "elephant", "flatfish", "forest", "fox", "girl", "hamster", "house", "kangaroo", "keyboard",
+		"lamp", "lawn_mower", "leopard", "lion", "lizard", "lobster", "man", "maple_tree", "motorcycle", "mountain",
+		"mouse", "mushroom", "oak_tree", "orange", "orchid", "otter", "palm_tree", "pear", "pickup_truck", "pine_tree",
+		"plain", "plate", "poppy", "porcupine", "possum", "rabbit", "raccoon", "ray", "road", "rocket", "rose",
+		"sea", "seal", "shark", "shrew", "skunk", "skyscraper", "snail", "snake", "spider", "squirrel", "streetcar",
+		"sunflower", "sweet_pepper", "table", "tank", "telephone", "television", "tiger", "tractor", "train", "trout",
+		"tulip", "turtle", "wardrobe", "whale", "willow_tree", "wolf", "woman", "worm"
+	]
 
 	@staticmethod
 	def load_data(
 			client_count: int,
 			batch_size: int,
 			preprocess_fn: Callable[[dict], dict],
-			alpha: float = 1.,
-			percent_non_iid: float = 0.,
+			alpha: float | None = None,
+			percent_non_iid: float | None = None,
 			seed: int = 78,
 			function_hash: str = "",
 	) -> Tuple[List[DataLoader], DataLoader]:
@@ -38,17 +49,17 @@ class Cifar10(Dataset):
 		:param function_hash: The hash of the function that is used to cache the preprocessed data for this function
 		"""
 		# See if the information has been cached before and if so load from cache
-		cache_file = f".cache/preprocessed/mnist/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
+		cache_file = f".cache/preprocessed/cifar100/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
 		if os.path.exists(cache_file):
 			# Load the data from the cache
 			with open(cache_file, "rb") as f:
 				return pickle.load(f)
 
 		# Confirm the dataset is downloaded locally and load in the dataset
-		Dataset.is_data_downloaded("cifar10")
+		Dataset.is_data_downloaded("cifar100")
 		train_dataset, test_dataset = load_dataset(
-			"cifar10",
-			name="plain_text",
+			"cifar100",
+			name="cifar100",
 			cache_dir=".cache",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
@@ -62,20 +73,27 @@ class Cifar10(Dataset):
 		train_dataset = train_dataset.map(preprocess_fn)
 		test_dataset = test_dataset.map(preprocess_fn)
 
-		# Split the data non-iid
-		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
-			image_list=train_dataset["x"],
-			label_list=train_dataset["y"],
-			num_clients=client_count,
-			method="dirichlet",
-			alpha=alpha,
-			percent_noniid=percent_non_iid
-		)
+		# If filled, split the data non-iid
+		if alpha is not None and percent_non_iid is not None:
+			federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
+				image_list=train_dataset["x"],
+				label_list=train_dataset["y"],
+				num_clients=client_count,
+				method="dirichlet",
+				alpha=alpha,
+				percent_noniid=percent_non_iid
+			)
+			clients = federated_train_data["with_class_completion"].values()
+		else:
+			lengths = [len(train_dataset) // client_count] * client_count
+			lengths[0] += len(train_dataset) % client_count
+			subsets = random_split(train_dataset, lengths)
+			clients = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
 
 		# Use with class completion so every client has at least one label of each class
 		# Create the train and test loaders and return
 		train_loaders = []
-		for client_data in federated_train_data["with_class_completion"].values():
+		for client_data in clients:
 			# Batch_size -1 corresponds to infinity
 			if batch_size == -1:
 				batch_size = len(client_data)

@@ -8,7 +8,7 @@ simulation:
     optimizer_name: FedAvg
     lr: 0.1
 dataset:
-  name: Texas
+  name: Purchase
   preprocess_fn: |
     def preprocess_fn(element):
       return element
@@ -17,7 +17,7 @@ model:
   criterion: CrossEntropyLoss
   layers:
     - type: Linear
-      in_features: 6169
+      in_features: 600
       out_features: 100
     - type: Softmax
       dim: -1
