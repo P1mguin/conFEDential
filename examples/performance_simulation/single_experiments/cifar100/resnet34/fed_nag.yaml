@@ -1,12 +1,13 @@
 simulation:
-  batch_size: 8
+  batch_size: 32 # Yang et al Federated Learning with Nesterov Accelerated Gradient
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 10
-  local_rounds: 20
+  global_rounds: 10 # Yang et al Federated Learning with Nesterov Accelerated Gradient
+  local_rounds: 20 # Yang et al Federated Learning with Nesterov Accelerated Gradient
   optimizer:
-    optimizer_name: FedAvg
-    lr: 0.2
+    optimizer_name: FedNAG
+    lr: 0.05 # Yang et al Federated Learning with Nesterov Accelerated Gradient
+    momentum: 0.95
 dataset:
   name: CIFAR100
   preprocess_fn: |

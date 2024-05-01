@@ -3,10 +3,11 @@ simulation:
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  local_rounds: 20
+  local_rounds: 50
   optimizer:
-    optimizer_name: FedAvg
-    lr: 0.25
+    optimizer_name: FedNAG
+    lr: 0.01
+    momentum: 0.95
 dataset:
   name: Purchase
   preprocess_fn: |
