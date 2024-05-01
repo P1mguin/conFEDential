@@ -54,7 +54,7 @@ class Texas(Dataset):
 			lengths = [len(train_dataset) // client_count] * client_count
 			lengths[0] += len(train_dataset) % client_count
 			subsets = random_split(train_dataset, lengths)
-			clients = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
+			clients = ([(value[0], value[1]) for value in subset] for subset in subsets)
 
 		# Use with class completion so every client has at least one label of each class
 		# Create the train and test loaders and return
