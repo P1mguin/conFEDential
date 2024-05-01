@@ -15,7 +15,7 @@ simulation:
         - 0.9
         - 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.9999
 dataset:
   name: MNIST
   splitter:

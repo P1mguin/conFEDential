@@ -1,15 +1,24 @@
 simulation:
   batch_size:
-    steps: [ 8, 8, 1 ]
+    steps: [ 16, 16, 1 ]
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 50
   local_rounds:
-    steps: [ 20, 20, 20 ]
+    steps: [ 20, 10, 8 ]
   optimizer:
-    optimizer_name: SGD
-    lr:
-      steps: [ 0.25, 0.2, 0.1 ]
+    optimizer_name: FedAdam
+    local:
+      lr:
+        steps: [ 0.25, 0.2, 0.1 ]
+    global:
+      lr:
+        steps: [ 0.01, 0.01, 0.1 ]
+      betas:
+        - 0.9
+        - 0.999
+      eps: 0.000000001
+      weight_decay: 0.9999
 dataset:
   name: MNIST
   splitter:
@@ -92,9 +101,3 @@ model:
           dim: -1
     - name: Logistic Regression
       criterion: CrossEntropyLoss
-      layers:
-        - type: Linear
-          in_features: 784
-          out_features: 10
-        - type: Softmax
-          dim: -1
