@@ -37,10 +37,10 @@ class MNIST(Dataset):
 		"""
 		# See if the information has been cached before and if so load from cache
 		cache_file = f".cache/preprocessed/mnist/{seed}{alpha}{percent_non_iid}{client_count}{batch_size}/{function_hash}"
-		# if os.path.exists(cache_file):
-		# 	# Load the data from the cache
-		# 	with open(cache_file, "rb") as f:
-		# 		return pickle.load(f)
+		if os.path.exists(cache_file):
+			# Load the data from the cache
+			with open(cache_file, "rb") as f:
+				return pickle.load(f)
 
 		Dataset.is_data_downloaded("mnist")
 		train_dataset, test_dataset = load_dataset(
