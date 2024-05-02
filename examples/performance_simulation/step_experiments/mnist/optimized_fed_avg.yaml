@@ -7,7 +7,7 @@ simulation:
   local_rounds:
     steps: [ 20, 20, 20 ]
   optimizer:
-    optimizer_name: SGD
+    optimizer_name: FedAvg
     lr:
       steps: [ 0.25, 0.2, 0.1 ]
 dataset:
