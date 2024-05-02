@@ -15,4 +15,4 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/simulations/performance/run_simulation.py --yaml-file examples/performance_simulation/single_experiments/cifar10/resnet18/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --no-capturing --run-name CIFAR10-RESNET18-FEDAVG
+srun python src/simulations/performance/run_simulation.py --yaml-file examples/performance_simulation/single_experiments/cifar10/resnet18/fed_avg.yaml --num-gpus 0.5 --num-cpus 32 --no-logging --no-capturing --run-name CIFAR10-RESNET18-FEDAVG
