@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.optim
 import yaml
 from flwr.common import parameters_to_ndarrays
-from torch.utils.data import ConcatDataset, DataLoader
+from torch.utils.data import DataLoader
 
 import src.utils.configs as configs
 from src.utils import split_dataloader
@@ -29,7 +29,6 @@ class AttackConfig(Config):
 	def __init__(self, attack: Attack, simulation: Simulation, dataset: Dataset, model: Model) -> None:
 		super(AttackConfig, self).__init__(simulation, dataset, model)
 		self.attack = attack
-		self.set_target_member()
 
 	def __repr__(self) -> str:
 		return "AttackConfig({})".format(", ".join([f"{repr(value)}" for key, value in self.__dict__.items()]))
@@ -67,13 +66,13 @@ class AttackConfig(Config):
 	def get_attack_data_loaders(
 			self,
 			all_train_loaders: Optional[List[DataLoader]] = None
-	) -> List[Tuple[DataLoader, DataLoader]]:
+	) -> List[Tuple[DataLoader, DataLoader]] | List[Tuple[DataLoader, bool]]:
 		"""
 		Creates a list of train and test loaders that can be used to train as many shadow models as the list is long
 		:param all_train_loaders: the train loaders from which the new train and test loaders should be created
 		"""
 		if all_train_loaders is None:
-			all_train_loaders, _ = self.get_dataloaders()
+			all_train_loaders, test_loader = self.get_dataloaders()
 
 		# Get the train_loaders to which the attacker has access
 		data_indices = self.get_attack_data_indices()
@@ -81,11 +80,15 @@ class AttackConfig(Config):
 		train_loaders = all_train_loaders[data_indices]
 
 		# Combine the train_loaders into one dataloader
-		datasets = [dataloader.dataset for dataloader in train_loaders]
-		combined_dataset = ConcatDataset(datasets)
+		target = None
+		if self.get_is_targeted_attack():
+			target = self.get_target_member(all_train_loaders, test_loader)
+
+		# Add the target sample to half the dataset later
+		dataset = list(sample for dataloader in train_loaders for sample in dataloader.dataset if sample is not target)
 
 		# Scale the batch size to be relatively equal size to the proportion of the client
-		combined_length = len(combined_dataset)
+		combined_length = len(dataset)
 		average_client_length = combined_length / len(all_train_loaders)
 
 		# Scale and round to nearest power of 2
@@ -93,15 +96,23 @@ class AttackConfig(Config):
 		batch_size = client_batch_size * int(combined_length / 2 / average_client_length)
 		batch_size = pow(2, round(math.log2(abs(batch_size))))
 
-		combined_dataloader = DataLoader(combined_dataset, batch_size=batch_size, shuffle=True)
-
-		# TODO: Split based on whether the attack is online or offline
-		n = self.get_shadow_model_amount()
-		data_loaders = []
-		for _ in range(n):
-			train_loader, test_loader = split_dataloader(combined_dataloader, 0.5)
-			data_loaders.append((train_loader, test_loader))
+		shadow_model_amount = self.get_shadow_model_amount()
+		if self.get_is_targeted_attack():
+			data_loaders = [
+				(DataLoader(dataset, batch_size=batch_size, shuffle=True), False) if i < shadow_model_amount / 2
+				else (DataLoader([*dataset, target], batch_size=batch_size, shuffle=True), True)
+				for i in range(shadow_model_amount)
+			]
+		else:
+			data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+			data_loaders = [split_dataloader(data_loader, 0.5) for _ in range(shadow_model_amount)]
 		return data_loaders
+
+	def get_is_member(self) -> bool:
+		return self.attack.get_is_member()
+
+	def get_is_targeted_attack(self) -> bool:
+		return self.attack.get_is_targeted_attack()
 
 	def get_attack_dataset_path(self) -> str:
 		dataset = self.get_dataset_name()
@@ -128,8 +139,8 @@ class AttackConfig(Config):
 	def get_shadow_model_amount(self):
 		return self.attack.get_shadow_model_amount()
 
-	def get_target_member(self) -> int:
-		return self.attack.get_target_member()
+	def get_target_member(self, train_loaders: List[DataLoader], test_loader: DataLoader) -> tuple:
+		return self.attack.get_target_member(train_loaders, test_loader)
 
 	def get_model_aggregate_indices(self, capture_output_directory: str = "") -> List[int]:
 		return self.attack.get_model_aggregate_indices(self.get_global_rounds(), capture_output_directory)
@@ -210,13 +221,3 @@ class AttackConfig(Config):
 
 			client_updates[key] = np_arrays
 		return client_updates
-
-	def is_target_member(self) -> bool:
-		return self.attack.is_target_member()
-
-	def set_target_member(self) -> None:
-		# Get the dataloaders
-		train_loaders, test_loader = self.get_dataloaders()
-
-		# Set the target member at the attack object
-		self.attack.set_target_member(train_loaders, test_loader)

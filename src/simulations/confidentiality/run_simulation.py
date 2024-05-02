@@ -168,9 +168,6 @@ def test_attack_model(criterion: nn.Module, attack_model: nn.Module, data_loader
 
 
 def get_attack_dataset(config: AttackConfig) -> DataLoader:
-	# Get the data split to train the several models
-	data_loaders = config.get_attack_data_loaders()
-
 	# Construct and cache the shadow model and attacking dataset separately as their configuration do not relate
 	attack_dataset_cache = config.get_attack_dataset_path()
 	if os.path.exists(attack_dataset_cache):
@@ -185,6 +182,9 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 		with open(shadow_models_cache, "rb") as f:
 			shadow_models = pickle.load(f)
 	else:
+		# Get the data split to train the several models
+		data_loaders = config.get_attack_data_loaders()
+
 		# Train all the shadow models for the dataloaders
 		shadow_models = []
 		for i, (train_loader, test_loader) in enumerate(data_loaders):
@@ -200,11 +200,14 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 	# Generate the dataset on which to train the attack model
 	dataset = []
 	for parameters, train_loader, test_loader in tqdm(shadow_models):
-		for data, target in train_loader.dataset:
-			dataset.append((parameters, data, target, 1))
+		if config.get_is_targeted_attack():
+			dataset.append((parameters, test_loader))
+		else:
+			for data, target in train_loader.dataset:
+				dataset.append((parameters, data, target, 1))
 
-		for data, target in test_loader.dataset:
-			dataset.append((parameters, data, target, 0))
+			for data, target in test_loader.dataset:
+				dataset.append((parameters, data, target, 0))
 
 	# Create and cache the dataloader
 	batch_size = config.get_attack_batch_size()
