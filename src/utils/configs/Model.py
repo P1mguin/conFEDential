@@ -36,7 +36,9 @@ class Model:
 				model_layers.append(layer)
 			self.model = get_net_class_from_layers(model_layers)
 		elif hub is not None:
-			self.model = lambda: torch.hub.load(**hub)
+			self.repo = hub["repo_or_dir"]
+			self.model_name = hub["model"]
+			self.model = lambda: torch.load(self.get_cache_path())
 
 	def __str__(self) -> str:
 		result = "Model"
@@ -60,6 +62,9 @@ class Model:
 		:param config: the configuration dictionary
 		"""
 		return Model(**config)
+
+	def get_cache_path(self) -> str:
+		return f".cache/models/{self.repo.replace('/', '')}_{self.model_name}.pth"
 
 	def get_class_count(self) -> int:
 		"""
