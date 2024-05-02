@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --partition=main
 #SBATCH --mail-type=BEGIN,END
-#SBATCH --ntasks=1
+#SBATCH --gres=gpu:1
+#SBATCH -c 8
+#SBATCH --mem=16G
 #SBATCH --output hpc_runs/slurm_outputs/performance_simulation/mnist/learning_method/scaffold/slurm-%j.out
-#SBATCH --gpus-per-task 1
-#SBATCH --cpus-per-task 8
 
 
 # Show node in output file

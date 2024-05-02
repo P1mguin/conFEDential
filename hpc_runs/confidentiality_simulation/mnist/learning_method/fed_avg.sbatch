@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --partition=main
 #SBATCH --mail-type=BEGIN,END
-#SBATCH --output hpc_runs/slurm_outputs/performance_simulation/mnist/slurm-%j.out
 #SBATCH --gres=gpu:1
 #SBATCH -c 8
 #SBATCH --mem=16G
+#SBATCH --output hpc_runs/slurm_outputs/confidentiality_simulation/mnist/learning_method/fed_avg/slurm-%j.out
 
 # Show node in output file
 hostname
