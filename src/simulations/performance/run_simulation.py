@@ -1,8 +1,6 @@
 import os
 import sys
 
-from src import training
-
 # Keep at top, so cluster knows which directory to work in
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
@@ -195,7 +193,6 @@ def run_simulation(
 
 
 def main() -> None:
-	log(INFO, training.DEVICE)
 	args = parser.parse_args()
 
 	client_resources = {
