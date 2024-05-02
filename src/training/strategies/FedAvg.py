@@ -1,7 +1,8 @@
+from logging import INFO
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import torch
-from flwr.common import FitRes, ndarrays_to_parameters, Parameters, parameters_to_ndarrays
+from flwr.common import FitRes, log, ndarrays_to_parameters, Parameters, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 from numpy import typing as npt
 from torch import nn as nn
@@ -49,6 +50,7 @@ class FedAvg(Strategy):
 			config: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		# Get and set training configuration
+		log(INFO, training.DEVICE)
 		net = run_config.get_model().to(training.DEVICE)
 		if parameters is not None:
 			training.set_weights(net, parameters)
