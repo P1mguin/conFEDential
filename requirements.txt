@@ -119,6 +119,7 @@ tensorflow-io-gcs-filesystem==0.36.0
 termcolor==2.4.0
 threadpoolctl==3.4.0
 torch==2.2.1
+torchvision==0.18.0
 tqdm==4.66.2
 traitlets==5.14.2
 triton==2.2.0
