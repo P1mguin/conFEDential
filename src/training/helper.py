@@ -1,13 +1,10 @@
 from collections import OrderedDict
-from logging import INFO
 from typing import List
 
 import numpy.typing as npt
 import torch
 import torch.nn as nn
-from flwr.common import log
 
-log(INFO, torch.cuda.is_available())
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
