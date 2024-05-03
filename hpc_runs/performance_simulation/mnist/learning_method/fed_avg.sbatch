@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --partition=main
 #SBATCH --mail-type=FAIL,END
-#SBATCH --gres=gpu:1
-#SBATCH -c 8
-#SBATCH --mem=16G
+#SBATCH --ntasks=1
+#SBATCH --gpus-per-task 1
+#SBATCH --cpus-per-task 8
 #SBATCH --output hpc_runs/slurm_outputs/performance_simulation/mnist/learning_method/fed_avg/slurm-%j.out
 
 # Show node in output file

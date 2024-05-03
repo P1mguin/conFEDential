@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=main
 #SBATCH --mail-type=FAIL,END
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks=1
 #SBATCH -c 8
 #SBATCH --mem=16G
 #SBATCH --output hpc_runs/slurm_outputs/performance_simulation/cifar100/fed_avg/slurm-%j.out
