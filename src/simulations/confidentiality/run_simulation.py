@@ -175,8 +175,7 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 			dataloader = pickle.load(f)
 		return dataloader
 
-	shadow_model_amount = config.get_shadow_model_amount()
-	shadow_models_cache = f".shadow_models/{'/'.join(config.get_output_capture_directory_path().split('/')[1:])[:-1]}/{shadow_model_amount}.pkl"
+	shadow_models_cache = config.get_shadow_model_cache_path()
 	if os.path.exists(shadow_models_cache):
 		# Load the data from the cache
 		with open(shadow_models_cache, "rb") as f:

@@ -37,6 +37,17 @@ class AttackModel:
 		self.gradient_components = None
 		self.encoder_component = None
 
+	def __str__(self):
+		result = "AttackModel"
+		result += "\n\tfcn:"
+		result += f"\n\t\t{self.raw_fcn}"
+		result += "\n\tencoder:"
+		result += f"\n\t\t{self.raw_encoder}"
+		result += "\n\tcnn:"
+		result += f"\n\t\t{self.raw_cnn}"
+		return result
+
+
 	@staticmethod
 	def from_dict(config: dict):
 		return AttackModel(**config)

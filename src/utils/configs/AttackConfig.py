@@ -118,9 +118,27 @@ class AttackConfig(Config):
 		dataset = self.get_dataset_name()
 		model = self.get_model_name()
 		optimizer = self.get_optimizer_name()
-		configuration_string = f"{self.simulation}\n{self.dataset}\n{self.model}\n{self.attack}"
+
+		# The attack dataset relies on the shadow models and the attack, so it relies on the entire configuration
+		configuration_string = str(self)
 		config_hash = hashlib.sha256(configuration_string.encode()).hexdigest()
 		path = f".attack_dataset/{dataset}/{model}/{optimizer}/{config_hash}.pkl"
+		return path
+
+	def get_shadow_model_cache_path(self):
+		dataset = self.get_dataset_name()
+		model = self.get_model_name()
+		optimizer = self.get_optimizer_name()
+
+		# The shadow model relies on the input data, the target model, the learning algorithm,
+		# the data access, the update access, the shadow model amount and whether the attack is targeted
+		configuration_string = f"{self.simulation}\n{self.dataset}\n{self.model}"
+		configuration_string += f"\n{self.attack.get_data_access_type()}"
+		configuration_string += f"\n{self.attack.get_update_access_type()}"
+		configuration_string += f"\n{self.attack.get_shadow_model_amount()}"
+		configuration_string += f"\n{self.attack.get_is_targeted_attack()}"
+		config_hash = hashlib.sha256(configuration_string.encode()).hexdigest()
+		path = f".shadow_models/{dataset}/{model}/{optimizer}/{config_hash}.pkl"
 		return path
 
 	def get_attack_data_indices(self) -> List[int]:

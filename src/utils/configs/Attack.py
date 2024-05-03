@@ -64,15 +64,17 @@ class Attack:
 		result = "Attack"
 		result += f"\n\tdata_access_type: {self.data_access_type}"
 		result += f"\n\tupdate_access_type: {self.update_access_type}"
-		result += f"\n\tshadow_model_amount: {self.shadow_model_amount}"
+		result += f"\n\ttarget_attack: {self.targeted_attack}"
+		result += f"\n\tshadow_model_amount: {self.get_shadow_model_amount()}"
 		result += "\n\t{}".format('\n\t'.join(str(self.simulation).split('\n')))
+		result += "\n\t{}".format('\n\t'.join(str(self.attack_model).split('\n')))
 		return result
 
 	def __repr__(self):
 		result = "Attack("
 		result += f"data_access_type={self.data_access_type}, "
 		result += f"update_access_type={self.update_access_type}, "
-		result += f"shadow_model_amount={self.shadow_model_amount}"
+		result += f"shadow_model_amount={self.get_shadow_model_amount()}"
 		result += f"{repr(self.simulation)}, "
 		result += ")"
 		return result
@@ -158,3 +160,9 @@ class Attack:
 
 	def get_shadow_model_amount(self):
 		return self.shadow_model_amount
+
+	def get_data_access_type(self) -> DataAccessType:
+		return self.data_access_type
+
+	def get_update_access_type(self) -> UpdateAccessType:
+		return self.update_access_type
