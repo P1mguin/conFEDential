@@ -168,7 +168,7 @@ def run_simulation(
 			"working_dir": PROJECT_DIRECTORY,
 			"excludes": [".git", "hpc_runs"]
 		},
-		"num_cpus": 1,
+		"num_cpus": 64,
 	}
 
 	# Cluster admin wants to use local instead of tmp
