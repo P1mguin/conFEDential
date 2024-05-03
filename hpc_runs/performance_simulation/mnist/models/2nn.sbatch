@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=main
-#SBATCH --mail-type=BEGIN,END
+#SBATCH --mail-type=FAIL,END
 #SBATCH --gres=gpu:1
 #SBATCH -c 8
 #SBATCH --mem=16G
