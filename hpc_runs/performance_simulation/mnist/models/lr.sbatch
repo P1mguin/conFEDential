@@ -4,6 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-task 1
 #SBATCH --cpus-per-task 8
+#SBATCH --mem=16G
 #SBATCH --output hpc_runs/slurm_outputs/performance_simulation/mnist/models/lr/slurm-%j.out
 
 # Show node in output file

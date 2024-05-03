@@ -1,8 +1,9 @@
 #!/bin/bash
 #SBATCH --partition=main
-#SBATCH --mail-type=BEGIN,END
-#SBATCH --gres=gpu:1
-#SBATCH -c 8
+#SBATCH --mail-type=FAIL,END
+#SBATCH --ntasks=1
+#SBATCH --gpus-per-task 1
+#SBATCH --cpus-per-task 8
 #SBATCH --mem=16G
 #SBATCH --output hpc_runs/slurm_outputs/confidentiality_simulation/fed_avg/cifar10/slurm-%j.out
 

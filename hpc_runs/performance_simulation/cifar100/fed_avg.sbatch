@@ -4,6 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH -c 8
 #SBATCH --mem=16G
+#SBATCH --mem=16G
 #SBATCH --output hpc_runs/slurm_outputs/performance_simulation/cifar100/fed_avg/slurm-%j.out
 
 # Show node in output file
