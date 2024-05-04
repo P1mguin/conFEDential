@@ -1,16 +1,8 @@
-import os
-import sys
-
-from tqdm import tqdm
-
-# Keep at top, so cluster knows which directory to work in
-PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
-sys.path.append(PROJECT_DIRECTORY)
-
 import argparse
 import os
 import pickle
 import random
+import sys
 from logging import INFO
 from pathlib import Path
 from typing import List, Tuple
@@ -22,6 +14,11 @@ import torch.nn as nn
 import wandb
 from flwr.common.logger import log
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+# Keep at top, so cluster knows which directory to work in
+PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
+sys.path.append(PROJECT_DIRECTORY)
 
 from src import training
 from src.simulations.performance.run_simulation import run_simulation

@@ -1,12 +1,7 @@
-import os
-import sys
-
-# Keep at top, so cluster knows which directory to work in
-PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
-sys.path.append(PROJECT_DIRECTORY)
-
 import argparse
+import os
 import random
+import sys
 from logging import INFO
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
@@ -19,6 +14,10 @@ import wandb
 from flwr.common import Scalar
 from flwr.common.logger import log
 from torch.utils.data import DataLoader
+
+# Keep at top, so cluster knows which directory to work in
+PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
+sys.path.append(PROJECT_DIRECTORY)
 
 import src.server_aggregation_strategies as agg
 from src.training.strategies.Strategy import Strategy

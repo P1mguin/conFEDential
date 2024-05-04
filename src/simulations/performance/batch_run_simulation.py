@@ -1,19 +1,18 @@
+import argparse
 import os
+import random
 import sys
+from logging import INFO
+from pathlib import Path
+
+import numpy as np
+import torch
+from flwr.common.logger import log
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
 
-import argparse
-import random
-from pathlib import Path
-from logging import INFO
-
-from flwr.common.logger import log
-import numpy as np
-import torch
 import src.utils.batch_config as batch_config
-
 from src.simulations.performance.run_simulation import run_simulation
 
 torch.manual_seed(78)
