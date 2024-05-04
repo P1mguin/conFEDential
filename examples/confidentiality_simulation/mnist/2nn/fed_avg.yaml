@@ -1,0 +1,95 @@
+attack:
+  data_access_type: all
+  update_access_type: server
+  shadow_model_amount: 128 # Carlini 2022 Membership Inference Attacks from First Principles
+  attack_model:
+    fcn:
+      - type: Dropout
+        p: 0.2
+      - type: Linear
+        out_features: 128
+      - type: ReLU
+      - type: Dropout
+        p: 0.2
+      - type: Linear
+        in_features: 128
+        out_features: 64
+      - type: ReLU
+    encoder:
+      - type: Dropout
+        p: 0.2
+      - type: Linear
+        out_features: 256
+      - type: ReLU
+      - type: Dropout
+        p: 0.2
+      - type: Linear
+        in_features: 256
+        out_features: 128
+      - type: ReLU
+      - type: Dropout
+        p: 0.2
+      - type: Linear
+        in_features: 128
+        out_features: 64
+      - type: ReLU
+      - type: Dropout
+        p: 0.2
+      - type: Linear
+        in_features: 64
+        out_features: 1
+      - type: ReLU
+      - type: Sigmoid
+    cnn:
+      - type: Dropout
+        p: 0.2
+      - type: Conv3d
+        in_channels: 1
+        out_channels: 1000
+        kernel_size:
+          - 1
+          - 1
+        stride: 1
+      - type: ReLU
+  simulation:
+    batch_size: 64 # 64 and 128 are most efficient
+    optimizer:
+      optimizer_name: RMSprop
+simulation:
+  batch_size: 8
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 10
+  local_rounds: 20
+  optimizer:
+    optimizer_name: FedAvg
+    lr: 0.25
+dataset:
+  name: MNIST
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": element["image"].reshape(784) / 255.,
+        "y": element["label"]
+      }
+model:
+  name: 2NN
+  criterion: CrossEntropyLoss
+  layers:
+    - type: Linear
+      in_features: 784
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 200
+    - type: ReLU
+    - type: Linear
+      in_features: 200
+      out_features: 10
+    - type: Softmax
+      dim: -1

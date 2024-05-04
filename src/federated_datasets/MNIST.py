@@ -4,7 +4,7 @@ from typing import Callable, List, Tuple
 
 from datasets import load_dataset
 from fedartml import SplitAsFederatedData
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 from src.federated_datasets.Dataset import Dataset
 
@@ -15,8 +15,8 @@ class MNIST(Dataset):
 			client_count: int,
 			batch_size: int,
 			preprocess_fn: Callable[[dict], dict],
-			alpha: float = 1.,
-			percent_non_iid: float = 0.,
+			alpha: float | None = None,
+			percent_non_iid: float | None = None,
 			seed: int = 78,
 			function_hash: str = "",
 	) -> Tuple[List[DataLoader], DataLoader]:
@@ -59,20 +59,27 @@ class MNIST(Dataset):
 		train_dataset = train_dataset.map(preprocess_fn)
 		test_dataset = test_dataset.map(preprocess_fn)
 
-		# Split the data non-iid
-		federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
-			image_list=train_dataset["x"],
-			label_list=train_dataset["y"],
-			num_clients=client_count,
-			method="dirichlet",
-			alpha=alpha,
-			percent_noniid=percent_non_iid
-		)
+		# If filled, split the data non-iid
+		if alpha is not None and percent_non_iid is not None:
+			federated_train_data, _, _, _ = SplitAsFederatedData(random_state=seed).create_clients(
+				image_list=train_dataset["x"],
+				label_list=train_dataset["y"],
+				num_clients=client_count,
+				method="dirichlet",
+				alpha=alpha,
+				percent_noniid=percent_non_iid
+			)
+			clients = federated_train_data["with_class_completion"].values()
+		else:
+			lengths = [len(train_dataset) // client_count] * client_count
+			lengths[0] += len(train_dataset) % client_count
+			subsets = random_split(train_dataset, lengths)
+			clients = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
 
 		# Use with class completion so every client has at least one label of each class
 		# Create the train and test loaders and return
 		train_loaders = []
-		for client_data in federated_train_data["with_class_completion"].values():
+		for client_data in clients:
 			# Batch_size -1 corresponds to infinity
 			if batch_size == -1:
 				batch_size = len(client_data)

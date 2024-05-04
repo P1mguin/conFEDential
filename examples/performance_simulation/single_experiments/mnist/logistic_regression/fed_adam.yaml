@@ -1,25 +1,23 @@
+# Optimal 0.9147
 simulation:
   batch_size: 1
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  local_rounds: 20
+  local_rounds: 8
   optimizer:
     optimizer_name: FedAdam
     local:
-      lr: 0.2
+      lr: 0.1
     global:
-      lr: 0.001
+      lr: 0.1
       betas:
         - 0.9
         - 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.9999
 dataset:
   name: MNIST
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn: |
     def preprocess_fn(element):
       return {

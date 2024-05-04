@@ -95,14 +95,15 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 	# Train the attack model until convergence
 	log(INFO, "Constructed dataset, starting training")
 	previous_loss, previous_accuracy = test_attack_model(criterion, attack_model, validation_loader)
-	log(INFO, "Initial test performance: Loss: {previous_loss}, Accuracy: {previous_accuracy}")
+	log(INFO, f"Initial test performance: Loss: {previous_loss}, Accuracy: {previous_accuracy}")
 
 	i = -1
 	try:
 		while True:
+			attack_model.train()
 			i += 1
 			correct, total, train_loss = 0, 0, 0.
-			for parameters, data, target, is_member in train_loader:
+			for parameters, data, target, is_member in tqdm(train_loader):
 				data, target, is_member = data.to(device), target.to(device), is_member.to(device)
 				optimizer.zero_grad()
 				output = attack_model(parameters, data, target)
@@ -138,7 +139,8 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 				break
 
 			previous_loss, previous_accuracy = validation_loss, validation_accuracy
-	except Exception as _:
+	except Exception as e:
+		print(e)
 		wandb.finish(exit_code=1)
 
 	wandb.finish()
@@ -150,7 +152,7 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 def test_attack_model(criterion: nn.Module, attack_model: nn.Module, data_loader: DataLoader) -> Tuple[float, float]:
 	attack_model.eval()
 	correct, total, loss = 0, 0, 0.
-	for parameters, data, target, is_member in data_loader:
+	for parameters, data, target, is_member in tqdm(data_loader):
 		data, target, is_member = data.to(device), target.to(device), is_member.to(device)
 		output = attack_model(parameters, data, target)
 

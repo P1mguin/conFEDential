@@ -1,0 +1,99 @@
+simulation:
+  batch_size:
+    steps: [ 8, 32, 2 ]
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 50
+  local_rounds:
+    steps: [ 50, 20, 20 ]
+  optimizer:
+    optimizer_name: FedNAG
+    lr:
+      steps: [ 0.01, 0.05, 0.1 ]
+    momentum:
+      steps: [ 0.95, 0.95, 0.85 ]
+dataset:
+  name: MNIST
+  preprocess_fn:
+    steps:
+      - >
+        def preprocess_fn(element):
+          return {
+            "x": element["image"].reshape(784) / 255.,
+            "y": element["label"]
+          }
+      - >
+        def preprocess_fn(element):
+          return {
+            "x": element["image"].reshape(1, 28, 28) / 255.,
+            "y": element["label"]
+          }
+      - >
+        def preprocess_fn(element):
+          return {
+            "x": element["image"].reshape(784) / 255.,
+            "y": element["label"]
+          }
+model:
+  steps:
+    - name: 2NN
+      criterion: CrossEntropyLoss
+      layers:
+        - type: Linear
+          in_features: 784
+          out_features: 200
+        - type: ReLU
+        - type: Linear
+          in_features: 200
+          out_features: 200
+        - type: ReLU
+        - type: Linear
+          in_features: 200
+          out_features: 200
+        - type: ReLU
+        - type: Linear
+          in_features: 200
+          out_features: 10
+        - type: Softmax
+          dim: -1
+    - name: CNN
+      criterion: CrossEntropyLoss
+      layers:
+        - type: Conv2d
+          in_channels: 1
+          out_channels: 32
+          kernel_size: 5
+          padding: 2
+        - type: ReLU
+        - type: MaxPool2d
+          kernel_size: 2
+          stride: 2
+        - type: Conv2d
+          in_channels: 32
+          out_channels: 64
+          kernel_size: 5
+          padding: 2
+        - type: ReLU
+        - type: MaxPool2d
+          kernel_size: 2
+          stride: 2
+        - type: Flatten
+          start_dim: 1
+          end_dim: -1
+        - type: Linear
+          in_features: 3136
+          out_features: 512
+        - type: ReLU
+        - type: Linear
+          in_features: 512
+          out_features: 10
+        - type: Softmax
+          dim: -1
+    - name: Logistic Regression
+      criterion: CrossEntropyLoss
+      layers:
+        - type: Linear
+          in_features: 784
+          out_features: 10
+        - type: Softmax
+          dim: -1

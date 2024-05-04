@@ -1,0 +1,11 @@
+ctit088
+2024-04-30 16:52:47.175933: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-04-30 16:52:47.980433: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-04-30 16:52:49.729078: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-04-30 16:54:02,064 | run_simulation.py:254 | Finished training, starting attack simulation
+INFO flwr 2024-04-30 16:54:20,496 | run_simulation.py:79 | Constructing attacker model dataset
+INFO flwr 2024-04-30 16:54:21,659 | run_simulation.py:189 | Training shadow model 0
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit088: error: *** STEP 283493.0 ON ctit088 CANCELLED AT 2024-04-30T16:55:13 ***
+slurmstepd-ctit088: error: *** JOB 283493 ON ctit088 CANCELLED AT 2024-04-30T16:55:13 ***

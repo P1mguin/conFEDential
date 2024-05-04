@@ -1,15 +1,15 @@
 simulation:
-  batch_size: 8
+  batch_size: -1
   client_count: 100
   fraction_fit: 0.1
   global_rounds: 10
-  local_rounds: 20
+  local_rounds: 50
   optimizer:
     optimizer_name: SCAFFOLD
     local:
-      lr: 0.2
+      lr: 0.3
     global:
-      lr: 0.2
+      lr: 0.8
 dataset:
   name: MNIST
   splitter:

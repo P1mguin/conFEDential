@@ -26,13 +26,10 @@ from src.utils.configs import Config
 
 # Set seeds and set hugging face in offline mode so that cluster nodes do not attempt internet connection
 # which they do not have
-os.environ["HF_DATASETS_OFFLINE"] = "1"
 torch.manual_seed(78)
 random.seed(78)
 np.random.seed(78)
-torch.autograd.set_detect_anomaly(True)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description="Running conFEDential performance simulation")
 
 parser.add_argument(

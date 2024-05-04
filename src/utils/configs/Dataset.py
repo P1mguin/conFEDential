@@ -14,15 +14,20 @@ class Dataset:
 	A class that represents the dataset on which the experiment will be performed.
 	name: the name of the dataset loaded from the Hugging Face library. Before calling get_dataloaders, this dataset
 	should be downloaded in .cache
-	splitter: a dictionary that should contain alpha and percent_non_idd. These values are used to dirichlet split
-	the data using FedArtML.
+	splitter: an optional dictionary that should contain alpha and percent_non_idd. These values are used to dirichlet
+	split the data using FedArtML.
 	preprocess_fn: a function that is applied to each element before it is returned, represented as a string.
 	"""
 
-	def __init__(self, name: str, splitter: dict, preprocess_fn: str) -> None:
+	def __init__(self, name: str, preprocess_fn: str, splitter: dict | None=None) -> None:
 		self.name = name
-		self.alpha = float(splitter['alpha'])
-		self.percent_non_iid = float(splitter['percent_non_iid'])
+		self.has_splitter = splitter is not None
+		if self.has_splitter:
+			self.alpha = float(splitter['alpha'])
+			self.percent_non_iid = float(splitter['percent_non_iid'])
+		else:
+			self.alpha = None
+			self.percent_non_iid = None
 		self.raw_preprocess_fn = preprocess_fn
 		self.preprocess_fn = utils.load_func_from_function_string(preprocess_fn, "preprocess_fn")
 
@@ -30,7 +35,8 @@ class Dataset:
 		result = "Dataset"
 		result += f"\n\tname: {self.name}"
 		result += "\n\tpreprocess_fn:\n\t\t{}".format("\n\t\t".join(self.raw_preprocess_fn.split("\n")))
-		result += f"\n\tsplitter:\n\t\talpha: {self.alpha}\n\t\tpercent_non_iid: {self.percent_non_iid}"
+		if self.has_splitter:
+			result += f"\n\tsplitter:\n\t\talpha: {self.alpha}\n\t\tpercent_non_iid: {self.percent_non_iid}"
 		return result
 
 	def __repr__(self) -> str:

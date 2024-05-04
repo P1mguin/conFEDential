@@ -12,9 +12,6 @@ simulation:
     momentum: 0.85 # Empirical, Yang 2022 Federated Learning with Nesterov accelerated gradient
 dataset:
   name: MNIST
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn: |
     def preprocess_fn(element):
       return {

@@ -3,18 +3,15 @@ simulation:
     steps: [ 8, 8, 1 ]
   client_count: 100
   fraction_fit: 0.1
-  global_rounds: 10
+  global_rounds: 50
   local_rounds:
     steps: [ 20, 20, 20 ]
   optimizer:
-    optimizer_name: SGD
+    optimizer_name: FedAvg
     lr:
       steps: [ 0.25, 0.2, 0.1 ]
 dataset:
   name: MNIST
-  splitter:
-    alpha: 1
-    percent_non_iid: 25
   preprocess_fn:
     steps:
       - >

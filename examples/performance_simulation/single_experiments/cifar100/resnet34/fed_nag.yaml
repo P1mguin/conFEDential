@@ -1,0 +1,25 @@
+simulation:
+  batch_size: 32 # Yang et al Federated Learning with Nesterov Accelerated Gradient
+  client_count: 100
+  fraction_fit: 0.1
+  global_rounds: 10 # Yang et al Federated Learning with Nesterov Accelerated Gradient
+  local_rounds: 20 # Yang et al Federated Learning with Nesterov Accelerated Gradient
+  optimizer:
+    optimizer_name: FedNAG
+    lr: 0.05 # Yang et al Federated Learning with Nesterov Accelerated Gradient
+    momentum: 0.95
+dataset:
+  name: CIFAR100
+  preprocess_fn: |
+    def preprocess_fn(element):
+      return {
+        "x": element["img"] / 255.,
+        "y": element["fine_label"]
+      }
+model:
+  name: ResNet34
+  criterion: CrossEntropyLoss
+  hub:
+    repo_or_dir: 'pytorch/vision:v0.10.0'
+    model: 'resnet34'
+    pretrained: False
