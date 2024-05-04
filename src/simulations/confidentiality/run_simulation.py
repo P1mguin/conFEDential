@@ -13,9 +13,10 @@ import pickle
 import random
 from logging import INFO
 from pathlib import Path
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
+import numpy.typing as npt
 import torch.autograd
 import torch.nn as nn
 import wandb
@@ -69,20 +70,50 @@ parser.add_argument(
 )
 
 
-def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
-	# Get the information that we can use in the attack
-	# TODO: Use in attack
-	simulation_aggregates = config.get_model_aggregates()
-	client_updates = config.get_client_updates()
+def online_attack(
+		config: AttackConfig,
+		args: argparse.Namespace,
+		target_parameters: List[npt.NDArray],
+		attack_loader
+):
+	# Get the target
+	target_sample, target_label = config.get_target_member()
+	target_sample, target_label = torch.tensor(target_sample).to(device), torch.tensor(target_label).to(device)
+	target_model = config.get_model().to(training.DEVICE)
+	training.set_weights(target_model, target_parameters)
 
-	# Construct the attacker model based on the config
-	log(INFO, "Constructing attacker model dataset")
-	attack_loader = get_attack_dataset(config)
+	criterion = config.get_criterion()
 
-	# 80 percent train, 10 percent test, 10 percent validation
-	train_loader, test_loader = split_dataloader(attack_loader, 0.9)
-	train_loader, validation_loader = split_dataloader(train_loader, 0.9)
+	outputs = {}
+	for parameters, is_member in attack_loader:
+		# Parameters are batched per 1, so squeeze each layer
+		parameters = [param[0] for param in parameters]
 
+		model = config.get_model().to(training.DEVICE)
+		training.set_weights(model, parameters)
+
+		optimizer = config.get_optimizer(model.parameters())
+		optimizer.zero_grad()
+		output = model(target_sample)
+		loss = criterion(output, target_label)
+		loss.backward()
+		gradients = [layer.grad for layer in model.parameters()]
+
+
+
+		pass
+
+
+	pass
+
+
+def offline_attack(
+		config: AttackConfig,
+		args: argparse.Namespace,
+		train_loader: DataLoader,
+		validation_loader: DataLoader,
+		test_loader: DataLoader
+):
 	# Take the model, BCELoss since we work with one probability, and the optimizer
 	attack_model = config.get_attack_model().to(training.DEVICE)
 	criterion = torch.nn.BCELoss()
@@ -144,6 +175,27 @@ def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
 		wandb.finish(exit_code=1)
 
 	wandb.finish()
+
+
+def attack_simulation(config: AttackConfig, args: argparse.Namespace) -> None:
+	# Get the information that we can use in the attack
+	# TODO: Use in attack
+	simulation_aggregates = config.get_model_aggregates()
+	client_updates = config.get_client_updates()
+
+	# Construct the attacker model based on the config
+	log(INFO, "Constructing attacker model dataset")
+	attack_loader = get_attack_dataset(config)
+	target_model = [layer[-1] for layer in simulation_aggregates["parameters"]]
+
+	if config.get_is_targeted_attack():
+		online_attack(config, args, target_model, attack_loader)
+	else:
+		# 80 percent train, 10 percent test, 10 percent validation
+		train_loader, test_loader = split_dataloader(attack_loader, 0.9)
+		train_loader, validation_loader = split_dataloader(train_loader, 0.9)
+
+		offline_attack(config, args, train_loader, validation_loader, test_loader)
 
 	# Test the model
 	return None
@@ -209,7 +261,7 @@ def get_attack_dataset(config: AttackConfig) -> DataLoader:
 				dataset.append((parameters, data, target, 0))
 
 	# Create and cache the dataloader
-	batch_size = config.get_attack_batch_size()
+	batch_size = config.get_attack_batch_size() if not config.get_is_targeted_attack() else 1
 	dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 	os.makedirs("/".join(attack_dataset_cache.split("/")[:-1]), exist_ok=True)

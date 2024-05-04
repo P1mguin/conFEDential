@@ -82,7 +82,7 @@ class AttackConfig(Config):
 		# Combine the train_loaders into one dataloader
 		target = None
 		if self.get_is_targeted_attack():
-			target = self.get_target_member(all_train_loaders, test_loader)
+			target = self.get_target_member()
 
 		# Add the target sample to half the dataset later
 		dataset = list(sample for dataloader in train_loaders for sample in dataloader.dataset if sample is not target)
@@ -157,7 +157,8 @@ class AttackConfig(Config):
 	def get_shadow_model_amount(self):
 		return self.attack.get_shadow_model_amount()
 
-	def get_target_member(self, train_loaders: List[DataLoader], test_loader: DataLoader) -> tuple:
+	def get_target_member(self) -> tuple:
+		train_loaders, test_loader = self.get_dataloaders()
 		return self.attack.get_target_member(train_loaders, test_loader)
 
 	def get_model_aggregate_indices(self, capture_output_directory: str = "") -> List[int]:

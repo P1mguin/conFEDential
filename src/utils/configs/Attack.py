@@ -109,7 +109,11 @@ class Attack:
 
 		return client_participation_indices
 
-	def get_target_member(self, train_loaders: List[DataLoader], test_loader: DataLoader) -> tuple:
+	def get_target_member(
+			self,
+			train_loaders: List[DataLoader] | None = None,
+			test_loader: DataLoader | None = None
+	) -> tuple:
 		if self.target_member is not None:
 			return self.target_member
 
