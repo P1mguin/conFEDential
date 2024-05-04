@@ -2,6 +2,7 @@ attack:
   data_access_type: all
   update_access_type: server
   shadow_model_amount: 128 # Carlini 2022 Membership Inference Attacks from First Principles
+  targeted_attack: True
   attack_model:
     fcn:
       - type: Dropout

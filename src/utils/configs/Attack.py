@@ -37,13 +37,14 @@ class Attack:
 			data_access_type: str,
 			update_access_type: str,
 			shadow_model_amount: int,
+			targeted_attack: bool,
 			attack_model: AttackModel,
 			simulation: Simulation
 	):
 		self.data_access_type = DataAccessType[data_access_type.upper()]
 		self.update_access_type = UpdateAccessType[update_access_type.upper()]
 		self.shadow_model_amount = shadow_model_amount
-		self.target_member = None
+		self.targeted_attack = targeted_attack
 		self.attack_model = attack_model
 		self.simulation = simulation
 
@@ -55,21 +56,25 @@ class Attack:
 			self.attacker_id = None
 
 		# Determine whether the item is in the dataset
-		self.is_member = bool(random.getrandbits(1))
+		if self.targeted_attack:
+			self.target_member = None
+			self.is_member = bool(random.getrandbits(1))
 
 	def __str__(self):
 		result = "Attack"
 		result += f"\n\tdata_access_type: {self.data_access_type}"
 		result += f"\n\tupdate_access_type: {self.update_access_type}"
-		result += f"\n\tshadow_model_amount: {self.shadow_model_amount}"
+		result += f"\n\ttarget_attack: {self.targeted_attack}"
+		result += f"\n\tshadow_model_amount: {self.get_shadow_model_amount()}"
 		result += "\n\t{}".format('\n\t'.join(str(self.simulation).split('\n')))
+		result += "\n\t{}".format('\n\t'.join(str(self.attack_model).split('\n')))
 		return result
 
 	def __repr__(self):
 		result = "Attack("
 		result += f"data_access_type={self.data_access_type}, "
 		result += f"update_access_type={self.update_access_type}, "
-		result += f"shadow_model_amount={self.shadow_model_amount}"
+		result += f"shadow_model_amount={self.get_shadow_model_amount()}"
 		result += f"{repr(self.simulation)}, "
 		result += ")"
 		return result
@@ -104,8 +109,30 @@ class Attack:
 
 		return client_participation_indices
 
-	def get_target_member(self):
+	def get_target_member(
+			self,
+			train_loaders: List[DataLoader] | None = None,
+			test_loader: DataLoader | None = None
+	) -> tuple:
+		if self.target_member is not None:
+			return self.target_member
+
+		if self.is_member:
+			# Get the first item from the second client, since we might assume the first to be the attacker
+			target_member = train_loaders[1].dataset[0]
+		else:
+			# Get the first item from the test loader
+			target_member = test_loader.dataset[0]
+			target_member = (target_member["x"], target_member["y"])
+
+		self.target_member = target_member
 		return self.target_member
+
+	def get_is_targeted_attack(self) -> bool:
+		return self.targeted_attack
+
+	def get_is_member(self) -> bool:
+		return self.is_member
 
 	def get_model_aggregate_indices(self, global_rounds: int, capture_output_directory: str = "") -> List[int]:
 		if (self.update_access_type == UpdateAccessType.SERVER
@@ -135,18 +162,11 @@ class Attack:
 		else:
 			return []
 
-	def is_target_member(self):
-		return self.is_member
-
 	def get_shadow_model_amount(self):
 		return self.shadow_model_amount
 
-	def set_target_member(self, train_loaders: List[DataLoader], test_loader: DataLoader):
-		if self.is_member:
-			# Get the first item from the second client, since we might assume the first to be the attacker
-			target_member = train_loaders[1].dataset[0][0]
-		else:
-			# Get the first item from the test loader
-			target_member = test_loader.dataset[0]["x"]
+	def get_data_access_type(self) -> DataAccessType:
+		return self.data_access_type
 
-		self.target_member = target_member
+	def get_update_access_type(self) -> UpdateAccessType:
+		return self.update_access_type
