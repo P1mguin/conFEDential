@@ -23,7 +23,6 @@ sys.path.append(PROJECT_DIRECTORY)
 from src import training
 from src.simulations.performance.run_simulation import run_simulation
 from src.utils import split_dataloader
-from src.utils.config import Config
 from src.utils.old_configs import AttackConfig
 
 os.environ["HF_DATASETS_OFFLINE"] = "1"
@@ -290,30 +289,23 @@ def main():
 		"num_gpus": args.num_gpus
 	}
 
-	yaml_file_path = str(Path(args.yaml_file).resolve())
-	config = Config.from_yaml_file(yaml_file_path)
-	print(config)
+	config = AttackConfig.from_yaml_file(str(Path(args.yaml_file).resolve()))
+	run_name = args.run_name
+	is_online = args.logging
 
-	print(repr(config))
-	pass
+	capture_output_path = config.get_output_capture_directory_path()
+	if not os.path.exists(capture_output_path):
+		log(INFO, f"Captured parameters not found, running training simulation")
+		run_simulation(
+			config,
+			client_resources,
+			run_name,
+			is_online,
+			is_capturing=True
+		)
 
-	# config = AttackConfig.from_yaml_file(str(Path(args.yaml_file).resolve()))
-	# run_name = args.run_name
-	# is_online = args.logging
-	#
-	# capture_output_path = config.get_output_capture_directory_path()
-	# if not os.path.exists(capture_output_path):
-	# 	log(INFO, f"Captured parameters not found, running training simulation")
-	# 	run_simulation(
-	# 		config,
-	# 		client_resources,
-	# 		run_name,
-	# 		is_online,
-	# 		is_capturing=True
-	# 	)
-	#
-	# log(INFO, "Finished training, starting attack simulation")
-	# attack_simulation(config, args)
+	log(INFO, "Finished training, starting attack simulation")
+	attack_simulation(config, args)
 
 
 if __name__ == '__main__':

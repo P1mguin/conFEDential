@@ -7,9 +7,9 @@ import torch.nn as nn
 import torch.optim
 from torch.utils.data import DataLoader
 
-from src.utils.configs.AttackConfig import AttackConfig
-from src.utils.configs.AttackModel import AttackModel
-from src.utils.configs.Simulation import Simulation
+from src.utils.old_configs.AttackConfig import AttackConfig
+from src.utils.old_configs.AttackModel import AttackModel
+from src.utils.old_configs.Simulation import Simulation
 
 
 class DataAccessType(Enum):

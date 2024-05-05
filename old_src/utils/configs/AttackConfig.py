@@ -14,10 +14,10 @@ import yaml
 from flwr.common import parameters_to_ndarrays
 from torch.utils.data import DataLoader
 
-import src.utils.configs as configs
+import src.utils.old_configs as configs
 from src.utils import split_dataloader
-from src.utils.configs import Attack, Dataset, Model, Simulation
-from src.utils.configs.Config import Config
+from src.utils.old_configs import Attack, Dataset, Model, Simulation
+from src.utils.old_configs.Config import Config
 
 
 class AttackConfig(Config):
@@ -57,7 +57,7 @@ class AttackConfig(Config):
 		the code will likely throw an error if the dictionary is invalid.
 		:param config: the configuration dictionary
 		"""
-		kwargs = {key: getattr(configs, key.capitalize()).from_dict(value) for key, value in config.items()}
+		kwargs = {key: getattr(old_configs, key.capitalize()).from_dict(value) for key, value in config.items()}
 		return AttackConfig(**kwargs)
 
 	def get_attack_batch_size(self) -> int:

@@ -9,7 +9,7 @@ from torch.nn import Module
 
 from src.attacks import AttackNet
 from src.utils import (get_gradient_shapes, get_layer_shapes, get_net_class_from_layers, get_trainable_layers_indices)
-from src.utils.configs import Config
+from src.utils.old_configs import Config
 
 
 class Expand(nn.Module):

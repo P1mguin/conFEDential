@@ -9,8 +9,8 @@ import yaml
 from flwr.common import Parameters
 from torch.utils.data import DataLoader
 
-import src.utils.configs as configs
-from src.utils.configs import Dataset, Model, Simulation
+import src.utils.old_configs as configs
+from src.utils.old_configs import Dataset, Model, Simulation
 
 project_name = "conFEDential"
 
@@ -55,7 +55,7 @@ class Config:
 		the code will likely throw an error if the dictionary is invalid.
 		:param config: the configuration dictionary
 		"""
-		kwargs = {key: getattr(configs, key.capitalize()).from_dict(value) for key, value in config.items()}
+		kwargs = {key: getattr(old_configs, key.capitalize()).from_dict(value) for key, value in config.items()}
 		return Config(**kwargs)
 
 	def get_batch_size(self) -> int:
