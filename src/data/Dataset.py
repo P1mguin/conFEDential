@@ -19,7 +19,7 @@ class Dataset(ABC):
 		"""
 		Checks if a given dataset is downloaded, otherwise throws an error
 		"""
-		if not os.path.isdir(f".cache/{dataset}"):
+		if not os.path.isdir(f".cache/data/{dataset}"):
 			raise FileNotFoundError(
 				f"Was unable to open cache for {dataset}, download it using the command:\npython download_dataset.py --dataset {dataset}")
 		return True
