@@ -7,7 +7,7 @@ import torch
 from fedartml import SplitAsFederatedData
 from torch.utils.data import DataLoader, random_split, TensorDataset
 
-from src.federated_datasets.Dataset import Dataset
+from src.datasets.Dataset import Dataset
 
 
 class Purchase(Dataset):
