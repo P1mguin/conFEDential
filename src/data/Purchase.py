@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.utils.data import random_split, TensorDataset
 
-from src.datasets.Dataset import Dataset
+from src.data.Dataset import Dataset
 
 
 class Purchase(Dataset):
@@ -13,7 +13,7 @@ class Purchase(Dataset):
 		# For documentation see Dataset
 		Dataset.is_data_downloaded("purchase")
 
-		purchase = np.load(".cache/purchase/purchase/purchase100.npz")
+		purchase = np.load(".cache/data/purchase/purchase/purchase100.npz")
 		features = torch.from_numpy(purchase["features"])
 		labels = torch.from_numpy(np.argmax(purchase["labels"], axis=1))
 

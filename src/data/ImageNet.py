@@ -2,7 +2,7 @@ from typing import Tuple
 
 from datasets import load_dataset
 
-from src.datasets.Dataset import Dataset
+from src.data.Dataset import Dataset
 
 
 class ImageNet(Dataset):
@@ -13,7 +13,7 @@ class ImageNet(Dataset):
 		train_dataset, test_dataset = load_dataset(
 			"zh-plus/tiny-imagenet",
 			name="default",
-			cache_dir=".cache",
+			cache_dir=".cache/data",
 			split=["train", "valid"],
 			download_mode="reuse_dataset_if_exists"
 		)

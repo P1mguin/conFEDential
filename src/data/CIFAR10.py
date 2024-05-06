@@ -3,7 +3,7 @@ from typing import List, Tuple
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
-from src.datasets.Dataset import Dataset
+from src.data.Dataset import Dataset
 
 
 class CIFAR10(Dataset):
@@ -14,7 +14,7 @@ class CIFAR10(Dataset):
 		train_dataset, test_dataset = load_dataset(
 			"cifar10",
 			name="plain_text",
-			cache_dir=".cache",
+			cache_dir=".cache/data",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
 		)

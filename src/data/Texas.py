@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.utils.data import random_split, TensorDataset
 
-from src.datasets.Dataset import Dataset
+from src.data.Dataset import Dataset
 
 
 class Texas(Dataset):
@@ -12,7 +12,7 @@ class Texas(Dataset):
 	def load_dataset() -> Tuple[Dataset, Dataset]:
 		Dataset.is_data_downloaded("texas")
 
-		texas = np.load(".cache/texas/texas/texas100.npz")
+		texas = np.load(".cache/data/texas/texas/texas100.npz")
 		features = torch.from_numpy(texas["features"])
 		labels = torch.from_numpy(np.argmax(texas["labels"], axis=1))
 

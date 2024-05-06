@@ -2,7 +2,7 @@ from typing import Tuple
 
 from datasets import load_dataset
 
-from src.datasets.Dataset import Dataset
+from src.data.Dataset import Dataset
 
 
 class MNIST(Dataset):
@@ -13,7 +13,7 @@ class MNIST(Dataset):
 		train_dataset, test_dataset = load_dataset(
 			"mnist",
 			name="mnist",
-			cache_dir=".cache",
+			cache_dir=".cache/data",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
 		)
