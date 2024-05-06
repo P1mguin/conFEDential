@@ -79,8 +79,8 @@ class Strategy(ABC):
 
 		# Disable gradient calculation for testing
 		with torch.no_grad():
-			for data in test_loader:
-				features, labels = data['x'].to(training.DEVICE), data['y'].to(training.DEVICE)
+			for features, labels in test_loader:
+				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
 				outputs = net(features)
 
 				# Accumulate the total loss

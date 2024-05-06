@@ -95,6 +95,14 @@ class Simulation:
 	def fraction_fit(self):
 		return self._federation.fraction_fit
 
+	@property
+	def global_rounds(self):
+		return self._federation.global_rounds
+
+	@property
+	def batch_size(self):
+		return self._data.batch_size
+
 	def get_aggregate_file_path(self) -> str:
 		capture_directory = self.get_capture_directory()
 		aggregate_file_path = f"{capture_directory}aggregate.pkl"
@@ -120,6 +128,38 @@ class Simulation:
 	def get_optimizer(self, parameters):
 		return self._model.get_optimizer(parameters)
 
+	def simulate_federation(
+			self,
+			client_resources: dict,
+			is_capturing: bool = False,
+			is_online: bool = False,
+			run_name: str = None
+	):
+		"""
+		Simulates federated learning for the given dataset, federation and model.
+		"""
+		client_fn = Client.get_client_fn(self)
+		strategy = Server(self, is_capturing)
+
+		wandb_kwargs = self._get_wandb_kwargs(run_name)
+		mode = "online" if is_online else "offline"
+		wandb.init(mode=mode, **wandb_kwargs)
+
+		ray_init_args = get_ray_init_args()
+
+		try:
+			fl.simulation.start_simulation(
+				client_fn=client_fn,
+				num_clients=self.client_count,
+				client_resources=client_resources,
+				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+				ray_init_args=ray_init_args,
+				strategy=strategy
+			)
+		except Exception as e:
+			log(ERROR, e)
+			wandb.finish(exit_code=1)
+
 	def _prepare_loaders(self):
 		"""
 		If the data has been split for the given amount of clients and the given splitter return the cached file.
@@ -139,6 +179,9 @@ class Simulation:
 
 		# Split the train dataset
 		train_datasets = self._split_data(train_dataset)
+
+		# Convert the test dataset to a tuple
+		test_dataset = [(value["x"], value["y"]) for value in test_dataset]
 
 		# Bundle the information in a dataloader
 		train_loaders = []
@@ -210,38 +253,6 @@ class Simulation:
 			split_data = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
 
 		return split_data
-
-	def _simulate_federation(
-			self,
-			client_resources: dict,
-			is_capturing: bool = False,
-			is_online: bool = False,
-			run_name: str = None
-	):
-		"""
-		Simulates federated learning for the given dataset, federation and model.
-		"""
-		client_fn = Client.get_client_fn(self)
-		strategy = Server(self, is_capturing)
-
-		wandb_kwargs = self._get_wandb_kwargs(run_name)
-		mode = "online" if is_online else "offline"
-		wandb.init(mode=mode, **wandb_kwargs)
-
-		ray_init_args = get_ray_init_args()
-
-		try:
-			fl.simulation.start_simulation(
-				client_fn=client_fn,
-				num_clients=self.client_count,
-				client_resources=client_resources,
-				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
-				ray_init_args=ray_init_args,
-				strategy=strategy
-			)
-		except Exception as e:
-			log(ERROR, e)
-			wandb.finish(exit_code=1)
 
 	def _get_wandb_kwargs(self, run_name: str = None):
 		if run_name is None:

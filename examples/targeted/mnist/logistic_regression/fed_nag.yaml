@@ -31,4 +31,5 @@ attack:
   is_targeted: True
   data_access: all
   message_access: server
-  shadow_model_amount: 128
+  shadow_model_amount: 2
+  targets: 2
