@@ -39,8 +39,12 @@ class Model:
 		result += "\n\toptimizer_parameters: \n\t\t{}".format(
 			"\n\t\t".join([f"{key}: {value}" for key, value in self._optimizer_parameters.items()]))
 		result += "\n\tmodel_architecture:"
-		for layer in self._model_architecture:
-			result += "\n\t\t{}".format("\n\t\t\t".join([f"{key}: {value}" for key, value in layer.items()]))
+		is_from_hub = isinstance(self._model_architecture, dict)
+		if is_from_hub:
+			result += "\n\t\t{}".format("\n\t\t\t".join([f"{key}: {value}" for key, value in self._model_architecture.items()]))
+		else:
+			for layer in self._model_architecture:
+				result += "\n\t\t{}".format("\n\t\t\t".join([f"{key}: {value}" for key, value in layer.items()]))
 		return result
 
 	def __repr__(self):
