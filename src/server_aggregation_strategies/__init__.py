@@ -1,1 +1,0 @@
-from .capture_generator import get_capturing_strategy
