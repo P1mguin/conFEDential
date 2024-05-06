@@ -1,0 +1,32 @@
+simulation:
+  data:
+    dataset_name: CIFAR10
+    batch_size: 32
+    preprocess_fn: |
+      def preprocess_fn(element):
+        return {
+          "x": element["image"] / 255.,
+          "y": element["label"]
+        }
+  federation:
+    client_count: 100
+    fraction_fit: 0.1
+    global_rounds: 10
+    local_rounds: 20
+  model:
+    optimizer_name: FedNag
+    model_name: ResNet18
+    criterion_name: CrossEntropyLoss
+    optimizer_parameters:
+      lr: 0.05
+      momentum: 0.95
+    model_architecture:
+      repo_or_dir: 'pytorch/vision:v0.10.0'
+      model: 'resnet18'
+      pretrained: False
+attack:
+  is_targeted: True
+  data_access: all
+  message_access: server
+  shadow_model_amount: 128
+  targets: 10
