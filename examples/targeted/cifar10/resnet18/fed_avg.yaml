@@ -5,7 +5,7 @@ simulation:
     preprocess_fn: |
       def preprocess_fn(element):
         return {
-          "x": element["image"] / 255.,
+          "x": element["img"] / 255.,
           "y": element["label"]
         }
   federation:
