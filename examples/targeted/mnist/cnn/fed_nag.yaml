@@ -53,60 +53,8 @@ simulation:
       - type: Softmax
         dim: -1
 attack:
-  is_targeted: False
+  is_targeted: True
   data_access: all
   message_access: server
   shadow_model_amount: 128
-  attack_simulation:
-    batch_size: 64
-    optimizer_name: FedAvg
-    optimizer_parameters:
-      lr: 0.1
-    model_architecture:
-      gradient_component:
-        - type: Dropout
-          p: 0.2
-        - type: Conv3d
-          out_channels: 1000
-          kernel_size:
-            - 1
-            - 1
-          stride: 1
-        - type: ReLU
-      fcn_component:
-        - type: Dropout
-          p: 0.2
-        - type: Linear
-          out_features: 128
-        - type: ReLU
-        - type: Dropout
-          p: 0.2
-        - type: Linear
-          in_features: 128
-          out_features: 64
-        - type: ReLU
-      encoder_component:
-        - type: Dropout
-          p: 0.2
-        - type: Linear
-          out_features: 256
-        - type: ReLU
-        - type: Dropout
-          p: 0.2
-        - type: Linear
-          in_features: 256
-          out_features: 128
-        - type: ReLU
-        - type: Dropout
-          p: 0.2
-        - type: Linear
-          in_features: 128
-          out_features: 64
-        - type: ReLU
-        - type: Dropout
-          p: 0.2
-        - type: Linear
-          in_features: 64
-          out_features: 1
-        - type: ReLU
-        - type: Sigmoid
+  targets: 10
