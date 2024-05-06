@@ -11,8 +11,8 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
 from src import training, utils
-from src.training.strategies.Strategy import Strategy
-from src.utils.old_configs import Config
+from src.experiment import Simulation
+from src.training.learning_methods.Strategy import Strategy
 
 
 class NewtonOptimizer(Optimizer):
@@ -80,12 +80,50 @@ class FedNL(Strategy):
 	def __init__(self, **kwargs):
 		super(FedNL, self).__init__(**kwargs)
 
+	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
+		# The newton method makes use of our custom newton optimizer
+		return NewtonOptimizer(parameters)
+
+	def train(
+			self,
+			parameters: List[npt.NDArray],
+			train_loader: DataLoader,
+			simulation: Simulation,
+			metrics: Dict[str, Any]
+	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
+		# Get and set training configuration
+		net = simulation.model.to(training.DEVICE)
+		if parameters is not None:
+			training.set_weights(net, parameters)
+		criterion = simulation.criterion
+		optimizer = simulation.get_optimizer(net.parameters())
+		local_rounds = simulation.local_rounds
+
+		# Do local rounds and epochs
+		for _ in range(local_rounds):
+			for features, labels in train_loader:
+				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
+
+				# Define the closure function that returns the loss of the model
+				def closure(*args, **kwargs):
+					optimizer.zero_grad()
+					loss = criterion(net(features), labels)
+					return loss
+
+				optimizer.step(closure)
+
+		# Take the gradients and hessian from the optimizer state and transmit the results
+		gradients = [value["gradients"].numpy() for value in optimizer.state_dict()["state"].values()]
+		hessian = [value["hessian"].numpy() for value in optimizer.state_dict()["state"].values()]
+		data_size = len(train_loader.dataset)
+		return gradients, data_size, {"hessian": hessian}
+
 	def aggregate_fit(
 			self,
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-			run_config: Config
+			simulation: Simulation
 	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		# If no results have been received, return noting
 		if not results:
@@ -141,41 +179,3 @@ class FedNL(Strategy):
 		]
 		self.current_weights = ndarrays_to_parameters(self.current_weights)
 		return self.current_weights, {}
-
-	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
-		# The newton method makes use of our custom newton optimizer
-		return NewtonOptimizer(parameters)
-
-	def train(
-			self,
-			parameters: List[npt.NDArray],
-			train_loader: DataLoader,
-			run_config: Config,
-			config: Dict[str, Any]
-	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
-		# Get and set training configuration
-		net = run_config.get_model().to(training.DEVICE)
-		if parameters is not None:
-			training.set_weights(net, parameters)
-		criterion = run_config.get_criterion()
-		optimizer = run_config.get_optimizer(net.parameters())
-		local_rounds = run_config.get_local_rounds()
-
-		# Do local rounds and epochs
-		for _ in range(local_rounds):
-			for features, labels in train_loader:
-				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
-
-				# Define the closure function that returns the loss of the model
-				def closure(*args, **kwargs):
-					optimizer.zero_grad()
-					loss = criterion(net(features), labels)
-					return loss
-
-				optimizer.step(closure)
-
-		# Take the gradients and hessian from the optimizer state and transmit the results
-		gradients = [value["gradients"].numpy() for value in optimizer.state_dict()["state"].values()]
-		hessian = [value["hessian"].numpy() for value in optimizer.state_dict()["state"].values()]
-		data_size = len(train_loader.dataset)
-		return gradients, data_size, {"hessian": hessian}

@@ -1,7 +1,8 @@
+# Optimal 0.9176
 simulation:
   data:
     dataset_name: MNIST
-    batch_size: 1
+    batch_size: 2
     preprocess_fn: |
       def preprocess_fn(element):
         return {
@@ -12,14 +13,14 @@ simulation:
     client_count: 100
     fraction_fit: 0.1
     global_rounds: 2
-    local_rounds:
-      values: [ 2, 4 ]
+    local_rounds: 2
   model:
-    optimizer_name: FedAvg
+    optimizer_name: FedNAG
     model_name: Logistic Regression
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
       lr: 0.1
+      momentum: 0.85
     model_architecture:
       - type: Linear
         in_features: 784

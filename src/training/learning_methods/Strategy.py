@@ -9,7 +9,7 @@ from flwr.server.client_proxy import ClientProxy
 from torch.utils.data import DataLoader
 
 import src.training as training
-from src.utils.old_configs import Config
+from src.experiment import Simulation
 
 
 class Strategy(ABC):
@@ -18,10 +18,9 @@ class Strategy(ABC):
 		self.current_weights = None
 
 	@abstractmethod
-	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
+	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		"""
-		Returns the optimizer that will be used for this training strategy
-		:param parameters: the parameters that will be used in the optimizer
+		Returns the optimizer that will be used for this training strategy given the parameters of the model
 		"""
 		pass
 
@@ -30,15 +29,15 @@ class Strategy(ABC):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			run_config: Config,
-			config: Dict[str, Any]
+			simulation: Simulation,
+			metrics: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		"""
 		A method to train a PyTorch model with a given train loader with a method described in a configuration
 		:param parameters: the initial parameters of the model
 		:param train_loader: the data to train with
-		:param run_config: the configuration that describes the experiment
-		:param config: extra parameters used for learning
+		:param simulation: the configuration that describes the local learning
+		:param metrics: extra parameters used for learning
 		"""
 		pass
 
@@ -48,31 +47,35 @@ class Strategy(ABC):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-			run_config: Config
+			simulation: Simulation
 	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		"""
 		A method to aggregate the results of the client of the global training round
 		:param server_round: an indicator of which global iterations the system is in
 		:param results: the results of the clients
 		:param failures: the clients that failed
-		:param run_config: the configuration that describes the experiment
+		:param simulation: the configuration that describes the experiment
 		"""
 		pass
 
 	@staticmethod
-	def test(parameters: List[npt.NDArray] | None, test_loader: DataLoader, config: Config) -> Tuple[float, float, int]:
+	def test(
+			parameters: List[npt.NDArray] | None,
+			test_loader: DataLoader,
+			simulation: Simulation
+	) -> Tuple[float, float, int]:
 		"""
 		A helper method to test a PyTorch model on a given test loader via criteria described in a configuration
 		:param parameters: the initial parameters of the model
 		:param test_loader: the data to test with
-		:param config: the configuration that describes the experiment
+		:param simulation: the configuration that describes the experiment
 		"""
 		# Get and set the testing configuration
-		net = config.get_model().to(training.DEVICE)
+		net = simulation.model.to(training.DEVICE)
 		if parameters is not None:
 			training.set_weights(net, parameters)
-		criterion = config.get_criterion()
-		correct, total, loss = 0, 0, 0.
+		criterion = simulation.criterion
+		correct, total_loss = 0, 0.
 
 		# Disable gradient calculation for testing
 		with torch.no_grad():
@@ -81,16 +84,17 @@ class Strategy(ABC):
 				outputs = net(features)
 
 				# Accumulate the total loss
-				loss += criterion(outputs, labels).item()
+				total_loss += criterion(outputs, labels).item()
 
 				# Get the amount of correct predictions
 				_, predicted = torch.max(outputs.data, 1)
-				total += labels.size(0)
 				correct += (predicted == labels).sum().item()
 
 		# Compute the accuracy and return the performance
-		accuracy = correct / total
 		data_size = len(test_loader.dataset)
+		accuracy = correct / data_size
+		loss = total_loss / data_size
+
 		return loss, accuracy, data_size
 
 	def set_parameters(self, parameters: Parameters) -> None:

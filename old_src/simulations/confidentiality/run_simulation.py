@@ -20,7 +20,7 @@ from tqdm import tqdm
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
 
-from src import training
+from src import old_training
 from src.simulations.performance.run_simulation import run_simulation
 from src.utils import split_dataloader
 from src.utils.old_configs import AttackConfig
@@ -76,8 +76,8 @@ def online_attack(
 	# Get the target
 	target_sample, target_label = config.get_target_member()
 	target_sample, target_label = torch.tensor(target_sample).to(device), torch.tensor(target_label).to(device)
-	target_model = config.get_model().to(training.DEVICE)
-	training.set_weights(target_model, target_parameters)
+	target_model = config.get_model().to(old_training.DEVICE)
+	old_training.set_weights(target_model, target_parameters)
 
 	criterion = config.get_criterion()
 
@@ -86,8 +86,8 @@ def online_attack(
 		# Parameters are batched per 1, so squeeze each layer
 		parameters = [param[0] for param in parameters]
 
-		model = config.get_model().to(training.DEVICE)
-		training.set_weights(model, parameters)
+		model = config.get_model().to(old_training.DEVICE)
+		old_training.set_weights(model, parameters)
 
 		optimizer = config.get_optimizer(model.parameters())
 		optimizer.zero_grad()
@@ -112,7 +112,7 @@ def offline_attack(
 		test_loader: DataLoader
 ):
 	# Take the model, BCELoss since we work with one probability, and the optimizer
-	attack_model = config.get_attack_model().to(training.DEVICE)
+	attack_model = config.get_attack_model().to(old_training.DEVICE)
 	criterion = torch.nn.BCELoss()
 	optimizer = config.get_attack_optimizer(attack_model.parameters())
 

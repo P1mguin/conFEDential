@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from .AttackSimulation import AttackSimulation
 
+
 class Attack:
 	def __init__(
 			self,
@@ -11,31 +12,31 @@ class Attack:
 			shadow_model_amount: int,
 			attack_simulation: AttackSimulation | None = None
 	):
-		self.is_targeted = is_targeted
-		self.data_access = data_access
-		self.message_access = message_access
-		self.shadow_model_amount = shadow_model_amount
-		self.attack_simulation = attack_simulation
+		self._is_targeted = is_targeted
+		self._data_access = data_access
+		self._message_access = message_access
+		self._shadow_model_amount = shadow_model_amount
+		self._attack_simulation = attack_simulation
 
 	def __str__(self):
 		result = "Attack:"
-		result += f"\n\tis_targeted: {self.is_targeted}"
-		result += f"\n\tdata_access: {self.data_access}"
-		result += f"\n\tmessage_access: {self.message_access}"
-		result += f"\n\tshadow_model_amount: {self.shadow_model_amount}"
-		if not self.is_targeted:
-			result += "\n\t{}".format("\n\t".join(str(self.attack_simulation).split("\n")))
+		result += f"\n\tis_targeted: {self._is_targeted}"
+		result += f"\n\tdata_access: {self._data_access}"
+		result += f"\n\tmessage_access: {self._message_access}"
+		result += f"\n\tshadow_model_amount: {self._shadow_model_amount}"
+		if not self._is_targeted:
+			result += "\n\t{}".format("\n\t".join(str(self._attack_simulation).split("\n")))
 
 		return result
 
 	def __repr__(self):
 		result = "Attack("
-		result += f"is_targeted={self.is_targeted}, "
-		result += f"data_access={self.data_access}, "
-		result += f"message_access={self.message_access}, "
-		result += f"shadow_model_amount={self.shadow_model_amount}"
-		if not self.is_targeted:
-			result += f", {repr(self.attack_simulation)}"
+		result += f"is_targeted={self._is_targeted}, "
+		result += f"data_access={self._data_access}, "
+		result += f"message_access={self._message_access}, "
+		result += f"shadow_model_amount={self._shadow_model_amount}"
+		if not self._is_targeted:
+			result += f", {repr(self._attack_simulation)}"
 		result += ")"
 		return result
 

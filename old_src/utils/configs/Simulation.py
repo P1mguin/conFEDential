@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterator, Tuple
 import torch
 import torch.nn as nn
 
-import src.training.strategies as strategies
+import src.old_training.strategies as strategies
 
 
 class Optimizer:

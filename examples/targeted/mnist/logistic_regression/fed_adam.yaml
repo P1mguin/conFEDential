@@ -1,3 +1,4 @@
+# Optimal 0.9147
 simulation:
   data:
     dataset_name: MNIST
@@ -12,14 +13,21 @@ simulation:
     client_count: 100
     fraction_fit: 0.1
     global_rounds: 2
-    local_rounds:
-      values: [ 2, 4 ]
+    local_rounds: 2
   model:
-    optimizer_name: FedAvg
+    optimizer_name: FedAdam
     model_name: Logistic Regression
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
-      lr: 0.1
+      local:
+        lr: 0.1
+      global:
+        lr: 0.1
+        betas:
+          - 0.9
+          - 0.999
+        eps: 0.00000001
+        weight_decay: 0.9999
     model_architecture:
       - type: Linear
         in_features: 784

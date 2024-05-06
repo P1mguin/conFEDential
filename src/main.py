@@ -1,19 +1,13 @@
 import argparse
-import os
 import random
-import sys
 from logging import INFO
 from pathlib import Path
 
 import numpy as np
 import torch
-from flwr.common.logger import log
+from flwr.common import log
 
-PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
-sys.path.append(PROJECT_DIRECTORY)
-
-import src.utils.batch_config as batch_config
-from src.simulations.performance.run_simulation import run_simulation
+from src.utils import batch_config
 
 torch.manual_seed(78)
 random.seed(78)
@@ -61,7 +55,7 @@ parser.add_argument(
 )
 
 
-def main() -> None:
+def main():
 	args = parser.parse_args()
 
 	client_resources = {
@@ -77,8 +71,7 @@ def main() -> None:
 
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
-		run_simulation(config, client_resources, run_name, is_online, is_capturing)
-
+		config.run_simulation(client_resources, is_online, is_capturing, run_name)
 
 if __name__ == '__main__':
 	main()

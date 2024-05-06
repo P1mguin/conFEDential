@@ -4,7 +4,7 @@ from typing import List, Tuple
 import yaml
 
 import src.utils as utils
-from src.utils.old_configs import Config
+from src.experiment import Config
 
 
 def _adjust_config_values(config: dict, configs: List[dict], *path: Tuple[str]) -> List[dict]:

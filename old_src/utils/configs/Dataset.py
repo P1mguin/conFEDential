@@ -6,7 +6,7 @@ from typing import List, Tuple
 from torch.utils.data import DataLoader
 
 import src.utils as utils
-from src import federated_datasets
+from src import datasets
 
 
 class Dataset:
@@ -55,7 +55,7 @@ class Dataset:
 		return Dataset(**config)
 
 	def get_dataloaders(self, client_count: int, batch_size: int) -> Tuple[List[DataLoader], DataLoader]:
-		dataclass = getattr(federated_datasets, self.name)
+		dataclass = getattr(datasets, self.name)
 
 		raw_preprocess_fn = self.get_raw_preprocess_fn()
 		hash_object = hashlib.sha256(raw_preprocess_fn.encode())

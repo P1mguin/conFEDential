@@ -12,8 +12,8 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
 from src import training, utils
-from src.training.strategies.Strategy import Strategy
-from src.utils.old_configs import Config
+from src.experiment import Simulation
+from src.training.learning_methods.Strategy import Strategy
 
 
 class ScaffoldOptimizer(Optimizer):
@@ -51,50 +51,6 @@ class SCAFFOLD(Strategy):
 		self.global_c = None
 		self.global_lr = kwargs["global"]["lr"]
 
-	def aggregate_fit(
-			self,
-			server_round: int,
-			results: List[Tuple[ClientProxy, FitRes]],
-			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-			run_config: Config
-	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
-		# If no results have been received return nothing
-		if not results:
-			return None, {}
-
-		# Get the aggregate of the client deltas
-		delta_results = [
-			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-			for _, fit_res in results
-		]
-		deltas_aggregated = utils.common.compute_weighted_average(delta_results)
-
-		# In the first round, global c is uninitialized, do so now
-		if self.global_c is None:
-			self.global_c = [np.zeros_like(layer) for layer in deltas_aggregated]
-
-		# Get the aggregate of the clients difference with global c
-		delta_c_results = [
-			(fit_res.metrics["local_c_delta"], fit_res.num_examples)
-			for _, fit_res in results
-		]
-		delta_c_aggregated = utils.common.compute_weighted_average(delta_c_results)
-
-		# Update the current weights and global c
-		current_weights = parameters_to_ndarrays(self.current_weights)
-		self.current_weights = [
-			old_layer + self.global_lr * new_layer
-			for old_layer, new_layer in zip(current_weights, deltas_aggregated)
-		]
-		self.global_c = [
-			old_global_c + (len(results) / run_config.get_client_count() * delta_c)
-			for old_global_c, delta_c in zip(self.global_c, delta_c_aggregated)
-		]
-
-		# Encode and return the current weights, and return the aggregate of the clients directions
-		self.current_weights = ndarrays_to_parameters(self.current_weights)
-		return self.current_weights, {"global_c": self.global_c}
-
 	def get_optimizer_instance(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# SCAFFOLD uses the custom SCAFFOLD optimizer
 		return ScaffoldOptimizer(parameters, **self.kwargs["local"])
@@ -103,26 +59,26 @@ class SCAFFOLD(Strategy):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			run_config: Config,
-			config: Dict[str, Any]
+			simulation: Simulation,
+			metrics: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		# If no local c has been set initialize it at zero
 		if self.local_c is None:
 			self.local_c = [np.zeros_like(layer) for layer in parameters]
 
 		# If no global c has been received, it is the first round: use zero instead
-		if config.get("global_c") is not None:
-			global_c = config.get("global_c")
+		if metrics.get("global_c") is not None:
+			global_c = metrics.get("global_c")
 		else:
 			global_c = [np.zeros_like(layer) for layer in parameters]
 
 		# Get and set the training configuration
-		net = run_config.get_model().to(training.DEVICE)
+		net = simulation.model.to(training.DEVICE)
 		if parameters is not None:
 			training.set_weights(net, parameters)
-		criterion = run_config.get_criterion()
-		optimizer = run_config.get_optimizer(net.parameters())
-		local_rounds = run_config.get_local_rounds()
+		criterion = simulation.criterion
+		optimizer = simulation.get_optimizer(net.parameters())
+		local_rounds = simulation.local_rounds
 
 		# Get the state of the optimizer and overwrite it with the global and local c
 		state_dict = optimizer.state_dict()
@@ -158,3 +114,47 @@ class SCAFFOLD(Strategy):
 
 		# Transmit all the differences
 		return model_delta, data_size, {"local_c_delta": local_c_delta}
+
+	def aggregate_fit(
+			self,
+			server_round: int,
+			results: List[Tuple[ClientProxy, FitRes]],
+			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+			simulation: Simulation
+	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
+		# If no results have been received return nothing
+		if not results:
+			return None, {}
+
+		# Get the aggregate of the client deltas
+		delta_results = [
+			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+			for _, fit_res in results
+		]
+		deltas_aggregated = utils.common.compute_weighted_average(delta_results)
+
+		# In the first round, global c is uninitialized, do so now
+		if self.global_c is None:
+			self.global_c = [np.zeros_like(layer) for layer in deltas_aggregated]
+
+		# Get the aggregate of the clients difference with global c
+		delta_c_results = [
+			(fit_res.metrics["local_c_delta"], fit_res.num_examples)
+			for _, fit_res in results
+		]
+		delta_c_aggregated = utils.common.compute_weighted_average(delta_c_results)
+
+		# Update the current weights and global c
+		current_weights = parameters_to_ndarrays(self.current_weights)
+		self.current_weights = [
+			old_layer + self.global_lr * new_layer
+			for old_layer, new_layer in zip(current_weights, deltas_aggregated)
+		]
+		self.global_c = [
+			old_global_c + (len(results) / simulation.get_client_count() * delta_c)
+			for old_global_c, delta_c in zip(self.global_c, delta_c_aggregated)
+		]
+
+		# Encode and return the current weights, and return the aggregate of the clients directions
+		self.current_weights = ndarrays_to_parameters(self.current_weights)
+		return self.current_weights, {"global_c": self.global_c}

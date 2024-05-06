@@ -6,7 +6,7 @@ import flwr.common
 import torch
 import torch.nn as nn
 
-from src.training import helper
+from src.old_training import helper
 from src.utils import get_net_class_from_layers
 
 

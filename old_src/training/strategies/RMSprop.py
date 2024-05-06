@@ -7,7 +7,7 @@ from numpy import typing as npt
 from torch import nn as nn
 from torch.utils.data import DataLoader
 
-from src.training.strategies.Strategy import Strategy
+from src.training.learning_methods.Strategy import Strategy
 from src.utils.old_configs import Config
 
 

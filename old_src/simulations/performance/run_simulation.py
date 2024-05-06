@@ -20,7 +20,7 @@ PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 sys.path.append(PROJECT_DIRECTORY)
 
 import src.server_aggregation_strategies as agg
-from src.training.strategies.Strategy import Strategy
+from src.training.learning_methods.Strategy import Strategy
 from src.utils.old_configs import Config
 
 # Set seeds and set hugging face in offline mode so that cluster nodes do not attempt internet connection

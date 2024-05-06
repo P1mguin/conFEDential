@@ -11,8 +11,8 @@ from torch.nn import Parameter
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
-from src import training, utils
-from src.training.strategies.Strategy import Strategy
+from src import old_training, utils
+from src.training.learning_methods.Strategy import Strategy
 from src.utils.old_configs import Config
 
 
@@ -117,9 +117,9 @@ class SCAFFOLD(Strategy):
 			global_c = [np.zeros_like(layer) for layer in parameters]
 
 		# Get and set the training configuration
-		net = run_config.get_model().to(training.DEVICE)
+		net = run_config.get_model().to(old_training.DEVICE)
 		if parameters is not None:
-			training.set_weights(net, parameters)
+			old_training.set_weights(net, parameters)
 		criterion = run_config.get_criterion()
 		optimizer = run_config.get_optimizer(net.parameters())
 		local_rounds = run_config.get_local_rounds()
@@ -135,7 +135,7 @@ class SCAFFOLD(Strategy):
 		# Do local rounds and epochs
 		for _ in range(local_rounds):
 			for features, labels in train_loader:
-				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
+				features, labels = features.to(old_training.DEVICE), labels.to(old_training.DEVICE)
 				optimizer.zero_grad()
 				loss = criterion(net(features), labels)
 				loss.backward()
@@ -144,7 +144,7 @@ class SCAFFOLD(Strategy):
 		# Compute the difference between the previous model, update the local c and compute the difference between the
 		# previous local c and the new local c
 		model_delta = [
-			new_layer - old_layer for old_layer, new_layer in zip(parameters, training.get_weights(net))
+			new_layer - old_layer for old_layer, new_layer in zip(parameters, old_training.get_weights(net))
 		]
 		local_c = [
 			(local_c_layer - global_c_layer) + (1 / (local_rounds * self.kwargs["local"]["lr"])) * -model_delta_layer

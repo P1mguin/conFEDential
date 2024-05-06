@@ -4,7 +4,7 @@ from typing import List, Tuple, Type
 import torch
 import torch.nn as nn
 
-from src import training
+from src import old_training
 from src.utils import get_trainable_layers_indices
 from src.utils.old_configs import AttackConfig
 
@@ -20,13 +20,13 @@ class AttackNet(nn.Module):
 			run_config: AttackConfig
 	) -> None:
 		super(AttackNet, self).__init__()
-		self.activation_components = [component().to(training.DEVICE) for component in activation_components]
+		self.activation_components = [component().to(old_training.DEVICE) for component in activation_components]
 		self.gradient_components = [
-			component().to(training.DEVICE) for components in gradient_components for component in components
+			component().to(old_training.DEVICE) for components in gradient_components for component in components
 		]
-		self.label_component = label_component().to(training.DEVICE)
-		self.loss_component = loss_component().to(training.DEVICE)
-		self.encoder_component = encoder_component().to(training.DEVICE)
+		self.label_component = label_component().to(old_training.DEVICE)
+		self.loss_component = loss_component().to(old_training.DEVICE)
+		self.encoder_component = encoder_component().to(old_training.DEVICE)
 		self.run_config = run_config
 
 	def get_label_value(self, y: torch.Tensor) -> torch.Tensor:
@@ -47,7 +47,7 @@ class AttackNet(nn.Module):
 			new_state_dict = {key: parameter[i] for key, parameter in zip(model.state_dict().keys(), parameters)}
 			model.load_state_dict(new_state_dict)
 			# Get the models to where the computer assumes it is
-			models.append(model.to(training.DEVICE))
+			models.append(model.to(old_training.DEVICE))
 
 		return models
 

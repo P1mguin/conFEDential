@@ -8,19 +8,19 @@ from .Simulation import Simulation
 
 class Config:
 	def __init__(self, simulation: Simulation, attack: Attack):
-		self.simulation = simulation
-		self.attack = attack
+		self._simulation = simulation
+		self._attack = attack
 
 	def __str__(self):
 		result = "Config:"
-		result += "\n\t{}".format("\n\t".join(str(self.simulation).split("\n")))
-		result += "\n\t{}".format("\n\t".join(str(self.attack).split("\n")))
+		result += "\n\t{}".format("\n\t".join(str(self._simulation).split("\n")))
+		result += "\n\t{}".format("\n\t".join(str(self._attack).split("\n")))
 		return result
 
 	def __repr__(self):
 		result = "Config("
-		result += f"{repr(self.simulation)}, "
-		result += f"{repr(self.attack)}"
+		result += f"{repr(self._simulation)}, "
+		result += f"{repr(self._attack)}"
 		result += ")"
 		return result
 
@@ -37,3 +37,14 @@ class Config:
 			simulation=Simulation.from_dict(config['simulation']),
 			attack=Attack.from_dict(config['attack'])
 		)
+
+	@property
+	def simulation(self) -> Simulation:
+		return self._simulation
+
+	@property
+	def attack(self) -> Attack:
+		return self._attack
+
+	def run_simulation(self, client_resources: dict, is_online: bool, is_capturing: bool, run_name: str):
+		pass

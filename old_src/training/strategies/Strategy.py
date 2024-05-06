@@ -8,7 +8,7 @@ from flwr.common import FitRes, Parameters
 from flwr.server.client_proxy import ClientProxy
 from torch.utils.data import DataLoader
 
-import src.training as training
+import src.old_training as training
 from src.utils.old_configs import Config
 
 
@@ -68,16 +68,16 @@ class Strategy(ABC):
 		:param config: the configuration that describes the experiment
 		"""
 		# Get and set the testing configuration
-		net = config.get_model().to(training.DEVICE)
+		net = config.get_model().to(old_training.DEVICE)
 		if parameters is not None:
-			training.set_weights(net, parameters)
+			old_training.set_weights(net, parameters)
 		criterion = config.get_criterion()
 		correct, total, loss = 0, 0, 0.
 
 		# Disable gradient calculation for testing
 		with torch.no_grad():
 			for data in test_loader:
-				features, labels = data['x'].to(training.DEVICE), data['y'].to(training.DEVICE)
+				features, labels = data['x'].to(old_training.DEVICE), data['y'].to(old_training.DEVICE)
 				outputs = net(features)
 
 				# Accumulate the total loss

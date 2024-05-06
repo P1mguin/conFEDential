@@ -8,8 +8,8 @@ from torch import nn as nn
 from torch.optim import SGD
 from torch.utils.data import DataLoader
 
-from src import training, utils
-from src.training.strategies.Strategy import Strategy
+from src import old_training, utils
+from src.training.learning_methods.Strategy import Strategy
 from src.utils.old_configs import Config
 
 
@@ -49,9 +49,9 @@ class FedAvg(Strategy):
 			config: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		# Get and set training configuration
-		net = run_config.get_model().to(training.DEVICE)
+		net = run_config.get_model().to(old_training.DEVICE)
 		if parameters is not None:
-			training.set_weights(net, parameters)
+			old_training.set_weights(net, parameters)
 		criterion = run_config.get_criterion()
 		optimizer = run_config.get_optimizer(net.parameters())
 		local_rounds = run_config.get_local_rounds()
@@ -59,13 +59,13 @@ class FedAvg(Strategy):
 		# Do local rounds and epochs
 		for _ in range(local_rounds):
 			for features, labels in train_loader:
-				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
+				features, labels = features.to(old_training.DEVICE), labels.to(old_training.DEVICE)
 				optimizer.zero_grad()
 				loss = criterion(net(features), labels)
 				loss.backward()
 				optimizer.step()
 
 		# Get the latest model parameters from the net and transmit them
-		parameters = training.get_weights(net)
+		parameters = old_training.get_weights(net)
 		data_size = len(train_loader.dataset)
 		return parameters, data_size, {}
