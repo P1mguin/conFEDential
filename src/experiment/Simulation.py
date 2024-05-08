@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import hashlib
 import json
 import os
@@ -8,6 +9,7 @@ from logging import ERROR
 from typing import Generator, List
 
 import flwr as fl
+import numpy as np
 import wandb
 from fedartml import SplitAsFederatedData
 from flwr.common.logger import log
@@ -17,6 +19,7 @@ from src.training import Client, Server
 from .Data import Data
 from .Federation import Federation
 from .Model import Model
+from .. import training
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 
@@ -64,7 +67,7 @@ class Simulation:
 		self._train_loaders = train_loaders
 
 	@property
-	def test_loader(self) -> DataLoader | None:
+	def test_loader(self) -> DataLoader:
 		return self._test_loader
 
 	@test_loader.setter
@@ -103,15 +106,13 @@ class Simulation:
 	def batch_size(self):
 		return self._data.batch_size
 
-	def get_aggregate_file_path(self) -> str:
-		capture_directory = self.get_capture_directory()
-		aggregate_file_path = f"{capture_directory}aggregate.pkl"
-		return aggregate_file_path
+	@property
+	def model_config(self):
+		return self._model
 
-	def get_message_file_path(self) -> str:
-		capture_directory = self.get_capture_directory()
-		message_file_path = f"{capture_directory}message.pkl"
-		return message_file_path
+	@property
+	def data(self):
+		return self._data
 
 	def get_capture_directory(self) -> str:
 		dataset = self._data.dataset_name
@@ -123,6 +124,10 @@ class Simulation:
 		simulation_hash = hashlib.sha256(simulation_string.encode()).hexdigest()
 
 		capture_directory = f".cache/data/{dataset}/training/{model_name}/{optimizer}/{simulation_hash}/"
+
+		# Ensure the directory exists
+		os.makedirs(capture_directory, exist_ok=True)
+
 		return capture_directory
 
 	def get_optimizer(self, parameters):
@@ -138,8 +143,8 @@ class Simulation:
 		"""
 		Simulates federated learning for the given dataset, federation and model.
 		"""
-		client_fn = Client.get_client_fn(self)
-		strategy = Server(self, is_capturing)
+		client_fn = Client.Client.get_client_fn(self)
+		strategy = Server.Server(self, is_capturing)
 
 		wandb_kwargs = self._get_wandb_kwargs(run_name)
 		mode = "online" if is_online else "offline"
@@ -159,6 +164,47 @@ class Simulation:
 		except Exception as e:
 			log(ERROR, e)
 			wandb.finish(exit_code=1)
+
+	def get_server_aggregates(self):
+		"""
+		Returns the server traffic of the simulation.
+		"""
+		capture_directory = self.get_capture_directory()
+		aggregate_directory = f"{capture_directory}aggregates/"
+		aggregate_file_path = f"{aggregate_directory}aggregates.npz"
+
+		aggregates = []
+		with open(aggregate_file_path, "rb") as f:
+			saved_aggregates = np.load(f)
+
+			for file in saved_aggregates.files:
+				aggregates.append(saved_aggregates[file])
+
+		# Prepend the initial model parameters to the aggregates
+		model = self.model
+		initial_parameters = training.get_weights(model)
+		aggregates = [np.insert(aggregates[i], 0, initial_parameters[i], axis=0) for i in range(len(aggregates))]
+
+		metric_directory = f"{aggregate_directory}metrics/"
+		metrics = collections.defaultdict(list)
+		for metric_file in os.listdir(metric_directory):
+			metric_name = ".".join(metric_file.split(".")[:-1])
+			with open(metric_directory + metric_file, "rb") as f:
+				metric = np.load(f)
+
+				metric_values = []
+				for file in metric.files:
+					metric_values.append(metric[file])
+
+				# Prepend zero like parameters to the metric aggregates
+				metric_values = [
+					np.insert(metric_values[i], 0, np.zeros_like(metric_values[i][0]), axis=0)
+					for i in range(len(metric_values))
+				]
+				metrics[metric_name] = metric_values
+
+		return aggregates, dict(metrics)
+
 
 	def _prepare_loaders(self):
 		"""

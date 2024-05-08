@@ -41,7 +41,7 @@ class Server(FedAvg):
 		self.simulation = simulation
 
 		output_directory = simulation.get_capture_directory()
-		self.is_capturing = is_capturing and not os.path.exists(output_directory)
+		self.is_capturing = is_capturing and not os.path.exists(f"{output_directory}aggregates")
 
 		output_directory = self.simulation.get_capture_directory()
 

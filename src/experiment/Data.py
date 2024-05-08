@@ -109,10 +109,6 @@ class Data:
 		train_dataset = train_dataset.map(self._preprocess_fn)
 		test_dataset = test_dataset.map(self._preprocess_fn)
 
-		# Create the cache directory if it does not exist
-		cache_directory = "/".join(preprocessed_cache_path.split("/")[:-1])
-		os.makedirs(cache_directory, exist_ok=True)
-
 		# Save the preprocessed dataset
 		with open(preprocessed_cache_path, "wb") as file:
 			pickle.dump((train_dataset, test_dataset), file)
@@ -128,6 +124,10 @@ class Data:
 		# Get the hash function of the preprocess function
 		function_hash = hashlib.sha256(self._raw_preprocess_fn.encode()).hexdigest()
 		preprocessed_cache_directory = f"{base_path}{function_hash}/"
+
+		# Create the directory if it does not exist yet
+		os.makedirs(preprocessed_cache_directory, exist_ok=True)
+
 		return preprocessed_cache_directory
 
 	def _get_unsplit_preprocessed_cache_file(self):

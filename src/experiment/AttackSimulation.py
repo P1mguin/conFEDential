@@ -43,3 +43,11 @@ class AttackSimulation:
 			optimizer_parameters=config['optimizer_parameters'],
 			model_architecture=ModelArchitecture.from_dict(config['model_architecture'])
 		)
+
+	@property
+	def batch_size(self) -> int:
+		return self._batch_size
+
+	@property
+	def model_architecture(self):
+		return self._model_architecture
