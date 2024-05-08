@@ -93,6 +93,36 @@ class Model:
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self._learning_method.get_optimizer(parameters)
 
+	def get_layer_shapes(self, input_shape):
+		layer_output_shapes = []
+		layer_shape = input_shape
+
+		layer_output_shapes.append(layer_shape)
+		for layer in self.model.layers:
+			if hasattr(layer, "kernel_size"):
+				# MaxPoolLayer does not have the out channels attribute fall back to the input amount of channels
+				out_channels = getattr(layer, "out_channels", layer_shape[0])
+				layer_shape = utils.compute_convolution_output_size(
+					layer_shape[1:],  # Remove the out channels dimension of the previous layer
+					out_channels,
+					layer.kernel_size,
+					layer.stride,
+					layer.padding
+				)
+			elif isinstance(layer, nn.Linear):
+				layer_shape = (layer.out_features,)
+			layer_output_shapes.append(layer_shape)
+		return layer_output_shapes
+
+	def get_trainable_layer_indices(self):
+		return set(int(name.split(".")[1]) for name, param in self.model.named_parameters() if param.requires_grad)
+
+	def get_gradient_shapes(self):
+		# Get the shapes of the weights and the biases and then join them together in tuples
+		gradient_shapes = [param.shape for name, param in self.model.named_parameters()]
+		gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
+		return gradient_shapes
+
 	def _prepare_model(self):
 		is_from_hub = isinstance(self._model_architecture, dict)
 		if is_from_hub:
