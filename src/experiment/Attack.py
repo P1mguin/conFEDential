@@ -121,7 +121,7 @@ class Attack:
 	def get_attack_dataset(
 			self,
 			server_aggregates: Tuple[List[npt.NDArray], dict],
-			attack_data: List[Tuple[npt.NDArray, npt.NDArray, npt.NDArray]],
+			attack_data: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]],
 			simulation: Simulation
 	) -> DataLoader:
 		"""
@@ -135,9 +135,9 @@ class Attack:
 		model_iterations = server_aggregates[0]
 		metric_iterations = server_aggregates[1]
 
-		features = torch.stack([torch.tensor(value[0]) for value in attack_data])
-		labels = torch.stack([torch.tensor(value[1]) for value in attack_data])
-		is_member = torch.stack([torch.tensor(value[2]) for value in attack_data])
+		features = torch.stack([value[0] for value in attack_data])
+		labels = torch.stack([value[1] for value in attack_data])
+		is_member = torch.stack([value[2] for value in attack_data])
 
 		batch_size = self._attack_simulation.batch_size
 		batch_amount = math.ceil(len(features) / batch_size)
@@ -156,7 +156,7 @@ class Attack:
 					batch_features, batch_labels, model_iterations, simulation
 				)
 
-				for j in range(len(loss)):
+				for j in range(batch_size):
 					activation_value = [layer[j] for layer in activation_values]
 					gradient = [layer[j] for layer in gradients]
 					loss_value = loss[j]
@@ -206,10 +206,9 @@ class Attack:
 		"""
 		trainable_indices = utils.get_trainable_layers_indices(models[0][0])
 		layer_count = len(models[0][0].layers)
-		iteration_count = len(models[0])
 
 		def get_activation_values():
-			value = features.unsqueeze(1).repeat_interleave(iteration_count, 1)
+			value = features
 			for i in range(layer_count):
 				value = torch.stack(
 					[
@@ -228,7 +227,6 @@ class Attack:
 		Gets the losses of a list of predictions and a list of labels
 		"""
 		iteration_count = predictions.shape[1]
-		label = label.unsqueeze(1).repeat_interleave(iteration_count, 1)
 		criterion = simulation.criterion
 		criterion.reduction = "none"
 		loss = torch.stack([criterion(predictions[i], label[i]) for i in range(predictions.shape[0])])

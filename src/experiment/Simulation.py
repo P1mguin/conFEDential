@@ -169,23 +169,32 @@ class Simulation:
 		"""
 		Returns the server traffic of the simulation.
 		"""
+		aggregates, metrics = self._get_captured_variable("aggregates")
+		return aggregates, dict(metrics)
+
+	def get_messages(self):
+		"""
+		Returns the messages of the simulation.
+		"""
+		messages, metrics = self._get_captured_variable("messages")
+		return messages, metrics
+
+	def _get_captured_variable(self, variable_name: str):
+		"""
+		Helper method to retrieve information that has been saved
+		"""
 		capture_directory = self.get_capture_directory()
-		aggregate_directory = f"{capture_directory}aggregates/"
-		aggregate_file_path = f"{aggregate_directory}aggregates.npz"
+		variable_directory = f"{capture_directory}{variable_name}/"
+		variable_path = f"{variable_directory}{variable_name}.npz"
 
-		aggregates = []
-		with open(aggregate_file_path, "rb") as f:
-			saved_aggregates = np.load(f)
+		variables = []
+		with open(variable_path, "rb") as f:
+			saved_variables = np.load(f)
 
-			for file in saved_aggregates.files:
-				aggregates.append(saved_aggregates[file])
+			for file in saved_variables.files:
+				variables.append(saved_variables[file])
 
-		# Prepend the initial model parameters to the aggregates
-		model = self.model
-		initial_parameters = training.get_weights(model)
-		aggregates = [np.insert(aggregates[i], 0, initial_parameters[i], axis=0) for i in range(len(aggregates))]
-
-		metric_directory = f"{aggregate_directory}metrics/"
+		metric_directory = f"{variable_directory}metrics/"
 		metrics = collections.defaultdict(list)
 		for metric_file in os.listdir(metric_directory):
 			metric_name = ".".join(metric_file.split(".")[:-1])
@@ -195,15 +204,22 @@ class Simulation:
 				metric_values = []
 				for file in metric.files:
 					metric_values.append(metric[file])
-
-				# Prepend zero like parameters to the metric aggregates
-				metric_values = [
-					np.insert(metric_values[i], 0, np.zeros_like(metric_values[i][0]), axis=0)
-					for i in range(len(metric_values))
-				]
 				metrics[metric_name] = metric_values
+		return variables, dict(metrics)
 
-		return aggregates, dict(metrics)
+	def get_client_participation(self):
+		"""
+		Returns the client participation of the simulation, i.e. if client i participated in round j. We expect the
+		resulting set of the result list to include client i at index j.
+		"""
+		messages, _ = self.get_messages()
+		tool_round = messages[0]
+		total_rounds = len(tool_round[0])
+		federation_participation = [
+			set(i for i, message in enumerate(tool_round[:, i]) if (message != 0).all()) for i in range(total_rounds)
+		]
+		return federation_participation
+
 
 
 	def _prepare_loaders(self):
