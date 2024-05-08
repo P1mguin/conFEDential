@@ -29,3 +29,15 @@ class ModelArchitecture:
 			fcn_component=config['fcn_component'],
 			encoder_component=config['encoder_component']
 		)
+
+	@property
+	def fcn(self):
+		return self._fcn_component
+
+	@property
+	def encoder(self):
+		return self._encoder_component
+
+	@property
+	def gradient(self):
+		return self._gradient_component
