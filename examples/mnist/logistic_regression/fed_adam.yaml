@@ -1,41 +1,43 @@
+# Optimal 0.9147
 simulation:
   data:
-    dataset_name: CIFAR10
-    batch_size: 16
+    dataset_name: MNIST
+    batch_size: 1
     preprocess_fn: |
       def preprocess_fn(element):
         return {
-          "x": element["img"] / 255.,
+          "x": element["image"].reshape(784) / 255.,
           "y": element["label"]
         }
   federation:
     client_count: 100
     fraction_fit: 0.1
     global_rounds: 10
-    local_rounds: 10
+    local_rounds: 8
   model:
     optimizer_name: FedAdam
-    model_name: ResNet18
+    model_name: Logistic Regression
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
       local:
-        lr: 0.2
+        lr: 0.1
       global:
         lr: 0.1
         betas:
           - 0.9
           - 0.999
-        eps: 0.000000001
+        eps: 0.00000001
         weight_decay: 0.9999
     model_architecture:
-      repo_or_dir: 'pytorch/vision:v0.10.0'
-      model: 'resnet18'
-      pretrained: False
+      - type: Linear
+        in_features: 784
+        out_features: 10
+      - type: Softmax
+        dim: -1
 attack:
-  is_targeted: False
   data_access: all
   message_access: server
-  shadow_model_amount: 128
+  repetitions: 10
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg

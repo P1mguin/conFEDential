@@ -47,10 +47,9 @@ simulation:
       - type: Softmax
         dim: -1
 attack:
-  is_targeted: False
   data_access: all
   message_access: server
-  shadow_model_amount: 128
+  repetitions: 10
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg

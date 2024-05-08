@@ -1,4 +1,3 @@
-# Optimal 0.9147
 simulation:
   data:
     dataset_name: MNIST
@@ -13,21 +12,13 @@ simulation:
     client_count: 100
     fraction_fit: 0.1
     global_rounds: 10
-    local_rounds: 8
+    local_rounds: 20
   model:
-    optimizer_name: FedAdam
+    optimizer_name: FedAvg
     model_name: Logistic Regression
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
-      local:
-        lr: 0.1
-      global:
-        lr: 0.1
-        betas:
-          - 0.9
-          - 0.999
-        eps: 0.00000001
-        weight_decay: 0.9999
+      lr: 0.1
     model_architecture:
       - type: Linear
         in_features: 784
@@ -35,10 +26,9 @@ simulation:
       - type: Softmax
         dim: -1
 attack:
-  is_targeted: False
   data_access: all
   message_access: server
-  shadow_model_amount: 128
+  repetitions: 10
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg

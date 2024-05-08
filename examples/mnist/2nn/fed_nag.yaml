@@ -1,34 +1,48 @@
+# Optimal 0.9498
 simulation:
   data:
-    dataset_name: CIFAR10
-    batch_size: 32
+    dataset_name: MNIST
+    batch_size: 8
     preprocess_fn: |
       def preprocess_fn(element):
         return {
-          "x": element["img"] / 255.,
+          "x": element["image"].reshape(784) / 255.,
           "y": element["label"]
         }
   federation:
     client_count: 100
     fraction_fit: 0.1
     global_rounds: 10
-    local_rounds: 20
+    local_rounds: 50
   model:
-    optimizer_name: FedNag
-    model_name: ResNet18
+    optimizer_name: FedNAG
+    model_name: 2NN
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
-      lr: 0.05
+      lr: 0.01
       momentum: 0.95
     model_architecture:
-      repo_or_dir: 'pytorch/vision:v0.10.0'
-      model: 'resnet18'
-      pretrained: False
+      - type: Linear
+        in_features: 784
+        out_features: 200
+      - type: ReLU
+      - type: Linear
+        in_features: 200
+        out_features: 200
+      - type: ReLU
+      - type: Linear
+        in_features: 200
+        out_features: 200
+      - type: ReLU
+      - type: Linear
+        in_features: 200
+        out_features: 10
+      - type: Softmax
+        dim: -1
 attack:
-  is_targeted: False
   data_access: all
   message_access: server
-  shadow_model_amount: 128
+  repetitions: 10
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg
