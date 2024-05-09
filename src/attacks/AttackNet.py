@@ -1,143 +1,252 @@
-import itertools
-from typing import List, Tuple, Type
+import copy
+import operator
+from functools import reduce
 
 import torch
 import torch.nn as nn
 
-from src import old_training
-from src.utils import get_trainable_layers_indices
-from src.utils.old_configs import AttackConfig
+from src import training, utils
 
 
 class AttackNet(nn.Module):
-	def __init__(
-			self,
-			activation_components: List[Type[nn.Module]],
-			gradient_components: List[Tuple[Type[nn.Module], Type[nn.Module]]],
-			loss_component: Type[nn.Module],
-			label_component: Type[nn.Module],
-			encoder_component: Type[nn.Module],
-			run_config: AttackConfig
-	) -> None:
+	def __init__(self, config):
 		super(AttackNet, self).__init__()
-		self.activation_components = [component().to(old_training.DEVICE) for component in activation_components]
+		self.config = config
+		self.activation_components = None
+		self.label_component = None
+		self.loss_component = None
+		self.gradient_component = None
+		self.metric_components = None
+		self.encoder_component = None
+
+		self._initialize_components()
+
+	def forward(self, activation_values, gradients, losses, labels, metrics):
+		batch_size = self.config.attack.attack_simulation.batch_size
+
+		activation = torch.stack(
+			[component(activation_value).view(batch_size, -1)
+			 for component, activation_value in zip(self.activation_components, activation_values)]
+		)
+
+		label = self.label_component(labels.unsqueeze(-1)).view(batch_size, -1)
+		loss = self.loss_component(losses.unsqueeze(-1)).view(batch_size, -1)
+
+		# The input of the gradient components is
+		# (attack batch size, iterations captured, out_channels, in_channels, kernel/out_features, kernel/in_features)
+		# The convolution is
+		gradient = torch.stack(
+			[
+				torch.stack([component(value).view(-1) for value in gradient_value])
+				for component, gradient_value in zip(self.gradient_components, gradients)
+			]
+		)
+
+		metric = torch.stack([
+			torch.stack([
+				torch.stack([metric_component(layer_metric_value).view(-1) for layer_metric_value in metric_value])
+				for metric_component, metric_value in zip(metric_components, metric_values)
+			])
+			for metric_components, metric_values in zip(self.metric_components, metrics.values())
+		])
+
+		# Concatenate the activation, label, loss, gradient and metric components
+		encoder_input = torch.cat([*activation, label, loss, *gradient, *metric.squeeze(0)], dim=1)
+		prediction = self.encoder_component(encoder_input)
+		return prediction
+
+	def _initialize_components(self):
+		self._initialize_activation_component()
+		self._initialize_label_component()
+		self._initialize_loss_component()
+		self._initialize_gradient_component()
+		self._initialize_encoder_component()
+		self._initialize_metric_component()
+
+	def _initialize_activation_component(self):
+		model = self.config.simulation.model
+		input_shape = self.config.simulation.data.get_input_size()
+		layer_shapes = self.config.simulation.model_config.get_layer_shapes(input_shape)
+
+		trainable_layer_indices = self.config.simulation.model_config.get_trainable_layer_indices()
+		activation_components = []
+		for i in range(len(model.layers)):
+			# Trainable layers are accounted for in the gradients components
+			if i in trainable_layer_indices:
+				continue
+
+			layer_output_shape = layer_shapes[i + 1]
+			is_flattened = len(layer_output_shape) > 1
+			if is_flattened:
+				layer_output_shape = (reduce(operator.mul, layer_output_shape, 1),)
+
+			activation_component = self._get_fcn_layers(layer_output_shape[0])
+
+			if is_flattened:
+				# Prepend a flattening layer to the activation component
+				activation_component.insert(0, nn.Flatten(start_dim=-len(layer_shapes[i])))
+
+			activation_component = utils.get_net_class_from_layers(activation_component)
+			activation_components.append(activation_component)
+
+		self.activation_components = [component().to(training.DEVICE) for component in activation_components]
+
+	def _initialize_label_component(self):
+		layers = self._get_fcn_layers(1)
+		label_component = utils.get_net_class_from_layers(layers)
+		self.label_component = label_component().to(training.DEVICE)
+
+	def _initialize_loss_component(self):
+		layers = self._get_fcn_layers(1)
+		loss_component = utils.get_net_class_from_layers(layers)
+		self.loss_component = loss_component().to(training.DEVICE)
+
+	def _initialize_gradient_component(self):
+		model = self.config.simulation.model
+		gradient_shapes = self.config.simulation.model_config.get_gradient_shapes()
+
+		trainable_layer_indices = self.config.simulation.model_config.get_trainable_layer_indices()
+		gradient_components = []
+		for i in range(len(model.layers)):
+			# Non-trainable layers are accounted for in the activation components
+			if i not in trainable_layer_indices:
+				continue
+
+			weights_shape, bias_shape = gradient_shapes.pop(0)
+
+			# Based on the assumption that the input will always be 3dimensional:
+			bias_shape = bias_shape + (1,)
+			while len(weights_shape) < 4:
+				weights_shape = (1,) + weights_shape
+			while len(bias_shape) < 4:
+				bias_shape = (1,) + bias_shape
+
+			# Assume the input to be batched
+			weights_shape = (1,) + weights_shape
+			bias_shape = (1,) + bias_shape
+
+			weights_convolution_component = self._get_convolution_layers(weights_shape)
+			bias_convolution_component = self._get_convolution_layers(bias_shape)
+
+			# Flatten both outputs to be a (batched) vector
+			weights_convolution_component.append(nn.Flatten(1))
+			bias_convolution_component.append(nn.Flatten(1))
+
+			# Get the output channels of the last convolutional component of the attacker model
+			out_channels = next(
+				layer.out_channels for layer in reversed(bias_convolution_component) if hasattr(layer, "out_channels"))
+
+			# The convolutional components will have reduced the last dimension of the gradient to 1, the rest will be
+			# flattened
+			weight_size = reduce(operator.mul, [out_channels, *weights_shape[2:-1], 1])
+			bias_size = reduce(operator.mul, [out_channels, *bias_shape[2:-1], 1])
+
+			# The weights are equal to (in_channels, out_channels, vertical kernel size/input features)
+			# Where it is the vertical kernel size for a convolutional layer and input features for a fcl
+			# Create the linear components and append
+			weights_convolution_component.extend(self._get_fcn_layers(weight_size))
+			bias_convolution_component.extend(self._get_fcn_layers(bias_size))
+
+			# Flatten the output of the fcn components
+			weight_net = utils.get_net_class_from_layers(weights_convolution_component)
+			bias_net = utils.get_net_class_from_layers(bias_convolution_component)
+			gradient_components.append((weight_net, bias_net))
 		self.gradient_components = [
-			component().to(old_training.DEVICE) for components in gradient_components for component in components
+			component().to(training.DEVICE) for components in gradient_components for component in components
 		]
-		self.label_component = label_component().to(old_training.DEVICE)
-		self.loss_component = loss_component().to(old_training.DEVICE)
-		self.encoder_component = encoder_component().to(old_training.DEVICE)
-		self.run_config = run_config
 
-	def get_label_value(self, y: torch.Tensor) -> torch.Tensor:
-		y = y.unsqueeze(1).float()
-		return self.label_component(y)
+	def _initialize_metric_component(self):
+		# Get the metrics from the config and then copy with equal shape as the
+		_, metrics = self.config.simulation.get_server_aggregates()
+		self.metric_components = [
+									 [copy.deepcopy(gradient_component) for gradient_component in
+									  self.gradient_components]
+								 ] * len(metrics)
 
-	def get_models(self, parameters: List[torch.Tensor]) -> List[nn.Module]:
-		"""
-		Creates a list of models from a list of parameters
-		:param parameters: the parameters of the model, where each index in the parameter are the parameters of the
-		model layer. The element at that index may be batched
-		"""
-		# Create all the models
-		batch_size = parameters[0].shape[0]
-		models = []
-		for i in range(batch_size):
-			model = self.run_config.get_model()
-			new_state_dict = {key: parameter[i] for key, parameter in zip(model.state_dict().keys(), parameters)}
-			model.load_state_dict(new_state_dict)
-			# Get the models to where the computer assumes it is
-			models.append(model.to(old_training.DEVICE))
+	def _initialize_encoder_component(self):
+		model = self.config.simulation.model
+		# First go over the activation and gradient components
+		# The gradient components will add the bias and weights in one sweep
+		trainable_layer_indices = self.config.simulation.model_config.get_trainable_layer_indices()
 
-		return models
+		activation_components = copy.deepcopy(self.activation_components)
+		gradient_components = copy.deepcopy(self.gradient_components)
 
-	def get_activation_values(self, models: List[nn.Module], x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-		"""
-		Passes the input through the models and gets the activation values
-		:param models: A list of models to pass the input through
-		:param x: The input, may be batched in that case the batch size must equal length of models
-		"""
-		model = self.run_config.get_model()
-		trainable_indices = get_trainable_layers_indices(model)
-		layer_count = len(model.layers)
+		layer_components = activation_components + gradient_components
 
-		def get_activation_values():
-			value = x
-			for i in range(layer_count):
-				value = torch.stack([model.layers[i](value[j]) for j, model in enumerate(models)])
-				if i not in trainable_indices:
-					yield value
+		global_rounds = self.config.simulation.global_rounds
+		metric_count = len(self.config.simulation.get_server_aggregates()[1])
 
-		activation_values = list(get_activation_values())
+		# Get the output size of each component
+		input_size = 0
+		for i, layer_component in enumerate(layer_components):
+			out_features = next(
+				layer.out_features for layer in reversed(gradient_components[0].layers) if
+				hasattr(layer, "out_features")
+			)
+			if i < len(activation_components):
+				input_size += out_features * global_rounds
+			else:
+				input_size += out_features * (1 + metric_count) * global_rounds
 
-		activation_component_values = torch.cat(
-			[component(activation_value) for activation_value, component in
-			 zip(activation_values, self.activation_components)],
-			dim=1
-		)
-		return activation_component_values, activation_values[-1]
+		# Add the out features two times for the loss and label component
+		input_size += out_features * 2 * global_rounds
 
-	def get_loss_value(
-			self,
-			predictions: torch.Tensor,
-			y: torch.Tensor
-	) -> Tuple[torch.Tensor, torch.Tensor]:
-		"""
-		Calculates the loss and the value of the loss component
-		:param predictions: the predictions to compute the loss for size must be equal to that of y
-		:param y: the expected output(s)
-		"""
-		criterion = self.run_config.get_criterion()
-		criterion.reduction = "none"
-		loss = criterion(predictions, y)
-		loss_value = self.loss_component(loss.unsqueeze(1))
-		return loss, loss_value
+		layers = []
+		in_features_set = False
+		raw_encoder_copy = copy.deepcopy(self.config.attack.attack_simulation.model_architecture.encoder)
+		for layer in raw_encoder_copy:
+			layer_type = getattr(nn, layer["type"])
+			parameters = {key: value for key, value in list(layer.items())[1:]}
 
-	def get_gradients_values(self, losses: torch.Tensor, models: List[nn.Module]) -> torch.Tensor:
-		"""
-		Calculates the gradient values for the models
-		:param losses: the losses of the models for the value that was put in
-		:param models: the models for which to compute the gradient component values
-		"""
-		# Get the gradients of all the model for all the layers
-		losses.sum().backward(retain_graph=self.training)
-		trainable_layer_count = len(list(models[0].parameters()))
+			# The first linear layer of the attack has the size of the concatenated output of all components
+			if not in_features_set and layer_type is nn.Linear:
+				in_features_set = True
+				parameters = {**parameters, "in_features": input_size}
 
-		def get_gradients():
-			for i in range(trainable_layer_count):
-				def reshape_to_4d(input_tensor: torch.Tensor) -> torch.Tensor:
-					while input_tensor.ndim < 4:
-						input_tensor = input_tensor.unsqueeze(0)
-					return input_tensor
+			layer = layer_type(**parameters)
+			layers.append(layer)
+		encoder_component = utils.get_net_class_from_layers(layers)
+		self.encoder_component = encoder_component()
 
-				layer_gradients = torch.stack(
-					list(reshape_to_4d(next(itertools.islice(model.parameters(), i, None)).grad) for model in models))
-				yield layer_gradients
+	def _get_fcn_layers(self, input_size: int):
+		layers = []
+		raw_fcn_copy = copy.deepcopy(self.config.attack.attack_simulation.model_architecture.fcn)
+		dynamic_parameters_set = False
+		for layer in raw_fcn_copy:
+			layer_type = getattr(nn, layer["type"])
+			parameters = {key: value for key, value in list(layer.items())[1:]}
 
-		gradients = list(get_gradients())
+			# The first linear layer of the attack has as many inputs as there are output classes
+			if not dynamic_parameters_set and layer_type is nn.Linear:
+				dynamic_parameters_set = True
+				parameters = {**parameters, "in_features": input_size}
 
-		# Get the gradient values for each model and layer
-		gradient_values = torch.cat(
-			[component(gradient) for (gradient, component) in zip(gradients, self.gradient_components)],
-			dim=1
-		)
-		return gradient_values
+			layer = layer_type(**parameters)
+			layers.append(layer)
+		return layers
+		pass
 
-	def forward(self, parameters: List[torch.Tensor], x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-		is_batched = x.ndim == 4 or x.ndim == 2
-		if not is_batched:
-			x = x.unsqueeze(0)
-			parameters = [parameter.unsqueeze(0) for parameter in parameters]
+	def _get_convolution_layers(self, input_shape):
+		layers = []
+		raw_cnn_copy = copy.deepcopy(self.config.attack.attack_simulation.model_architecture.gradient)
+		dynamic_parameters_set = False
+		for layer in raw_cnn_copy:
+			# Get the static parameters
+			if hasattr(nn, layer["type"]):
+				module = nn
+			else:
+				module = utils
 
-		models = self.get_models(parameters)
-		label_value = self.get_label_value(y)
-		activation_values, predictions = self.get_activation_values(models, x)
-		loss, loss_value = self.get_loss_value(predictions, y)
-		gradient_values = self.get_gradients_values(loss, models)
-		encoder_input_values = torch.cat([activation_values, loss_value, label_value, gradient_values], dim=1)
-		result = self.encoder_component(encoder_input_values)
-		result = result.view(-1)
-		if not is_batched:
-			result = result.squeeze(0)
+			layer_type = getattr(module, layer["type"])
+			parameters = {key: value for key, value in list(layer.items())[1:]}
 
-		return result
+			# The kernel of the first convolution layer is as wide as the width/breadth of the input shape
+			if not dynamic_parameters_set and (layer_type is nn.Conv2d or layer_type is nn.Conv3d):
+				parameters["in_channels"] = input_shape[1]
+				parameters["kernel_size"].append(input_shape[-1])
+				dynamic_parameters_set = True
+
+			layer = layer_type(**parameters)
+			layers.append(layer)
+		return layers

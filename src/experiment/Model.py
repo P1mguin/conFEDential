@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import operator
+from functools import reduce
 from typing import Iterator, List
 
 import flwr as fl
@@ -111,6 +113,16 @@ class Model:
 				)
 			elif isinstance(layer, nn.Linear):
 				layer_shape = (layer.out_features,)
+			elif isinstance(layer, nn.Flatten):
+				start_dim = layer.start_dim
+				end_dim = layer.end_dim
+				if end_dim == -1:
+					end_dim = len(layer_shape)
+				flattened_shape = reduce(operator.mul, layer_shape[start_dim:end_dim], 1)
+
+				layer_shape = (
+					*layer_shape[0:start_dim], flattened_shape, *layer_shape[end_dim:len(layer_shape)]
+				)
 			layer_output_shapes.append(layer_shape)
 		return layer_output_shapes
 

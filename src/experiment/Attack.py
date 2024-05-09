@@ -135,6 +135,15 @@ class Attack:
 		model_iterations = server_aggregates[0]
 		metric_iterations = server_aggregates[1]
 
+		# Reshape each value in the metrics to be 5D
+		for key, value in metric_iterations.items():
+			for i, layer in enumerate(value):
+				layer_value = torch.tensor(layer)
+				while layer_value.ndim < 5:
+					layer_value = layer_value.unsqueeze(1)
+
+				metric_iterations[key][i] = layer_value.float()
+
 		features = torch.stack([value[0] for value in attack_data])
 		labels = torch.stack([value[1] for value in attack_data])
 		is_member = torch.stack([value[2] for value in attack_data])
@@ -161,7 +170,8 @@ class Attack:
 					gradient = [layer[j] for layer in gradients]
 					loss_value = loss[j]
 					is_value_member = batch_is_member[j]
-					yield (activation_value, gradient, loss_value, metric_iterations), is_value_member
+					label = batch_labels[j].float()
+					yield (activation_value, gradient, loss_value, label, metric_iterations), is_value_member
 
 		attack_dataset = attack_dataset_generator()
 		dataset = GeneratorDataset(attack_dataset, len(attack_data))
@@ -241,14 +251,17 @@ class Attack:
 
 		def get_gradients():
 			for i in range(trainable_layer_count):
-				layer_gradients = torch.stack(
-					[
-						torch.stack(
-							[next(itertools.islice(iteration.parameters(), i, None)).grad for iteration in iterations]
-						)
-						for iterations in models
-					]
-				)
+				def reshape_to_4d(input_tensor: torch.Tensor) -> torch.Tensor:
+					while input_tensor.ndim < 4:
+						input_tensor = input_tensor.unsqueeze(0)
+					return input_tensor
+
+				layer_gradients = torch.stack([
+					torch.stack(
+						[reshape_to_4d(next(itertools.islice(iteration.parameters(), i, None)).grad)
+						 for iteration in iterations]
+					) for iterations in models
+				])
 				yield layer_gradients
 
 		gradients = list(get_gradients())

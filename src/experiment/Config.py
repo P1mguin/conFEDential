@@ -9,6 +9,7 @@ import yaml
 
 from .Attack import Attack
 from .Simulation import Simulation
+from ..attacks import AttackNet
 
 
 class Config:
@@ -63,6 +64,10 @@ class Config:
 
 		# For each intercepted datapoint, get their gradients, activation functions, loss
 		attack_dataset = self._get_attack_dataset()
+
+		# Get the attack model
+		attack_model = AttackNet(self)
+
 
 	def _get_attack_dataset(self):
 		# Get the model
