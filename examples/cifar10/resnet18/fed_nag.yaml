@@ -11,15 +11,15 @@ simulation:
   federation:
     client_count: 100
     fraction_fit: 0.1
-    global_rounds: 10
-    local_rounds: 20
+    global_rounds: 200
+    local_rounds: 1
   model:
     optimizer_name: FedNag
     model_name: ResNet18
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
-      lr: 0.05
-      momentum: 0.95
+      lr: 0.01
+      momentum: 0.9
     model_architecture:
       repo_or_dir: 'pytorch/vision:v0.10.0'
       model: 'resnet18'

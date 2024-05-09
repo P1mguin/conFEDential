@@ -63,10 +63,10 @@ class Config:
 			self.simulation.simulate_federation(client_resources, is_capturing, is_online, run_name)
 
 		# For each intercepted datapoint, get their gradients, activation functions, loss
-		attack_dataset = self._get_attack_dataset()
+		# attack_dataset = self._get_attack_dataset()
 
 		# Get the attack model
-		attack_model = AttackNet(self)
+# 		attack_model = AttackNet(self)
 
 
 	def _get_attack_dataset(self):
