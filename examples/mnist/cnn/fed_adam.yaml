@@ -48,7 +48,7 @@ simulation:
         kernel_size: 2
         stride: 2
       - type: Flatten
-        start_dim: 1
+        start_dim: -3
         end_dim: -1
       - type: Linear
         in_features: 3136
