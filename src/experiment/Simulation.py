@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import collections
 import hashlib
 import json
@@ -18,10 +16,8 @@ from fedartml import SplitAsFederatedData
 from flwr.common.logger import log
 from torch.utils.data import DataLoader, Dataset, random_split
 
+from src.experiment import Data, Federation, Model
 from src.training import Client, Server
-from .Data import Data
-from .Federation import Federation
-from .Model import Model
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 
@@ -55,7 +51,7 @@ class Simulation:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> Simulation:
+	def from_dict(config: dict) -> 'Simulation':
 		return Simulation(
 			data=Data.from_dict(config['data']),
 			federation=Federation.from_dict(config['federation']),
@@ -301,7 +297,7 @@ class Simulation:
 		split_cache_path = f"{base_path}split/{split_hash}.pkl"
 		return split_cache_path
 
-	def _split_data(self, dataset: Dataset) -> Generator[Dataset]:
+	def _split_data(self, dataset: Dataset) -> Generator[Dataset, None, None]:
 		# Split the data based on the non-iid splitter
 		client_count = self._federation.client_count
 		if self._data.is_split:

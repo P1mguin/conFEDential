@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from .ModelArchitecture import ModelArchitecture
+from src.experiment import ModelArchitecture
 
 
 class AttackSimulation:
@@ -36,7 +34,7 @@ class AttackSimulation:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> AttackSimulation:
+	def from_dict(config: dict) -> 'AttackSimulation':
 		return AttackSimulation(
 			batch_size=config['batch_size'],
 			optimizer_name=config['optimizer_name'],

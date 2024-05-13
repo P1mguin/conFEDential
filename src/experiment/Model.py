@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import operator
 from functools import reduce
 from typing import Iterator, List
@@ -59,7 +57,7 @@ class Model:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> Model:
+	def from_dict(config: dict) -> 'Model':
 		return Model(
 			optimizer_name=config['optimizer_name'],
 			model_name=config['model_name'],

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 class Federation:
 	def __init__(self, client_count: int, fraction_fit: float, global_rounds: int, local_rounds: int):
 		self._client_count = client_count
@@ -25,7 +23,7 @@ class Federation:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> Federation:
+	def from_dict(config: dict) -> 'Federation':
 		return Federation(
 			client_count=config['client_count'],
 			fraction_fit=config['fraction_fit'],

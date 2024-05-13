@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import random
 from logging import INFO
@@ -9,9 +7,7 @@ import torch
 import yaml
 from flwr.common import log
 
-from .Attack import Attack
-from .Simulation import Simulation
-from ..attacks import AttackNet
+from src.experiment import Attack, Simulation
 
 
 class Config:
@@ -37,14 +33,14 @@ class Config:
 		return result
 
 	@staticmethod
-	def from_yaml_file(yaml_file: str) -> Config:
+	def from_yaml_file(yaml_file: str) -> 'Config':
 		with open(yaml_file, "r") as f:
 			config = yaml.safe_load(f)
 
 		return Config.from_dict(config)
 
 	@staticmethod
-	def from_dict(config: dict) -> Config:
+	def from_dict(config: dict) -> 'Config':
 		return Config(
 			simulation=Simulation.from_dict(config['simulation']),
 			attack=Attack.from_dict(config['attack'])

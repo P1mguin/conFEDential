@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 import itertools
 import math
@@ -13,8 +11,7 @@ from torch.utils.data import DataLoader
 
 import src.training as training
 import src.utils as utils
-from . import Simulation
-from .AttackSimulation import AttackSimulation
+from src.experiment import AttackSimulation, Simulation
 
 
 class Attack:
@@ -53,7 +50,7 @@ class Attack:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> Attack:
+	def from_dict(config: dict) -> 'Attack':
 		attack_simulation = AttackSimulation.from_dict(config['attack_simulation'])
 		return Attack(
 			data_access=config['data_access'],

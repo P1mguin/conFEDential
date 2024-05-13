@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import hashlib
 import os
 import pickle
@@ -55,7 +53,7 @@ class Data:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> Data:
+	def from_dict(config: dict) -> 'Data':
 		return Data(
 			dataset_name=config['dataset_name'],
 			batch_size=config['batch_size'],

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List
 
 
@@ -23,7 +21,7 @@ class ModelArchitecture:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> ModelArchitecture:
+	def from_dict(config: dict) -> 'ModelArchitecture':
 		return ModelArchitecture(
 			gradient_component=config['gradient_component'],
 			fcn_component=config['fcn_component'],
