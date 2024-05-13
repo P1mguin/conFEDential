@@ -20,7 +20,7 @@ class Attack:
 			data_access: str,
 			message_access: str,
 			repetitions: int,
-			attack_simulation: AttackSimulation | None = None
+			attack_simulation = None
 	):
 		self._data_access = data_access
 		self._message_access = message_access
@@ -85,7 +85,7 @@ class Attack:
 		elif self._data_access == "all":
 			return list(range(client_count))
 
-	def get_target_sample(self, simulation: Simulation):
+	def get_target_sample(self, simulation):
 		"""
 		Function that selects the target to attack based on the configuration. In case the attacker has access to all
 		data, it will be any sample from the dataset. If they only have access to one client, the sample will come from
@@ -119,7 +119,7 @@ class Attack:
 			self,
 			server_aggregates: Tuple[List[npt.NDArray], dict],
 			attack_data: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]],
-			simulation: Simulation
+			simulation
 	) -> DataLoader:
 		"""
 		A function that takes a simulation of a federated learning application, a list of intercepted data:

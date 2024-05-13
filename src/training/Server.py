@@ -10,12 +10,11 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
 from src import training
-from src.experiment import Simulation
 from src.training.learning_methods import Strategy
 
 
 class Server(FedAvg):
-	def __init__(self, simulation: Simulation, is_capturing: bool):
+	def __init__(self, simulation, is_capturing: bool):
 		fraction_evaluate = 0.
 		min_evaluate_clients = 0
 		fraction_fit = simulation.fraction_fit
@@ -50,7 +49,7 @@ class Server(FedAvg):
 			os.makedirs(f"{output_directory}aggregates/metrics", exist_ok=True)
 
 	@staticmethod
-	def get_evaluate_fn(simulation: Simulation):
+	def get_evaluate_fn(simulation):
 		test_loader = simulation.test_loader
 
 		def evaluate(

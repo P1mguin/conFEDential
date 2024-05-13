@@ -6,7 +6,7 @@ class AttackSimulation:
 			self,
 			batch_size: int,
 			optimizer_name: str,
-			model_architecture: ModelArchitecture,
+			model_architecture,
 			optimizer_parameters: dict | None = None
 	):
 		if optimizer_parameters is None:

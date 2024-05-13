@@ -4,11 +4,9 @@ import flwr as fl
 import numpy.typing as npt
 from torch.utils.data import DataLoader
 
-from src.experiment import Simulation
-
 
 class Client(fl.client.NumPyClient):
-	def __init__(self, cid: int, simulation: Simulation, train_loader: DataLoader):
+	def __init__(self, cid: int, simulation, train_loader: DataLoader):
 		self.cid = cid
 		self.simulation = simulation
 		self.learning_method = simulation.learning_method
@@ -24,7 +22,7 @@ class Client(fl.client.NumPyClient):
 		return new_parameters, data_size, metrics
 
 	@staticmethod
-	def get_client_fn(simulation: Simulation):
+	def get_client_fn(simulation):
 		train_loaders = simulation.train_loaders
 
 		def client_fn(cid: str) -> fl.client.Client:

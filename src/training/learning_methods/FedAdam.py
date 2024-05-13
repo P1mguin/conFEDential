@@ -10,7 +10,6 @@ from torch.optim import SGD
 from torch.utils.data import DataLoader
 
 from src import training, utils
-from src.experiment import Simulation
 from src.training.learning_methods.Strategy import Strategy
 
 
@@ -38,7 +37,7 @@ class FedAdam(Strategy):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			simulation: Simulation,
+			simulation,
 			metrics: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		# Get and set training configuration
@@ -70,7 +69,7 @@ class FedAdam(Strategy):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-			simulation: Simulation
+			simulation
 	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		# If no results have been received return nothing
 		if not results:

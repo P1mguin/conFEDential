@@ -7,7 +7,6 @@ from numpy import typing as npt
 from torch import nn as nn
 from torch.utils.data import DataLoader
 
-from src.experiment import Simulation
 from src.training.learning_methods.Strategy import Strategy
 
 
@@ -22,7 +21,7 @@ class RMSprop(Strategy):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			simulation: Simulation,
+			simulation,
 			metrics: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		raise NotImplementedError
@@ -32,6 +31,6 @@ class RMSprop(Strategy):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-			simulation: Simulation
+			simulation
 	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		raise NotImplementedError

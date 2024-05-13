@@ -11,7 +11,7 @@ from src.experiment import Attack, Simulation
 
 
 class Config:
-	def __init__(self, simulation: Simulation, attack: Attack):
+	def __init__(self, simulation, attack):
 		self._simulation = simulation
 		self._attack = attack
 
@@ -47,11 +47,11 @@ class Config:
 		)
 
 	@property
-	def simulation(self) -> Simulation:
+	def simulation(self):
 		return self._simulation
 
 	@property
-	def attack(self) -> Attack:
+	def attack(self):
 		return self._attack
 
 	def run_simulation(self, concurrent_clients: int, is_online: bool, is_capturing: bool, run_name: str):

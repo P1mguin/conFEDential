@@ -23,7 +23,7 @@ PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 
 
 class Simulation:
-	def __init__(self, data: Data, federation: Federation, model: Model):
+	def __init__(self, data, federation, model):
 		self._data = data
 		self._federation = federation
 		self._model = model
@@ -143,8 +143,8 @@ class Simulation:
 		"""
 		Simulates federated learning for the given dataset, federation and model.
 		"""
-		client_fn = Client.Client.get_client_fn(self)
-		strategy = Server.Server(self, is_capturing)
+		client_fn = Client.get_client_fn(self)
+		strategy = Server(self, is_capturing)
 
 		wandb_kwargs = self._get_wandb_kwargs(run_name)
 		mode = "online" if is_online else "offline"
@@ -297,7 +297,7 @@ class Simulation:
 		split_cache_path = f"{base_path}split/{split_hash}.pkl"
 		return split_cache_path
 
-	def _split_data(self, dataset: Dataset) -> Generator[Dataset, None, None]:
+	def _split_data(self, dataset) -> Generator[Dataset, None, None]:
 		# Split the data based on the non-iid splitter
 		client_count = self._federation.client_count
 		if self._data.is_split:

@@ -9,7 +9,6 @@ from flwr.server.client_proxy import ClientProxy
 from torch.utils.data import DataLoader
 
 import src.training as training
-from src.experiment import Simulation
 
 
 class Strategy(ABC):
@@ -29,7 +28,7 @@ class Strategy(ABC):
 			self,
 			parameters: List[npt.NDArray],
 			train_loader: DataLoader,
-			simulation: Simulation,
+			simulation,
 			metrics: Dict[str, Any]
 	) -> Tuple[List[npt.NDArray], int, Dict[str, Any]]:
 		"""
@@ -47,7 +46,7 @@ class Strategy(ABC):
 			server_round: int,
 			results: List[Tuple[ClientProxy, FitRes]],
 			failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-			simulation: Simulation
+			simulation
 	) -> Tuple[Optional[Parameters], Dict[str, Any]]:
 		"""
 		A method to aggregate the results of the client of the global training round
@@ -62,7 +61,7 @@ class Strategy(ABC):
 	def test(
 			parameters: List[npt.NDArray] | None,
 			test_loader: DataLoader,
-			simulation: Simulation
+			simulation
 	) -> Tuple[float, float, int]:
 		"""
 		A helper method to test a PyTorch model on a given test loader via criteria described in a configuration
