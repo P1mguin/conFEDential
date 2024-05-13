@@ -364,7 +364,7 @@ def get_client_resources(concurrent_clients: int) -> dict:
 				  "consider changing the amount of clients so that all available resources are used."
 				  f"The total resources are {total_cpus} CPUs and {total_gpus} GPUs.")
 	else:
-		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs and {client_cpus} GPUs for"
+		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs and {client_gpus} GPUs for"
 				  f"the total available {total_cpus} CPUs and {total_gpus} GPUs")
 
 	client_resources = {
