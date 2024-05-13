@@ -363,6 +363,9 @@ def get_client_resources(concurrent_clients: int) -> dict:
 		log(WARN, "The amount of clients is not a divisor of the total amount of CPUs,\n"
 				  "consider changing the amount of clients so that all available resources are used."
 				  f"The total resources are {total_cpus} CPUs and {total_gpus} GPUs.")
+	else:
+		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs and {client_cpus} GPUs for"
+				  f"the total available {total_cpus} CPUs and {total_gpus} GPUs")
 
 	client_resources = {
 		"num_cpus": client_cpus,
