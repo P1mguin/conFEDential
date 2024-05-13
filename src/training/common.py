@@ -23,5 +23,5 @@ def set_weights(model: nn.Module, weights: List[npt.NDArray]) -> None:
 	:param weights: the target weights
 	"""
 	params_dict = zip(model.state_dict().keys(), weights)
-	state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+	state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
 	model.load_state_dict(state_dict, strict=True)
