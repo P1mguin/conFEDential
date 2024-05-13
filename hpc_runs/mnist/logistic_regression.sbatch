@@ -15,6 +15,6 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/main.py --yaml-file examples/mnist/logistic_regression/fed_adam.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name MNIST-LOGISTICREGRESSION-FEDADAM
-srun python src/main.py --yaml-file examples/mnist/logistic_regression/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name MNIST-LOGISTICREGRESSION-FEDAVG
-srun python src/main.py --yaml-file examples/mnist/logistic_regression/fed_nag.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name MNIST-LOGISTICREGRESSION-FEDNAG
+srun python src/main.py --yaml-file examples/mnist/logistic_regression/fed_adam.yaml --clients 8 --no-logging --capturing --run-name MNIST-LOGISTICREGRESSION-FEDADAM
+srun python src/main.py --yaml-file examples/mnist/logistic_regression/fed_avg.yaml --clients 8 --no-logging --capturing --run-name MNIST-LOGISTICREGRESSION-FEDAVG
+srun python src/main.py --yaml-file examples/mnist/logistic_regression/fed_nag.yaml --clients 8 --no-logging --capturing --run-name MNIST-LOGISTICREGRESSION-FEDNAG

@@ -15,6 +15,6 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_adam.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name CIFAR10-RESNET18-FEDADAM
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name CIFAR10-RESNET18-FEDAVG
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name CIFAR10-RESNET18-FEDNAG
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_adam.yaml --clients 8 --no-logging --capturing --run-name CIFAR10-RESNET18-FEDADAM
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_avg.yaml --clients 8 --no-logging --capturing --run-name CIFAR10-RESNET18-FEDAVG
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --clients 8 --no-logging --capturing --run-name CIFAR10-RESNET18-FEDNAG

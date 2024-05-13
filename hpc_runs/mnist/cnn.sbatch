@@ -15,6 +15,6 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/main.py --yaml-file examples/mnist/cnn/fed_adam.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name MNIST-CNN-FEDADAM
-srun python src/main.py --yaml-file examples/mnist/cnn/fed_avg.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name MNIST-CNN-FEDAVG
-srun python src/main.py --yaml-file examples/mnist/cnn/fed_nag.yaml --num-gpus 0.125 --num-cpus 8 --no-logging --capturing --run-name MNIST-CNN-FEDNAG
+srun python src/main.py --yaml-file examples/mnist/cnn/fed_adam.yaml --clients 8 --no-logging --capturing --run-name MNIST-CNN-FEDADAM
+srun python src/main.py --yaml-file examples/mnist/cnn/fed_avg.yaml --clients 8 --no-logging --capturing --run-name MNIST-CNN-FEDAVG
+srun python src/main.py --yaml-file examples/mnist/cnn/fed_nag.yaml --clients 8 --no-logging --capturing --run-name MNIST-CNN-FEDNAG
