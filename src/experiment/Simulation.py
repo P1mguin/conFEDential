@@ -145,15 +145,18 @@ class Simulation:
 		"""
 		Simulates federated learning for the given dataset, federation and model.
 		"""
+		log(INFO, "Creating client and strategy functions")
 		client_fn = Client.Client.get_client_fn(self)
 		strategy = Server.Server(self, is_capturing)
 
+		log(INFO, "Creating W&B configuration")
 		wandb_kwargs = self._get_wandb_kwargs(run_name)
 		mode = "online" if is_online else "offline"
 		wandb.init(mode=mode, **wandb_kwargs)
 
 		ray_init_args = get_ray_init_args()
 
+		log(INFO, "Starting federated learning simulation")
 		try:
 			fl.simulation.start_simulation(
 				client_fn=client_fn,
