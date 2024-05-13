@@ -5,7 +5,7 @@ import hashlib
 import json
 import os
 import pickle
-from logging import ERROR
+from logging import ERROR, INFO
 from typing import Generator, List
 
 import flwr as fl
@@ -33,6 +33,8 @@ class Simulation:
 		# Set the train and test loaders based on the dataset and the federation
 		self.train_loaders = None
 		self.test_loader = None
+
+		log(INFO, "Preparing datasets for federated learning simulation")
 		self._prepare_loaders()
 
 	def __str__(self):
@@ -233,9 +235,12 @@ class Simulation:
 
 		# If the split dataloaders are available, load it
 		if os.path.exists(split_cache_path):
+			log(INFO, "Found previously split dataloaders, loading them")
 			with open(split_cache_path, "rb") as file:
 				self.train_loaders, self.test_loader = pickle.load(file)
 				return
+		else:
+			log(INFO, "Found no previously split dataloaders, splitting the data now")
 
 		train_dataset, test_dataset = self._data.dataset
 

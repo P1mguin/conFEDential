@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import os
 import random
+from logging import INFO
 
 import numpy as np
 import torch
 import yaml
+from flwr.common import log
 
 from .Attack import Attack
 from .Simulation import Simulation
@@ -57,10 +59,14 @@ class Config:
 		return self._attack
 
 	def run_simulation(self, client_resources: dict, is_online: bool, is_capturing: bool, run_name: str):
+		log(INFO, "Starting conFEDential simulation")
 		# If nothing has been captured for this simulation, capture the simulation
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
+			log(INFO, "No previous federated learning simulation found, starting training simulation...")
 			self.simulation.simulate_federation(client_resources, is_capturing, is_online, run_name)
+		else:
+			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 
 		# For each intercepted datapoint, get their gradients, activation functions, loss
 		# attack_dataset = self._get_attack_dataset()

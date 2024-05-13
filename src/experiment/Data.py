@@ -3,6 +3,9 @@ from __future__ import annotations
 import hashlib
 import os
 import pickle
+from logging import INFO
+
+from flwr.common import log
 
 from src import data
 
@@ -26,6 +29,8 @@ class Data:
 
 		# Prepare the train and test data
 		self._dataset = None
+
+		log(INFO, "Preprocessing the federated learning dataset")
 		self._prepare_dataset()
 
 	def __str__(self):
@@ -101,9 +106,12 @@ class Data:
 
 		# If the preprocessed dataset is available, load it
 		if os.path.exists(preprocessed_cache_path):
+			log(INFO, "Found preprocessed data for the given preprocess function, returning")
 			with open(preprocessed_cache_path, "rb") as file:
 				self.dataset = pickle.load(file)
 				return
+		else:
+			log(INFO, "No preprocessed data found for the given preprocess function, preprocessing now")
 
 		# Load the raw dataset
 		train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
