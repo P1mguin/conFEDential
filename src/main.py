@@ -29,17 +29,9 @@ parser.add_argument(
 )
 
 parser.add_argument(
-	"--num-cpus",
+	"--clients",
 	type=int,
-	default=144,
-	help="Number of CPUs to assign to a virtual client"
-)
-
-parser.add_argument(
-	"--num-gpus",
-	type=float,
-	default=8.,
-	help="Number of GPUs to assign to a virtual client"
+	help="The amount of concurrent clients to run simultaneously"
 )
 
 parser.add_argument(
@@ -65,20 +57,16 @@ parser.add_argument(
 def main():
 	args = parser.parse_args()
 
-	client_resources = {
-		"num_cpus": args.num_cpus,
-		"num_gpus": args.num_gpus
-	}
-
 	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
 
+	concurrent_clients = args.clients
 	run_name = args.run_name
 	is_online = args.logging
 	is_capturing = args.capturing
 
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
-		config.run_simulation(client_resources, is_online, is_capturing, run_name)
+		config.run_simulation(concurrent_clients, is_online, is_capturing, run_name)
 
 if __name__ == '__main__':
 	main()

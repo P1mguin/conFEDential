@@ -58,13 +58,13 @@ class Config:
 	def attack(self) -> Attack:
 		return self._attack
 
-	def run_simulation(self, client_resources: dict, is_online: bool, is_capturing: bool, run_name: str):
+	def run_simulation(self, concurrent_clients: int, is_online: bool, is_capturing: bool, run_name: str):
 		log(INFO, "Starting conFEDential simulation")
 		# If nothing has been captured for this simulation, capture the simulation
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
 			log(INFO, "No previous federated learning simulation found, starting training simulation...")
-			self.simulation.simulate_federation(client_resources, is_capturing, is_online, run_name)
+			self.simulation.simulate_federation(concurrent_clients, is_capturing, is_online, run_name)
 		else:
 			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 

@@ -3,13 +3,16 @@ from __future__ import annotations
 import collections
 import hashlib
 import json
+import multiprocessing
 import os
 import pickle
-from logging import ERROR, INFO
+from logging import ERROR, INFO, WARN
 from typing import Generator, List
 
 import flwr as fl
 import numpy as np
+import ray
+import torch
 import wandb
 from fedartml import SplitAsFederatedData
 from flwr.common.logger import log
@@ -19,7 +22,6 @@ from src.training import Client, Server
 from .Data import Data
 from .Federation import Federation
 from .Model import Model
-from .. import training
 
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 
@@ -137,7 +139,7 @@ class Simulation:
 
 	def simulate_federation(
 			self,
-			client_resources: dict,
+			concurrent_clients: int,
 			is_capturing: bool = False,
 			is_online: bool = False,
 			run_name: str = None
@@ -145,17 +147,18 @@ class Simulation:
 		"""
 		Simulates federated learning for the given dataset, federation and model.
 		"""
-		log(INFO, "Creating client and strategy functions")
 		client_fn = Client.Client.get_client_fn(self)
 		strategy = Server.Server(self, is_capturing)
 
-		log(INFO, "Creating W&B configuration")
 		wandb_kwargs = self._get_wandb_kwargs(run_name)
 		mode = "online" if is_online else "offline"
 		wandb.init(mode=mode, **wandb_kwargs)
 
+		# Initialize ray
 		ray_init_args = get_ray_init_args()
+		ray.init(**ray_init_args)
 
+		client_resources = get_client_resources(concurrent_clients)
 		log(INFO, "Starting federated learning simulation")
 		try:
 			fl.simulation.start_simulation(
@@ -163,12 +166,15 @@ class Simulation:
 				num_clients=self.client_count,
 				client_resources=client_resources,
 				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
-				ray_init_args=ray_init_args,
+				keep_initialised=True,
 				strategy=strategy
 			)
 		except Exception as e:
 			log(ERROR, e)
 			wandb.finish(exit_code=1)
+
+		# Shut ray down
+		ray.shutdown()
 
 	def get_server_aggregates(self):
 		"""
@@ -346,12 +352,43 @@ class Simulation:
 		}
 
 
-def get_ray_init_args():
+def get_client_resources(concurrent_clients: int) -> dict:
+	"""
+	Finds the amount of resources available to each client based on the amount of desired concurrent clients and the
+	resources available to the system.
+	"""
+	total_cpus = multiprocessing.cpu_count()
+	total_gpus = torch.cuda.device_count()
+
+	client_cpus = total_cpus // concurrent_clients
+	client_gpus = total_gpus / concurrent_clients
+
+	if client_cpus * concurrent_clients < total_cpus:
+		log(WARN, "The amount of clients is not a divisor of the total amount of CPUs,\n"
+				  "consider changing the amount of clients so that all available resources are used."
+				  f"The total resources are {total_cpus} CPUs and {total_gpus} GPUs.")
+
+	client_resources = {
+		"num_cpus": client_cpus,
+		"num_gpus": client_gpus,
+	}
+	return client_resources
+
+
+def get_ray_init_args() -> dict:
+	"""
+	Returns the ray init arguments for the type of system the simulation is run on.
+	"""
+	total_cpus = multiprocessing.cpu_count()
+	total_gpus = torch.cuda.device_count()
+
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
 			"excludes": [".git", "hpc_runs"]
 		},
+		"num_cpus": total_cpus,
+		"num_gpus": total_gpus,
 	}
 
 	# Cluster admin wants to use local instead of tmp
