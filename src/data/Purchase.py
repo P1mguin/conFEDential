@@ -2,14 +2,14 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from torch.utils.data import random_split, TensorDataset
+from torch.utils.data import DataLoader, random_split, TensorDataset
 
 from src.data.Dataset import Dataset
 
 
 class Purchase(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[Dataset, Dataset]:
+	def load_dataset() -> Tuple[DataLoader, DataLoader]:
 		# For documentation see Dataset
 		Dataset.is_data_downloaded("purchase")
 

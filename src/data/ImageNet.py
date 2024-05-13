@@ -1,13 +1,14 @@
 from typing import Tuple
 
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 
 from src.data.Dataset import Dataset
 
 
 class ImageNet(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[Dataset, Dataset]:
+	def load_dataset() -> Tuple[DataLoader, DataLoader]:
 		# For documentation see Dataset
 		Dataset.is_data_downloaded("zh-plus___tiny-imagenet")
 		train_dataset, test_dataset = load_dataset(
