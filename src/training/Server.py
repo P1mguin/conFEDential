@@ -1,3 +1,4 @@
+import collections
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -75,15 +76,7 @@ class Server(FedAvg):
 
 		# Capture the results
 		if self.is_capturing:
-			self._capture_messages(results)
-
-			output_directory = self.simulation.get_capture_directory()
-			self._capture_aggregates(
-				parameters_to_ndarrays(aggregated_parameters),
-				f"{output_directory}aggregates/aggregates.npz"
-			)
-			for key, value in config.items():
-				self._capture_aggregates(value, f"{output_directory}aggregates/metrics/{key}.npz")
+			self._capture_results(server_round, results, aggregated_parameters, config)
 
 		# Update config with the configuration values received from the aggregation
 		self.update_config_fn(config)
@@ -96,94 +89,101 @@ class Server(FedAvg):
 
 		self.on_fit_config_fn = fit_config
 
-	def _capture_aggregates(self, aggregate: List[npt.NDArray], path: str) -> None:
-		# Ensure the path to the file exists
-		if not os.path.exists(path):
-			# Grab some non-zero message as a representation
-			shapes = [layer.shape for layer in aggregate]
-			np.savez(path, *[np.zeros((0, *shape)) for shape in shapes])
+	def _capture_results(
+			self,
+			server_round: int,
+			results: List[Tuple[ClientProxy, FitRes]],
+			aggregated_parameters: Parameters,
+			metrics: dict
+	) -> None:
+		self._capture_aggregates(server_round, aggregated_parameters, metrics)
+		self._capture_messages(server_round, results)
 
-		# Retrieve the earlier captures of the variable to which this iteration will be appended
-		variables = self._load_npz_file(path)
+	def _capture_messages(self, server_round, messages: List[Tuple[ClientProxy, FitRes]]) -> None:
+		base_path = self.simulation.get_capture_directory()
+		base_path = f"{base_path}messages/"
 
-		# Expand the dimension of each layer by one such it supports a new iteration of captures
-		for i, (captures, layer) in enumerate(zip(variables, aggregate)):
-			shape = captures.shape
-			expanded_matrix = np.zeros((shape[0] + 1, shape[1], *shape[2:]))
-			expanded_matrix[:-1] = variables[i]
-			expanded_matrix[-1] = layer
-			variables[i] = expanded_matrix
+		participating_clients = [int(client_proxy.cid) for client_proxy, _ in messages]
+		client_count = self.simulation.client_count
 
-		# Save this variable
-		np.savez(path, *variables)
+		# Function that converts the received messages to the format (client_count, iteration, *shape)
+		# and fills in the blanks for the clients that did not participate in the round
+		def reshape_to_federation_capture(messages):
+			# Stack the layers together
+			messages = list(map(np.stack, zip(*messages)))
 
-	def _capture_messages(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
-		output_directory = self.simulation.get_capture_directory()
+			# Explode so the iteration is there
+			messages = [np.expand_dims(message, 1) for message in messages]
 
-		# Bundle the messages in a dict
-		captured_results = {"parameters": {}, "metrics": {}}
-		for client_proxy, fit_results in results:
-			cid = int(client_proxy.cid)
+			# Create a list of zeros for the clients that did not participate and set the variables for those that did
+			results = [
+				np.expand_dims(np.zeros_like(message[0]), axis=0).repeat(client_count, axis=0) for message in messages
+			]
+			for result, message in zip(results, messages):
+				result[participating_clients] = message
 
-			# Store the parameters
-			parameters = parameters_to_ndarrays(fit_results.parameters)
-			captured_results["parameters"][cid] = parameters
+			return results
 
-			# Store the metrics
-			metrics = fit_results.metrics
-			for key, value in metrics.items():
-				if not captured_results["metrics"].get(key):
-					captured_results["metrics"][key] = {}
-				captured_results["metrics"][key][cid] = value
+		# Take the parameters, transpose them and stack them
+		parameter_messages = [parameters_to_ndarrays(fitres.parameters) for _, fitres in messages]
+		parameter_messages = reshape_to_federation_capture(parameter_messages)
+		self._capture_variable(
+			server_round, parameter_messages, f"{base_path}messages.npz", is_message=True, is_aggregate=True
+		)
 
-		# Capture the parameters
-		parameters_path = f"{output_directory}messages/messages.npz"
-		self._capture_variable(captured_results["parameters"], parameters_path)
+		# Combine the metrics in one dict
+		metrics = collections.defaultdict(list)
+		for _, fitres in messages:
+			for key, value in fitres.metrics.items():
+				metrics[key].append(value)
+		metrics = dict(metrics)
 
-		# Capture the variables in the metrics
-		for key, value in captured_results["metrics"].items():
-			capture_path = f"{output_directory}messages/metrics/{key}.npz"
-			self._capture_variable(value, capture_path)
+		for key, value in metrics.items():
+			value = reshape_to_federation_capture(value)
+			self._capture_variable(server_round, value, f"{base_path}metrics/{key}.npz", is_message=True)
 
-	def _capture_variable(self, messages: Dict[int, List[npt.NDArray]], path: str) -> None:
-		# Ensure the path to the file exists
-		if not os.path.exists(path):
-			# Grab some non-zero message as a representation
-			message = list(messages.values())[0]
-			shapes = [layer.shape for layer in message]
-			self._initialize_empty_npz_file(path, shapes)
+	def _capture_aggregates(self, server_round: int, aggregated_parameters: Parameters, metrics: dict):
+		base_path = self.simulation.get_capture_directory()
+		base_path = f"{base_path}aggregates/"
 
-		# Retrieve the earlier captures of the variable to which this iteration will be appended
-		variables = self._load_npz_file(path)
+		# Convert the aggregated parameters to a list of numpy arrays
+		aggregated_parameters = parameters_to_ndarrays(aggregated_parameters)
+		self._capture_variable(server_round, aggregated_parameters, f"{base_path}aggregates.npz", is_aggregate=True)
 
-		# Expand the dimension of each layer by one such it supports a new iteration of captures
-		for i, layer in enumerate(variables):
-			shape = layer.shape
-			expanded_matrix = np.zeros((shape[0], shape[1] + 1, *shape[2:]))
-			expanded_matrix[:, :-1] = variables[i]
-			variables[i] = expanded_matrix
+		# Capture all metrics
+		for key, value in metrics.items():
+			self._capture_variable(server_round, value, f"{base_path}metrics/{key}.npz")
 
-		# Set the value for each client
-		for cid, message in messages.items():
-			for i, layer in enumerate(message):
-				variables[i][cid, -1] = layer
+	def _capture_variable(
+			self,
+			server_round: int,
+			values: List[npt.NDArray],
+			path: str,
+			is_aggregate: bool = False,
+			is_message: bool = False
+	):
+		# If nothing has been captured yet, the file needs to be initialized
+		# The initial parameter is all zeros for the metric and the initial model parameters for an aggregate
+		if server_round == 1:
+			if is_aggregate:
+				saved_values = training.get_weights(self.simulation.model)
+			else:
+				saved_values = [np.zeros_like(value) for value in values]
 
-		# Save this variable
-		np.savez(path, *variables)
+			# Expand everything to account for several iterations
+			saved_values = [np.expand_dims(value, 0) for value in saved_values]
 
-	def _load_npz_file(self, path: str) -> List[npt.NDArray]:
-		if not os.path.exists(path):
-			raise FileNotFoundError(f"Path {path} does not exist")
-		npz_file = np.load(path)
-		np_arrays = []
-		for file in npz_file.files:
-			np_arrays.append(npz_file[file])
-		return np_arrays
+			if is_message:
+				client_count = self.simulation.client_count
+				saved_values = [np.expand_dims(value, 0).repeat(client_count, 0) for value in values]
+		else:
+			# Load in the saved variable
+			saved_values = np.load(path)
+			saved_values = [saved_values[file] for file in saved_values.files]
 
-	def _initialize_empty_npz_file(self, path: str, shapes: List[Tuple[int, ...]]) -> None:
-		"""
-		Initializes an empty npz file with the given shapes for the amount of clients of the simulation
-		:param path: the path to the npz file
-		:param shapes: the shapes of the layers to be captured
-		"""
-		np.savez(path, *[np.zeros((self.simulation.client_count, 0, *shape)) for shape in shapes])
+		# Expand so it can be concatenated with the saved values
+		expansion_axis = 1 if is_message else 0
+		values = [np.expand_dims(value, expansion_axis) for value in values]
+		values = [np.concatenate((saved_value, value), axis=expansion_axis) for value, saved_value in
+				  zip(values, saved_values)]
+		np.savez(path, *values)

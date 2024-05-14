@@ -13,7 +13,7 @@ def get_weights(model: nn.Module) -> List[npt.NDArray]:
 	Takes a PyTorch model and returns its parameters as a list of NumPy arrays
 	:param model: the PyTorch model
 	"""
-	return [val.cpu().numpy().copy() for _, val in model.state_dict().items()]
+	return [parameter.data.cpu().numpy().copy() for parameter in model.parameters()]
 
 
 def set_weights(model: nn.Module, weights: List[npt.NDArray]) -> None:
