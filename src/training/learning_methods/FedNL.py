@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -20,57 +20,68 @@ class NewtonOptimizer(Optimizer):
 		defaults = dict()
 		super(NewtonOptimizer, self).__init__(params, defaults)
 
-	def step(self, closure=None) -> Optional[float]:
+	def step(self, closure: Callable[[Tuple[torch.Tensor]], torch.Tensor] | None = None) -> Optional[float]:
 		# The closure function is required to compute the Hessian, if it is not there raise an error
 		if closure is None:
 			raise RuntimeError('closure function must be provided for NewtonOptimizer')
 
-		# Compute the loss gradient based on the loss and current parameters
-		loss = closure()
-		if loss is None:
-			raise RuntimeError('closure function did not return the loss value')
-		parameters = [value for value in self.param_groups[0]["params"]]
-		loss_gradient = torch.autograd.grad(loss, parameters, create_graph=True)
+		model_parameters = tuple(value for param_group in self.param_groups for value in param_group["params"])
 
-		# Compute the update per layer
-		for parameter, gradients in zip(parameters, loss_gradient):
-			# We assume each layer to work on multiple variables, if that is not the case, expand the gradient
-			# to mimic it working on one variable
-			is_unsqueezed = gradients.ndim == 1
-			if is_unsqueezed:
-				gradients = gradients.unsqueeze(0)
+		# The gradients are directly computed from the closure function
+		loss = closure(*model_parameters)
+		gradients = torch.autograd.grad(loss, model_parameters)
 
-			# Compute the hessian per parameter
-			hessians = torch.zeros(*gradients.shape, gradients.shape[-1])
-			for i in range(gradients.size(0)):
-				for j in range(gradients.size(1)):
-					hessians[:, j] = torch.autograd.grad(gradients[i][j], parameter, create_graph=True)[0]
+		# Ensure the gradients are at least 2D with shape (out_feature, in_feature), the tuple in the list is
+		# (gradient, is_expanded). We need the boolean to correct the expansion later
+		gradients = [
+			(gradient.unsqueeze(-1), True) if gradient.ndim == 1 else (gradient, False)
+			for gradient in gradients
+		]
 
-			# Per parameter compute the update
-			updates = torch.zeros_like(gradients)
-			for i in range(gradients.size(0)):
-				# Compute the inverse hessian
+		# The hessian is computed using torch func
+		hessians = torch.func.hessian(closure, argnums=tuple(range(len(model_parameters))))(*model_parameters)
+		hessians = [hessians[i][i] for i in range(len(hessians))]
+
+		# Expand the hessians similarly, do not keep track of the boolean as that is in the gradients
+		hessians = [
+			hessian.unsqueeze(-2).unsqueeze(-1) if is_expanded else hessian
+			for (_, is_expanded), hessian in zip(gradients, hessians)
+		]
+
+		# Reshape the matrix to be square, the hessian at index i, j is hessian[i, :, j]
+		hessians = [torch.stack([hessian[i, :, i] for i in range(hessian.size(0))]) for hessian in hessians]
+
+		inverse_hessians = []
+		for hessian in hessians:
+			# Set all null-variables in the hessian to 1 to prevent those from disrupting learning
+			inverse_hessian = []
+			for out_feature_hessian in hessian:
 				try:
-					inv_hessian = torch.linalg.inv(hessians[i])
-					# When the elements become infinitesimally small, the inverse sometimes contains nans
+					inv_hessian = torch.linalg.inv(out_feature_hessian)
 					inv_hessian[inv_hessian.isnan()] = 0.
 				except torch.linalg.LinAlgError:
-					inv_hessian = torch.ones_like(hessians[i])
+					inv_hessian = torch.ones_like(out_feature_hessian)
+				inverse_hessian.append(inv_hessian)
+			inverse_hessians.append(torch.stack(inverse_hessian))
 
-				# Compute the update and set in list
-				update = inv_hessian @ gradients[i]
-				updates[i] = update
+		# Compute the update per layer
+		for i in range(len(gradients)):
+			gradient, is_expanded = gradients[i]
+			inverse_hessian = inverse_hessians[i]
+			update = torch.stack([inverse_hessian[j] @ gradient[j] for j in range(len(gradient))])
 
 			# Correct the expansion
-			if is_unsqueezed:
-				hessians = hessians.view(hessians.shape[1:])
-				gradients = gradients.view(-1)
-				updates = updates.view(-1)
+			hessian = hessians[i]
+			if is_expanded:
+				hessian = hessian.view(-1)
+				gradient = gradient.view(-1)
+				update = update.view(-1)
 
 			# Set the state with the gradient and hessian, and update the model parameters
-			self.state[parameter]["gradients"] = gradients.detach()
-			self.state[parameter]["hessian"] = hessians.detach()
-			parameter.data.sub_(updates)
+			self.state[model_parameters[i]]["gradients"] = gradient.detach()
+			self.state[model_parameters[i]]["hessian"] = hessian.detach()
+			model_parameters[i].data.sub_(update)
+
 		# Return the loss
 		return loss.item()
 
@@ -103,17 +114,21 @@ class FedNL(Strategy):
 			for features, labels in train_loader:
 				features, labels = features.to(training.DEVICE), labels.to(training.DEVICE)
 
-				# Define the closure function that returns the loss of the model
-				def closure(*args, **kwargs):
-					optimizer.zero_grad()
-					loss = criterion(net(features), labels)
+				def get_gradient(*weights):
+					# Query the model as if the parameters had been set
+					net_parameters = {name: value for name, value in zip(net.state_dict().keys(), weights)}
+					prediction = torch.func.functional_call(net, net_parameters, features)
+
+					# Set the parameters as the state dict of the model
+					loss = criterion(prediction, labels)
 					return loss
 
-				optimizer.step(closure)
+				optimizer.zero_grad()
+				optimizer.step(get_gradient)
 
 		# Take the gradients and hessian from the optimizer state and transmit the results
-		gradients = [value["gradients"].numpy() for value in optimizer.state_dict()["state"].values()]
-		hessian = [value["hessian"].numpy() for value in optimizer.state_dict()["state"].values()]
+		gradients = [value["gradients"] for value in optimizer.state_dict()["state"].values()]
+		hessian = [value["hessian"] for value in optimizer.state_dict()["state"].values()]
 		data_size = len(train_loader.dataset)
 		return gradients, data_size, {"hessian": hessian}
 
@@ -142,39 +157,39 @@ class FedNL(Strategy):
 		]
 		hessians = utils.common.compute_weighted_average(hessian_results)
 
-		# Per layer calculate the model update
-		updates = []
-		for hessian, gradient in zip(hessians, gradients):
-			# We assume the layer to want to predict multiple parameters, if it is only for one parameter the gradient is
-			# one dimensional, then expand the gradient.
-			is_unsqueezed = gradient.ndim == 1
-			if is_unsqueezed:
-				gradient = np.expand_dims(gradient, 0)
-				hessian = np.expand_dims(hessian, 0)
-
-			# Per parameter compute the update
-			layer_updates = np.zeros_like(gradient)
-			for i, (parameter_hessian, parameter_gradient) in enumerate(zip(hessian, gradient)):
-				# Compute the inverse hessian
-				try:
-					inv_hessian = np.linalg.inv(parameter_hessian)
-				except np.linalg.LinAlgError:
-					inv_hessian = np.ones_like(parameter_hessian)
-
-				# Set the update for the parameter
-				layer_updates[i] = inv_hessian @ parameter_gradient
-
-			# Correct the earlier gradient expansion; Only the layer update is relevant
-			if is_unsqueezed:
-				layer_updates = layer_updates.squeeze(0)
-
-			updates.append(layer_updates)
-
-		# Update the model, encode it and return it
-		current_weights = parameters_to_ndarrays(self.current_weights)
-		self.current_weights = [
-			layer - update
-			for layer, update in zip(current_weights, updates)
+		gradients = [
+			(np.expand_dims(gradient, axis=-1), True) if gradient.ndim == 1 else (gradient, False)
+			for gradient in gradients
 		]
-		self.current_weights = ndarrays_to_parameters(self.current_weights)
+		hessians = [
+			np.expand_dims(hessian, axis=(-2, -1)) if is_expanded else hessian
+			for (_, is_expanded), hessian in zip(gradients, hessians)
+		]
+
+		inverse_hessians = []
+		for hessian in hessians:
+			inverse_hessian = []
+			for out_feature_hessian in hessian:
+				try:
+					inv_hessian = np.linalg.inv(out_feature_hessian)
+				except np.linalg.LinAlgError:
+					inv_hessian = np.ones_like(out_feature_hessian)
+				inverse_hessian.append(inv_hessian)
+			inverse_hessians.append(np.stack(inverse_hessian))
+
+
+		# Per layer calculate the model update
+		current_weights = parameters_to_ndarrays(self.current_weights)
+		for i in range(len(gradients)):
+			gradient, is_expanded = gradients[i]
+			inverse_hessian = inverse_hessians[i]
+			update = np.stack([inverse_hessian[j] @ gradient[j] for j in range(len(gradient))])
+
+			# Correct the expansion
+			if is_expanded:
+				update = update.reshape(-1)
+
+			current_weights[i] -= update
+
+		self.current_weights = ndarrays_to_parameters(current_weights)
 		return self.current_weights, {}
