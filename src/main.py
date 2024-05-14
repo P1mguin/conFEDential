@@ -30,6 +30,7 @@ parser.add_argument(
 
 parser.add_argument(
 	"--clients",
+	default=4,
 	type=int,
 	help="The amount of concurrent clients to run simultaneously"
 )
@@ -43,12 +44,14 @@ parser.add_argument(
 
 parser.add_argument(
 	"--logging",
+	default=False,
 	action=argparse.BooleanOptionalAction,
 	help="Whether to log to Weights and Biases dashboard during simulation"
 )
 
 parser.add_argument(
 	"--capturing",
+	default=True,
 	action=argparse.BooleanOptionalAction,
 	help="Whether to save the messages from client to server"
 )

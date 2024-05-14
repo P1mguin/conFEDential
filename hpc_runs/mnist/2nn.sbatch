@@ -15,6 +15,6 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/main.py --yaml-file examples/mnist/2nn/fed_adam.yaml --clients 8 --no-logging --capturing --run-name MNIST-2NN-FEDADAM
-srun python src/main.py --yaml-file examples/mnist/2nn/fed_avg.yaml --clients 8 --no-logging --capturing --run-name MNIST-2NN-FEDAVG
-srun python src/main.py --yaml-file examples/mnist/2nn/fed_nag.yaml --clients 8 --no-logging --capturing --run-name MNIST-2NN-FEDNAG
+srun python src/main.py --yaml-file examples/mnist/2nn/fed_adam.yaml --clients 8 --run-name MNIST-2NN-FEDADAM
+srun python src/main.py --yaml-file examples/mnist/2nn/fed_avg.yaml --clients 8 --run-name MNIST-2NN-FEDAVG
+srun python src/main.py --yaml-file examples/mnist/2nn/fed_nag.yaml --clients 8 --run-name MNIST-2NN-FEDNAG
