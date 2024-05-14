@@ -15,9 +15,11 @@ class Model:
 			optimizer_name: str,
 			model_name: str,
 			criterion_name: str,
-			optimizer_parameters: dict,
-			model_architecture: List[dict] | dict
+			model_architecture: List[dict] | dict,
+			optimizer_parameters: dict | None = None
 	):
+		if optimizer_parameters is None:
+			optimizer_parameters = {}
 		self._optimizer_name = optimizer_name
 		self._model_name = model_name
 		self._criterion_name = criterion_name
