@@ -155,7 +155,7 @@ class Model:
 
 		# Convert that to a model and return
 		model = utils.get_net_class_from_layers(layers)
-		return model
+		return model()
 
 	def _load_model_from_hub(self):
 		model_path = self._get_model_cache_path()
