@@ -70,7 +70,7 @@ class Model:
 
 	@property
 	def model(self):
-		return self._model()
+		return self._model
 
 	@property
 	def criterion(self):
@@ -167,7 +167,7 @@ class Model:
 			base_model.fc = nn.Linear(in_features, out_features)
 			return base_model
 
-		return get_model
+		return get_model()
 
 	def _get_model_cache_path(self):
 		repo = self._model_architecture["repo_or_dir"]
