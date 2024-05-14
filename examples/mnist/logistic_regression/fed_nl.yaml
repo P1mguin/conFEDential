@@ -10,7 +10,7 @@ simulation:
         }
   federation:
     client_count: 100
-    fraction_fit: 0.02
+    fraction_fit: 0.1
     global_rounds: 10
     local_rounds: 10
   model:
