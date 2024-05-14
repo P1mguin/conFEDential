@@ -152,7 +152,6 @@ class Simulation:
 
 		# Initialize ray
 		ray_init_args = get_ray_init_args()
-		ray.init(**ray_init_args)
 
 		client_resources = get_client_resources(concurrent_clients)
 		log(INFO, "Starting federated learning simulation")
@@ -161,8 +160,8 @@ class Simulation:
 				client_fn=client_fn,
 				num_clients=self.client_count,
 				client_resources=client_resources,
+				ray_init_args=ray_init_args,
 				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
-				keep_initialised=True,
 				strategy=strategy
 			)
 		except Exception as e:
