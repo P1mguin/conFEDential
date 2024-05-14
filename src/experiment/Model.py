@@ -159,7 +159,15 @@ class Model:
 
 	def _load_model_from_hub(self):
 		model_path = self._get_model_cache_path()
-		return lambda: torch.load(model_path)
+
+		def get_model():
+			base_model = torch.load(model_path)
+			out_features = self._model_architecture["out_features"]
+			in_features = base_model.fc.in_features
+			base_model.fc = nn.Linear(in_features, out_features)
+			return base_model
+
+		return get_model
 
 	def _get_model_cache_path(self):
 		repo = self._model_architecture["repo_or_dir"]

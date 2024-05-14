@@ -11,8 +11,8 @@ simulation:
   federation:
     client_count: 100
     fraction_fit: 0.1
-    global_rounds: 10
-    local_rounds: 20
+    global_rounds: 1
+    local_rounds: 1
   model:
     optimizer_name: FedAvg
     model_name: Logistic Regression

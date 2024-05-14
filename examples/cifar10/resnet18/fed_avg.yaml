@@ -5,7 +5,7 @@ simulation:
     preprocess_fn: |
       def preprocess_fn(element):
         return {
-          "x": element["img"] / 255.,
+          "x": (element["img"] / 255.).transpose(2, 0, 1),
           "y": element["label"]
         }
   federation:
@@ -23,6 +23,7 @@ simulation:
       repo_or_dir: 'pytorch/vision:v0.10.0'
       model: 'resnet18'
       pretrained: False
+      out_features: 10
 attack:
   data_access: all
   message_access: server
