@@ -285,7 +285,8 @@ class Simulation:
 
 		# Get the hash of the amount of clients, and the splitter
 		split_configuration = {
-			"client_count": self._federation.client_count
+			"client_count": self._federation.client_count,
+			"batch_size": self.batch_size,
 		}
 
 		if self._data.is_split:
