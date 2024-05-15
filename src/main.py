@@ -69,6 +69,7 @@ def main():
 
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
+		log(INFO, config)
 		config.run_simulation(concurrent_clients, is_online, is_capturing, run_name)
 
 
