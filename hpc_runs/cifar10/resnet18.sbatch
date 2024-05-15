@@ -3,7 +3,7 @@
 #SBATCH --mail-type=BEGIN,END
 #SBATCH --gres=gpu:1
 #SBATCH -c 8
-#SBATCH --mem=32G
+#SBATCH --mem=16G
 #SBATCH --output hpc_runs/cifar10/outputs/resnet18/slurm-%j.out
 
 # Show node in output file
@@ -15,6 +15,6 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_adam.yaml --clients 8 --run-name CIFAR10-RESNET18-FEDADAM
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_avg.yaml --clients 8 --run-name CIFAR10-RESNET18-FEDAVG
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --clients 8 --run-name CIFAR10-RESNET18-FEDNAG
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_adam.yaml --clients 4 --run-name CIFAR10-RESNET18-FEDADAM
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_avg.yaml --clients 4 --run-name CIFAR10-RESNET18-FEDAVG
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --clients 4 --run-name CIFAR10-RESNET18-FEDNAG
