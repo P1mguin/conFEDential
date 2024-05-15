@@ -1,0 +1,111 @@
+# Optimal 0.9796
+simulation:
+  data:
+    dataset_name: MNIST
+    batch_size: 32
+    preprocess_fn: |
+      def preprocess_fn(element):
+        return {
+          "x": element["image"].reshape(1, 28, 28) / 255.,
+          "y": element["label"]
+        }
+  federation:
+    client_count: 100
+    fraction_fit: 0.1
+    global_rounds: 10
+    local_rounds: 20
+  model:
+    optimizer_name: FedNAG
+    model_name: CNN
+    criterion_name: CrossEntropyLoss
+    optimizer_parameters:
+      lr: 0.05
+      momentum: 0.95
+    model_architecture:
+      - type: Conv2d
+        in_channels: 1
+        out_channels: 32
+        kernel_size: 5
+        padding: 2
+      - type: ReLU
+      - type: MaxPool2d
+        kernel_size: 2
+        stride: 2
+      - type: Conv2d
+        in_channels: 32
+        out_channels: 64
+        kernel_size: 5
+        padding: 2
+      - type: ReLU
+      - type: MaxPool2d
+        kernel_size: 2
+        stride: 2
+      - type: Flatten
+        start_dim: -3
+        end_dim: -1
+      - type: Linear
+        in_features: 3136
+        out_features: 512
+      - type: ReLU
+      - type: Linear
+        in_features: 512
+        out_features: 10
+      - type: Softmax
+        dim: -1
+attack:
+  data_access: all
+  message_access: server
+  repetitions: 10
+  attack_simulation:
+    batch_size: 64
+    optimizer_name: FedAvg
+    optimizer_parameters:
+      lr: 0.1
+    model_architecture:
+      gradient_component:
+        - type: Dropout
+          p: 0.2
+        - type: Conv3d
+          out_channels: 1000
+          kernel_size:
+            - 1
+            - 1
+          stride: 1
+        - type: ReLU
+      fcn_component:
+        - type: Dropout
+          p: 0.2
+        - type: Linear
+          out_features: 128
+        - type: ReLU
+        - type: Dropout
+          p: 0.2
+        - type: Linear
+          in_features: 128
+          out_features: 64
+        - type: ReLU
+      encoder_component:
+        - type: Dropout
+          p: 0.2
+        - type: Linear
+          out_features: 256
+        - type: ReLU
+        - type: Dropout
+          p: 0.2
+        - type: Linear
+          in_features: 256
+          out_features: 128
+        - type: ReLU
+        - type: Dropout
+          p: 0.2
+        - type: Linear
+          in_features: 128
+          out_features: 64
+        - type: ReLU
+        - type: Dropout
+          p: 0.2
+        - type: Linear
+          in_features: 64
+          out_features: 1
+        - type: ReLU
+        - type: Sigmoid

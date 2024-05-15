@@ -23,8 +23,8 @@ def main() -> None:
 	repo = args.repo
 	model = args.model
 	net = torch.hub.load(repo, model, force_reload=True)
-	os.makedirs(".cache/models/", exist_ok=True)
-	torch.save(net, f".cache/models/{repo.replace('/', '')}_{model}.pth")
+	os.makedirs(".cache/model_architectures/", exist_ok=True)
+	torch.save(net, f".cache/model_architectures/{repo.replace('/', '')}_{model}.pth")
 
 
 if __name__ == '__main__':

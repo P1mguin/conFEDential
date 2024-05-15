@@ -86,57 +86,12 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 		value = value[key]
 	return value
 
-
-def get_layer_shapes(model: nn.Module, run_config) -> List[Tuple[int, ...]]:
-	"""
-	Returns a list that contains the input size of the model and then the output size of each layer
-	:param model: the model to get the layer shapes from
-	:param run_config: the configuration of the experiment
-	"""
-	layer_output_shapes = []
-	layer_shape = get_config_input_shape(run_config)
-
-	layer_output_shapes.append(layer_shape)
-	for layer in model.layers:
-		if hasattr(layer, "kernel_size"):
-			# MaxPoolLayer does not have the out channels attribute fall back to the input amount of channels
-			out_channels = getattr(layer, "out_channels", layer_shape[0])
-			layer_shape = compute_convolution_output_size(
-				layer_shape[1:],  # Remove the out channels dimension of the previous layer
-				out_channels,
-				layer.kernel_size,
-				layer.stride,
-				layer.padding
-			)
-		elif isinstance(layer, nn.Linear):
-			layer_shape = (layer.out_features,)
-		layer_output_shapes.append(layer_shape)
-	return layer_output_shapes
-
-
-def get_gradient_shapes(model: nn.Module) -> List[Tuple[torch.Size, torch.Size]]:
-	# Get the shapes of the weights and the biases and then join them together in tuples
-	gradient_shapes = [param.shape for name, param in model.named_parameters()]
-	gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
-	return gradient_shapes
-
-
 def get_trainable_layers_indices(model: nn.Module) -> Set[int]:
 	"""
 	Returns the indices of the trainable layers
 	:param model: the model to get the trainable layers from
 	"""
 	return set(int(name.split(".")[1]) for name, param in model.named_parameters() if param.requires_grad)
-
-
-def get_config_input_shape(run_config) -> Tuple[int, ...]:
-	"""
-	Returns the input shape of the model from the configuration
-	:param run_config: the configuration for which the experiment is run
-	"""
-	_, test_loader = run_config.get_dataloaders()
-	input_shape = tuple(next(iter(test_loader))["x"].shape[1:])
-	return input_shape
 
 
 def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
