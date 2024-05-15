@@ -112,9 +112,6 @@ class Server(FedAvg):
 			# Stack the layers together
 			messages = list(map(np.stack, zip(*messages)))
 
-			# Explode so the iteration is there
-			messages = [np.expand_dims(message, 1) for message in messages]
-
 			# Create a list of zeros for the clients that did not participate and set the variables for those that did
 			results = [
 				np.expand_dims(np.zeros_like(message[0]), axis=0).repeat(client_count, axis=0) for message in messages
@@ -162,28 +159,35 @@ class Server(FedAvg):
 			is_aggregate: bool = False,
 			is_message: bool = False
 	):
+		# The axis along which the expansion can happen to account for several iterations
+		expansion_axis = 1 if is_message else 0
+
 		# If nothing has been captured yet, the file needs to be initialized
 		# The initial parameter is all zeros for the metric and the initial model parameters for an aggregate
 		if server_round == 1:
 			if is_aggregate:
 				saved_values = training.get_weights(self.simulation.model)
+
+				# For messages repeat the messages for each client
+				if is_message:
+					client_count = self.simulation.client_count
+					saved_values = [
+						np.expand_dims(saved_value, axis=0).repeat(client_count, axis=0)
+						for saved_value in saved_values
+					]
 			else:
 				saved_values = [np.zeros_like(value) for value in values]
 
 			# Expand everything to account for several iterations
-			saved_values = [np.expand_dims(value, 0) for value in saved_values]
-
-			if is_message:
-				client_count = self.simulation.client_count
-				saved_values = [np.expand_dims(value, 0).repeat(client_count, 0) for value in values]
+			saved_values = [np.expand_dims(value, expansion_axis) for value in saved_values]
 		else:
 			# Load in the saved variable
 			saved_values = np.load(path)
 			saved_values = [saved_values[file] for file in saved_values.files]
 
-		# Expand so it can be concatenated with the saved values
-		expansion_axis = 1 if is_message else 0
 		values = [np.expand_dims(value, expansion_axis) for value in values]
-		values = [np.concatenate((saved_value, value), axis=expansion_axis) for value, saved_value in
-				  zip(values, saved_values)]
-		np.savez(path, *values)
+		values = [
+			np.concatenate((saved_value, value), axis=expansion_axis)
+			for value, saved_value in zip(values, saved_values)
+		]
+		np.savez_compressed(path, *values)
