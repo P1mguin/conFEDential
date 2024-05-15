@@ -1,8 +1,6 @@
-from functools import reduce
 from typing import Any, Callable, List, Set, Tuple, Type
 
 import numpy as np
-import numpy.typing as npt
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -42,16 +40,15 @@ def compute_convolution_output_size(
 	return out_channels, *output_shape
 
 
-def compute_weighted_average(values: List[Tuple[List[npt.NDArray], int]]) -> Any:
+def compute_weighted_average(values, counts) -> Any:
 	"""
-	Computes the weighted average of a list of tuple with the first item a list of numpy arrays and the second item
+	Computes the weighted average of a generator of tuple with the first item a list of numpy arrays and the second item
 	the weight of the list
-	:param values: the list of tuples
 	"""
-	total_count = sum(num_examples for (_, num_examples) in values)
-	values = [[layer * num_examples for layer in weights] for weights, num_examples in values]
-	average = [reduce(np.add, layers) / total_count for layers in zip(*values)]
-	return average
+	total = sum(counts)
+	multiplied_values = ((layer * weight / total for layer in value) for value, weight in zip(values, counts))
+	mean_values = (np.sum(layer, axis=0) for layer in zip(*multiplied_values))
+	return mean_values
 
 
 def find_all_paths(dictionary: dict, key: str, path=None):

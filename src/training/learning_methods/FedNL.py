@@ -143,46 +143,46 @@ class FedNL(Strategy):
 		if not results:
 			return None, {}
 
+		counts = [fitres.num_examples for _, fitres in results]
+
 		# Aggregate the gradients
-		gradient_results = [
-			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-			for _, fit_res in results
-		]
-		gradients = utils.common.compute_weighted_average(gradient_results)
+		gradient_results = (parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results)
+		gradients = utils.common.compute_weighted_average(gradient_results, counts)
 
 		# Aggregate the hessians
-		hessian_results = [
-			(fit_res.metrics["hessian"], fit_res.num_examples)
-			for _, fit_res in results
-		]
-		hessians = utils.common.compute_weighted_average(hessian_results)
+		hessian_results = (fit_res.metrics["hessian"] for _, fit_res in results)
+		hessians = utils.common.compute_weighted_average(hessian_results, counts)
 
 		gradients = [
 			(np.expand_dims(gradient, axis=-1), True) if gradient.ndim == 1 else (gradient, False)
 			for gradient in gradients
 		]
-		hessians = [
+		hessians = (
 			np.expand_dims(hessian, axis=(-2, -1)) if is_expanded else hessian
 			for (_, is_expanded), hessian in zip(gradients, hessians)
-		]
+		)
 
-		inverse_hessians = []
-		for hessian in hessians:
-			inverse_hessian = []
+		def compute_inverse_hessian(hessian):
 			for out_feature_hessian in hessian:
 				try:
 					inv_hessian = np.linalg.inv(out_feature_hessian)
 				except np.linalg.LinAlgError:
 					inv_hessian = np.ones_like(out_feature_hessian)
-				inverse_hessian.append(inv_hessian)
-			inverse_hessians.append(np.stack(inverse_hessian))
+				yield inv_hessian
 
 		# Per layer calculate the model update
 		current_weights = parameters_to_ndarrays(self.current_weights)
 		for i in range(len(gradients)):
 			gradient, is_expanded = gradients[i]
-			inverse_hessian = inverse_hessians[i]
-			update = np.stack([inverse_hessian[j] @ gradient[j] for j in range(len(gradient))])
+			hessian = next(hessians)
+			inverse_hessian = compute_inverse_hessian(hessian)
+			del hessian
+
+			update = np.stack([
+				out_feature_inverse_hessian @ out_feature_gradient
+				for out_feature_inverse_hessian, out_feature_gradient in zip(inverse_hessian, gradient)
+			])
+			del inverse_hessian, gradient
 
 			# Correct the expansion
 			if is_expanded:

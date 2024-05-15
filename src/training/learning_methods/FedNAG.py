@@ -70,19 +70,14 @@ class FedNAG(Strategy):
 			return None, {}
 
 		# Aggregate the results and encode them
-		parameter_results = [
-			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-			for _, fit_res in results
-		]
-		parameters_aggregated = utils.common.compute_weighted_average(parameter_results)
+		counts = [fitres.num_examples for _, fitres in results]
+		parameter_results = (parameters_to_ndarrays(fit_res.parameters)	for _, fit_res in results)
+		parameters_aggregated = utils.common.compute_weighted_average(parameter_results, counts)
 		parameters_aggregated = ndarrays_to_parameters(parameters_aggregated)
 
 		# Aggregate the velocities
-		velocity_results = [
-			(fit_res.metrics["velocity"], fit_res.num_examples)
-			for _, fit_res in results
-		]
-		velocity_aggregated = utils.common.compute_weighted_average(velocity_results)
+		velocity_results = (fit_res.metrics["velocity"] for _, fit_res in results)
+		velocity_aggregated = utils.common.compute_weighted_average(velocity_results, counts)
 
 		# Return the aggregated results and velocities
 		return parameters_aggregated, {"velocity": velocity_aggregated}
