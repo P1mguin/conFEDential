@@ -9,6 +9,7 @@ from typing import Generator, List
 
 import flwr as fl
 import numpy as np
+import psutil
 import ray
 import torch
 import wandb
@@ -151,7 +152,7 @@ class Simulation:
 		wandb.init(mode=mode, **wandb_kwargs)
 
 		# Initialize ray
-		ray_init_args = get_ray_init_args()
+		ray_init_args = get_ray_init_args(concurrent_clients)
 
 		client_resources = get_client_resources(concurrent_clients)
 		log(INFO, "Starting federated learning simulation")
@@ -353,31 +354,36 @@ def get_client_resources(concurrent_clients: int) -> dict:
 	"""
 	total_cpus = multiprocessing.cpu_count()
 	total_gpus = torch.cuda.device_count()
+	total_memory = psutil.virtual_memory().total
 
 	client_cpus = total_cpus // concurrent_clients
 	client_gpus = total_gpus / concurrent_clients
+	client_memory = total_memory // (concurrent_clients + 1)
 
 	if client_cpus * concurrent_clients < total_cpus:
 		log(WARN, "The amount of clients is not a divisor of the total amount of CPUs,\n"
 				  "consider changing the amount of clients so that all available resources are used."
 				  f"The total resources are {total_cpus} CPUs and {total_gpus} GPUs.")
 	else:
-		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs and {client_gpus} GPUs for"
-				  f" the total available {total_cpus} CPUs and {total_gpus} GPUs")
+		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs, {client_gpus} GPUs, "
+				  f"and {round(client_memory / (1024 ** 3), 1)}GB for the total available {total_cpus} CPUs, {total_gpus} GPUs "
+				  f"and {round(total_memory / (1024 ** 3), 1)}GB.")
 
 	client_resources = {
 		"num_cpus": client_cpus,
 		"num_gpus": client_gpus,
+		"memory": client_memory,
 	}
 	return client_resources
 
 
-def get_ray_init_args() -> dict:
+def get_ray_init_args(concurrent_clients: int) -> dict:
 	"""
 	Returns the ray init arguments for the type of system the simulation is run on.
 	"""
 	total_cpus = multiprocessing.cpu_count()
 	total_gpus = torch.cuda.device_count()
+	server_memory = psutil.virtual_memory().total // (concurrent_clients + 1)
 
 	ray_init_args = {
 		"runtime_env": {
@@ -386,6 +392,7 @@ def get_ray_init_args() -> dict:
 		},
 		"num_cpus": total_cpus,
 		"num_gpus": total_gpus,
+		"_memory": server_memory,
 	}
 
 	# Cluster admin wants to use local instead of tmp
