@@ -1,0 +1,580 @@
+ctit083
+2024-05-14 21:44:22.368056: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-14 21:44:27.094820: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-14 21:44:48,377 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-14 21:44:48,387 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-14 21:44:56,197 | Simulation.py:35 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-14 21:44:56,198 | Simulation.py:242 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-14 21:44:57,671 | main.py:70 | Loaded 1 configs with name CIFAR10-RESNET18-FEDADAM, running...
+INFO flwr 2024-05-14 21:44:57,671 | Config.py:58 | Starting conFEDential simulation
+INFO flwr 2024-05-14 21:44:57,672 | Config.py:62 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-14 21:45:03,256 | Simulation.py:367 | Created 8 clients with resources 8 CPUs and 0.125 GPUs for the total available 64 CPUs and 1 GPUs
+INFO flwr 2024-05-14 21:45:03,256 | Simulation.py:157 | Starting federated learning simulation
+INFO flwr 2024-05-14 21:45:03,324 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=200, round_timeout=None)
+2024-05-14 21:45:09,938	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-14 21:45:10,095	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-14 21:45:10,295	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_a9c889f33c84efdd.zip' (1.08MiB) to Ray cluster...
+2024-05-14 21:45:10,299	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_a9c889f33c84efdd.zip'.
+INFO flwr 2024-05-14 21:45:25,180 | app.py:213 | Flower VCE: Ray initialized with resources: {'object_store_memory': 2168956108.0, 'node:__internal_head__': 1.0, 'GPU': 1.0, 'accelerator_type:G': 1.0, 'CPU': 64.0, 'memory': 4337912219.0, 'node:10.20.240.13': 1.0}
+INFO flwr 2024-05-14 21:45:25,180 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-05-14 21:45:25,181 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.125}
+INFO flwr 2024-05-14 21:45:25,229 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-05-14 21:45:25,230 | server.py:89 | Initializing global parameters
+INFO flwr 2024-05-14 21:45:25,230 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-05-14 21:45:25,230 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-05-14 21:45:33,381 | server.py:94 | initial parameters (loss, other metrics): 0.0002507773160934448, {'accuracy': 0.0943, 'data_size': 10000}
+INFO flwr 2024-05-14 21:45:33,381 | server.py:104 | FL starting
+DEBUG flwr 2024-05-14 21:45:33,382 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+ERROR flwr 2024-05-14 21:45:49,078 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff0e823006ceb06d377950d3be01000000, name=DefaultActor.__init__, pid=177720, memory used=0.08GB) was running was 248.15GB / 251.78GB (0.985569), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.54	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177720	0.08	ray::IDLE
+177718	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:49,094 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff0e823006ceb06d377950d3be01000000, name=DefaultActor.__init__, pid=177720, memory used=0.08GB) was running was 248.15GB / 251.78GB (0.985569), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.54	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177720	0.08	ray::IDLE
+177718	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,470 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffffce4a1bab6f6c75d28a21242301000000, name=DefaultActor.__init__, pid=177719, memory used=0.08GB) was running was 248.16GB / 251.78GB (0.985603), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 844be9cca8f05857284caba064618fa517ce68eedeaeeee063d8cee7) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-844be9cca8f05857284caba064618fa517ce68eedeaeeee063d8cee7*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.50	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.78	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176365	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,471 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffffce4a1bab6f6c75d28a21242301000000, name=DefaultActor.__init__, pid=177719, memory used=0.08GB) was running was 248.16GB / 251.78GB (0.985603), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 844be9cca8f05857284caba064618fa517ce68eedeaeeee063d8cee7) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-844be9cca8f05857284caba064618fa517ce68eedeaeeee063d8cee7*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.50	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.78	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176365	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,472 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff43a06db6dae33629bbfe734101000000, name=DefaultActor.__init__, pid=177718, memory used=0.08GB) was running was 248.09GB / 251.78GB (0.985336), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.72	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177718	0.08	ray::IDLE
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,474 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffffbc0c9da8e1ac4be9965de40d01000000, name=DefaultActor.__init__, pid=177717, memory used=0.08GB) was running was 248.24GB / 251.78GB (0.985949), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: af6d373fca37bda4606d06edd74064a35a73562f99920618a4baa128) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-af6d373fca37bda4606d06edd74064a35a73562f99920618a4baa128*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.57	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.57	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+177720	0.08	ray::IDLE
+177717	0.08	ray::IDLE
+177718	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,475 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffffe4198e5bf30452f0e6a6ab8c01000000, name=DefaultActor.__init__, pid=177716, memory used=0.06GB) was running was 247.87GB / 251.78GB (0.984484), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: a1da16a2555fca1bd36e0c45fecba89b2f9233a49043c2792d6dbeda) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-a1da16a2555fca1bd36e0c45fecba89b2f9233a49043c2792d6dbeda*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.60	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.49	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177719	0.07	ray::IDLE
+177718	0.06	ray::IDLE
+177715	0.06	ray::IDLE
+177716	0.06	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,482 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff43a06db6dae33629bbfe734101000000, name=DefaultActor.__init__, pid=177718, memory used=0.08GB) was running was 248.09GB / 251.78GB (0.985336), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.72	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177718	0.08	ray::IDLE
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,483 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff1956bcf812127f126ff4254f01000000, name=DefaultActor.__init__, pid=177715, memory used=0.16GB) was running was 248.07GB / 251.78GB (0.985244), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 7f9d9c675a215d9290fa21715796d6e6b2203a4ee34f177026206560) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-7f9d9c675a215d9290fa21715796d6e6b2203a4ee34f177026206560*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.51	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.79	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.16	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176365	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176356	0.03	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --rayle...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,485 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff360614e7c1a339e49c841b1d01000000, name=DefaultActor.__init__, pid=177714, memory used=0.05GB) was running was 247.46GB / 251.78GB (0.98284), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: fee5ec1c82a64120a459511b4e05f9a2255d504ae8e74ba63bd1dbf0) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-fee5ec1c82a64120a459511b4e05f9a2255d504ae8e74ba63bd1dbf0*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.14	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.46	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+176196	0.06	wandb-service(2-176134-s-34817)
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+177714	0.05	ray::IDLE
+176365	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+177715	0.05	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,490 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff0e823006ceb06d377950d3be01000000, name=DefaultActor.__init__, pid=177720, memory used=0.08GB) was running was 248.15GB / 251.78GB (0.985569), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.54	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177720	0.08	ray::IDLE
+177718	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,490 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffffbc0c9da8e1ac4be9965de40d01000000, name=DefaultActor.__init__, pid=177717, memory used=0.08GB) was running was 248.24GB / 251.78GB (0.985949), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: af6d373fca37bda4606d06edd74064a35a73562f99920618a4baa128) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-af6d373fca37bda4606d06edd74064a35a73562f99920618a4baa128*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.57	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.57	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+177720	0.08	ray::IDLE
+177717	0.08	ray::IDLE
+177718	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,490 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff50a910ac321204688df4f63b01000000, name=DefaultActor.__init__, pid=177713, memory used=0.07GB) was running was 248.25GB / 251.78GB (0.985974), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 6dae3e7e804e70eab7b41bc6eed0e27a75a15dd21dbd334083174f1f) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-6dae3e7e804e70eab7b41bc6eed0e27a75a15dd21dbd334083174f1f*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.71	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.55	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177718	0.08	ray::IDLE
+177715	0.07	ray::IDLE
+177719	0.07	ray::IDLE
+177720	0.07	ray::IDLE
+177717	0.07	ray::IDLE
+177713	0.07	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,491 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2526, in get
+    raise value
+ray.exceptions.OutOfMemoryError: Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff43a06db6dae33629bbfe734101000000, name=DefaultActor.__init__, pid=177718, memory used=0.08GB) was running was 248.09GB / 251.78GB (0.985336), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.72	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177718	0.08	ray::IDLE
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+
+ERROR flwr 2024-05-14 21:45:50,491 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffffe4198e5bf30452f0e6a6ab8c01000000, name=DefaultActor.__init__, pid=177716, memory used=0.06GB) was running was 247.87GB / 251.78GB (0.984484), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: a1da16a2555fca1bd36e0c45fecba89b2f9233a49043c2792d6dbeda) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-a1da16a2555fca1bd36e0c45fecba89b2f9233a49043c2792d6dbeda*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.60	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.49	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177719	0.07	ray::IDLE
+177718	0.06	ray::IDLE
+177715	0.06	ray::IDLE
+177716	0.06	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,492 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff1956bcf812127f126ff4254f01000000, name=DefaultActor.__init__, pid=177715, memory used=0.16GB) was running was 248.07GB / 251.78GB (0.985244), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 7f9d9c675a215d9290fa21715796d6e6b2203a4ee34f177026206560) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-7f9d9c675a215d9290fa21715796d6e6b2203a4ee34f177026206560*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.51	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.79	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.16	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176365	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176356	0.03	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --rayle...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,492 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff360614e7c1a339e49c841b1d01000000, name=DefaultActor.__init__, pid=177714, memory used=0.05GB) was running was 247.46GB / 251.78GB (0.98284), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: fee5ec1c82a64120a459511b4e05f9a2255d504ae8e74ba63bd1dbf0) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-fee5ec1c82a64120a459511b4e05f9a2255d504ae8e74ba63bd1dbf0*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.14	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.46	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+176196	0.06	wandb-service(2-176134-s-34817)
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+177714	0.05	ray::IDLE
+176365	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+177715	0.05	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,493 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff0e823006ceb06d377950d3be01000000, name=DefaultActor.__init__, pid=177720, memory used=0.08GB) was running was 248.15GB / 251.78GB (0.985569), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-75b41c4d3e3afe80be19dfb8176accd6fb9e2cf654c73d64bb777322*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.54	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177715	0.08	ray::IDLE
+177720	0.08	ray::IDLE
+177718	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,495 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff50a910ac321204688df4f63b01000000, name=DefaultActor.__init__, pid=177713, memory used=0.07GB) was running was 248.25GB / 251.78GB (0.985974), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 6dae3e7e804e70eab7b41bc6eed0e27a75a15dd21dbd334083174f1f) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-6dae3e7e804e70eab7b41bc6eed0e27a75a15dd21dbd334083174f1f*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.71	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.55	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177718	0.08	ray::IDLE
+177715	0.07	ray::IDLE
+177719	0.07	ray::IDLE
+177720	0.07	ray::IDLE
+177717	0.07	ray::IDLE
+177713	0.07	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+ERROR flwr 2024-05-14 21:45:50,495 | ray_client_proxy.py:162 | Task was killed due to the node running low on memory.
+Memory on the node (IP: 10.20.240.13, ID: 0eea624b8608574fd09d44729b7f699539fe7371798b8641b6fe1279) where the task (task ID: ffffffffffffffff43a06db6dae33629bbfe734101000000, name=DefaultActor.__init__, pid=177718, memory used=0.08GB) was running was 248.09GB / 251.78GB (0.985336), which exceeds the memory usage threshold of 0.95. Ray killed this worker (ID: 4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935) because it was the most recently scheduled task; to see more information about memory usage on this node, use `ray logs raylet.out -ip 10.20.240.13`. To see the logs of the worker, use `ray logs worker-4a15b92179cdbf96f33ea1f204b9a877ad9f6fb6df50ba679e07f935*out -ip 10.20.240.13. Top 10 memory users:
+PID	MEM(GB)	COMMAND
+172166	238.58	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176134	1.72	/home/s2240084/conFEDential/venv/bin/python src/main.py --yaml-file examples/cifar10/resnet18/fed_ad...
+176239	0.23	/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_...
+177718	0.08	ray::IDLE
+177715	0.08	ray::IDLE
+177719	0.08	ray::IDLE
+176415	0.06	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+176323	0.06	/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-pac...
+176196	0.06	wandb-service(2-176134-s-34817)
+176322	0.05	/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-...
+Refer to the documentation on how to address the out of memory issue: https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html. Consider provisioning more memory on this node or reducing task parallelism by requesting more CPUs per task. Set max_restarts and max_task_retries to enable retry when the task crashes due to OOM. To adjust the kill threshold, set the environment variable `RAY_memory_usage_threshold` when starting Ray. To disable worker killing, set the environment variable `RAY_memory_monitor_refresh_ms` to zero.
+DEBUG flwr 2024-05-14 21:45:50,503 | server.py:236 | fit_round 1 received 0 results and 10 failures
+ERROR flwr 2024-05-14 21:45:50,515 | app.py:313 | 'NoneType' object has no attribute 'tensors'
+ERROR flwr 2024-05-14 21:45:50,717 | app.py:314 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/app.py", line 308, in start_simulation
+    hist = run_fl(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/app.py", line 225, in run_fl
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/server.py", line 109, in fit
+    res_fit = self.fit_round(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/server.py", line 248, in fit_round
+    ] = self.strategy.aggregate_fit(server_round, results, failures)
+  File "/home/s2240084/conFEDential/src/training/Server.py", line 79, in aggregate_fit
+    self._capture_results(server_round, results, aggregated_parameters, config)
+  File "/home/s2240084/conFEDential/src/training/Server.py", line 99, in _capture_results
+    self._capture_aggregates(server_round, aggregated_parameters, metrics)
+  File "/home/s2240084/conFEDential/src/training/Server.py", line 150, in _capture_aggregates
+    aggregated_parameters = parameters_to_ndarrays(aggregated_parameters)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/common/parameter.py", line 34, in parameters_to_ndarrays
+    return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
+AttributeError: 'NoneType' object has no attribute 'tensors'
+
+ERROR flwr 2024-05-14 21:45:50,718 | app.py:315 | Your simulation crashed :(. This could be because of several reasons. The most common are: 
+	 > Sometimes, issues in the simulation code itself can cause crashes. It's always a good idea to double-check your code for any potential bugs or inconsistencies that might be contributing to the problem. For example: 
+		 - You might be using a class attribute in your clients that hasn't been defined.
+		 - There could be an incorrect method call to a 3rd party library (e.g., PyTorch).
+		 - The return types of methods in your clients/strategies might be incorrect.
+	 > Your system couldn't fit a single VirtualClient: try lowering `client_resources`.
+	 > All the actors in your pool crashed. This could be because: 
+		 - You clients hit an out-of-memory (OOM) error and actors couldn't recover from it. Try launching your simulation with more generous `client_resources` setting (i.e. it seems {'num_cpus': 8, 'num_gpus': 0.125} is not enough for your run). Use fewer concurrent actors. 
+		 - You were running a multi-node simulation and all worker nodes disconnected. The head node might still be alive but cannot accommodate any actor with resources: {'num_cpus': 8, 'num_gpus': 0.125}.
+Take a look at the Flower simulation examples for guidance <https://flower.dev/docs/framework/how-to-run-simulations.html>.
+ERROR flwr 2024-05-14 21:45:50,718 | Simulation.py:168 | Simulation crashed.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.0943
+wandb:     loss 0.00025
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240514_214502-rilx4hrk
+wandb: Find logs at: ./wandb/offline-run-20240514_214502-rilx4hrk/logs
+2024-05-14 21:47:27.146669: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-14 21:47:28.544642: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-14 21:47:45,593 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-14 21:47:45,594 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-14 21:47:50,112 | Simulation.py:35 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-14 21:47:50,112 | Simulation.py:242 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-14 21:47:51,744 | main.py:70 | Loaded 1 configs with name CIFAR10-RESNET18-FEDAVG, running...
+INFO flwr 2024-05-14 21:47:51,745 | Config.py:58 | Starting conFEDential simulation
+INFO flwr 2024-05-14 21:47:51,766 | Config.py:62 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-14 21:47:53,600 | Simulation.py:367 | Created 8 clients with resources 8 CPUs and 0.125 GPUs for the total available 64 CPUs and 1 GPUs
+INFO flwr 2024-05-14 21:47:53,601 | Simulation.py:157 | Starting federated learning simulation
+INFO flwr 2024-05-14 21:47:53,603 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=200, round_timeout=None)
+2024-05-14 21:48:03,292	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-14 21:48:03,426	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-14 21:48:03,519	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_a9c889f33c84efdd.zip' (1.08MiB) to Ray cluster...
+2024-05-14 21:48:03,523	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_a9c889f33c84efdd.zip'.
+INFO flwr 2024-05-14 21:48:16,176 | app.py:213 | Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'object_store_memory': 78839294361.0, 'GPU': 1.0, 'accelerator_type:G': 1.0, 'memory': 173958353511.0, 'node:10.20.240.13': 1.0, 'CPU': 64.0}
+INFO flwr 2024-05-14 21:48:16,176 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-05-14 21:48:16,176 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.125}
+INFO flwr 2024-05-14 21:48:16,194 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-05-14 21:48:16,194 | server.py:89 | Initializing global parameters
+INFO flwr 2024-05-14 21:48:16,195 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-05-14 21:48:16,195 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-05-14 21:48:19,324 | server.py:94 | initial parameters (loss, other metrics): 0.0002507773160934448, {'accuracy': 0.0943, 'data_size': 10000}
+INFO flwr 2024-05-14 21:48:19,325 | server.py:104 | FL starting
+DEBUG flwr 2024-05-14 21:48:19,325 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=182812)[0m 2024-05-14 21:48:23.038390: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=182812)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=182813)[0m 2024-05-14 21:48:26.023188: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[2m[36m(DefaultActor pid=182810)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=182810)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=182804)[0m 2024-05-14 21:48:23.211280: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.[32m [repeated 7x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/ray-logging.html#log-deduplication for more options.)[0m
+[2m[36m(pid=182804)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=182803)[0m 2024-05-14 21:48:26.184935: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT[32m [repeated 7x across cluster][0m
+[2m[36m(DefaultActor pid=182805)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)[32m [repeated 5x across cluster][0m
+[2m[36m(DefaultActor pid=182805)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)[32m [repeated 5x across cluster][0m
+DEBUG flwr 2024-05-14 21:48:50,463 | server.py:236 | fit_round 1 received 10 results and 0 failures
+srun: error: ctit083: task 0: Killed
+srun: Force Terminated StepId=285726.1
+2024-05-14 21:54:15.158613: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-14 21:54:18.194958: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-14 21:54:39,307 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-14 21:54:39,309 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-14 21:54:43,200 | Simulation.py:35 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-14 21:54:43,201 | Simulation.py:242 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-14 21:54:45,559 | main.py:70 | Loaded 1 configs with name CIFAR10-RESNET18-FEDNAG, running...
+INFO flwr 2024-05-14 21:54:45,560 | Config.py:58 | Starting conFEDential simulation
+INFO flwr 2024-05-14 21:54:46,630 | Config.py:62 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-14 21:54:55,278 | Simulation.py:367 | Created 8 clients with resources 8 CPUs and 0.125 GPUs for the total available 64 CPUs and 1 GPUs
+INFO flwr 2024-05-14 21:54:55,279 | Simulation.py:157 | Starting federated learning simulation
+INFO flwr 2024-05-14 21:54:55,281 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=200, round_timeout=None)
+2024-05-14 21:55:00,691	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-14 21:55:02,488	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-14 21:55:02,625	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_a9c889f33c84efdd.zip' (1.08MiB) to Ray cluster...
+2024-05-14 21:55:02,630	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_a9c889f33c84efdd.zip'.
+INFO flwr 2024-05-14 21:55:14,026 | app.py:213 | Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'accelerator_type:G': 1.0, 'GPU': 1.0, 'memory': 167930263348.0, 'node:10.20.240.13': 1.0, 'object_store_memory': 76255827148.0, 'CPU': 64.0}
+INFO flwr 2024-05-14 21:55:14,026 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-05-14 21:55:14,026 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.125}
+INFO flwr 2024-05-14 21:55:14,043 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+INFO flwr 2024-05-14 21:55:14,044 | server.py:89 | Initializing global parameters
+INFO flwr 2024-05-14 21:55:14,044 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-05-14 21:55:14,045 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-05-14 21:55:18,601 | server.py:94 | initial parameters (loss, other metrics): 0.0002507773160934448, {'accuracy': 0.0943, 'data_size': 10000}
+INFO flwr 2024-05-14 21:55:18,601 | server.py:104 | FL starting
+DEBUG flwr 2024-05-14 21:55:18,601 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=188653)[0m 2024-05-14 21:55:20.242443: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=188653)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=188653)[0m 2024-05-14 21:55:22.623382: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[2m[36m(DefaultActor pid=188662)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=188662)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=188658)[0m 2024-05-14 21:55:20.428064: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.[32m [repeated 7x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/ray-logging.html#log-deduplication for more options.)[0m
+[2m[36m(pid=188658)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.[32m [repeated 7x across cluster][0m
+[2m[36m(pid=188658)[0m 2024-05-14 21:55:22.765882: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT[32m [repeated 7x across cluster][0m
+[2m[36m(DefaultActor pid=188655)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)[32m [repeated 4x across cluster][0m
+[2m[36m(DefaultActor pid=188655)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)[32m [repeated 4x across cluster][0m
+[2m[36m(DefaultActor pid=188653)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)[32m [repeated 2x across cluster][0m
+[2m[36m(DefaultActor pid=188653)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)[32m [repeated 2x across cluster][0m
+DEBUG flwr 2024-05-14 21:55:49,744 | server.py:236 | fit_round 1 received 10 results and 0 failures
+srun: error: ctit083: task 0: Killed
+srun: Force Terminated StepId=285726.2
