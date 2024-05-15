@@ -3,7 +3,7 @@
 #SBATCH --mail-type=BEGIN,END
 #SBATCH --gres=gpu:1
 #SBATCH -c 8
-#SBATCH --mem=16G
+#SBATCH --mem=32G
 #SBATCH --output hpc_runs/cifar10/outputs/resnet18/slurm-%j.out
 
 # Show node in output file
