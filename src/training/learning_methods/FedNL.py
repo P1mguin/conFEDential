@@ -40,38 +40,38 @@ class NewtonOptimizer(Optimizer):
 
 		# The hessian is computed using torch func
 		hessians = torch.func.hessian(closure, argnums=tuple(range(len(model_parameters))))(*model_parameters)
-		hessians = [hessians[i][i] for i in range(len(hessians))]
+		hessians = (hessian[i] for i, hessian in enumerate(hessians))
 
 		# Expand the hessians similarly, do not keep track of the boolean as that is in the gradients
-		hessians = [
+		hessians = (
 			hessian.unsqueeze(-2).unsqueeze(-1) if is_expanded else hessian
 			for (_, is_expanded), hessian in zip(gradients, hessians)
-		]
+		)
 
 		# Reshape the matrix to be square, the hessian at index i, j is hessian[i, :, j]
-		hessians = [torch.stack([hessian[i, :, i] for i in range(hessian.size(0))]) for hessian in hessians]
+		hessians = (torch.stack([hessian[i, :, i] for i in range(hessian.size(0))]) for hessian in hessians)
 
-		inverse_hessians = []
-		for hessian in hessians:
-			# Set all null-variables in the hessian to 1 to prevent those from disrupting learning
-			inverse_hessian = []
+		# Use a generator to limit memory usage
+		def compute_inverse_hessian(hessian):
 			for out_feature_hessian in hessian:
 				try:
 					inv_hessian = torch.linalg.inv(out_feature_hessian)
 					inv_hessian[inv_hessian.isnan()] = 0.
 				except torch.linalg.LinAlgError:
 					inv_hessian = torch.ones_like(out_feature_hessian)
-				inverse_hessian.append(inv_hessian)
-			inverse_hessians.append(torch.stack(inverse_hessian))
+				yield inv_hessian
 
 		# Compute the update per layer
 		for i in range(len(gradients)):
 			gradient, is_expanded = gradients[i]
-			inverse_hessian = inverse_hessians[i]
-			update = torch.stack([inverse_hessian[j] @ gradient[j] for j in range(len(gradient))])
+			hessian = next(hessians)
+			inverse_hessian = compute_inverse_hessian(hessian)
+			update = torch.stack([
+				out_feature_inverse_hessian @ out_feature_gradient
+				for out_feature_inverse_hessian, out_feature_gradient in zip(inverse_hessian, gradient)
+			])
 
 			# Correct the expansion
-			hessian = hessians[i]
 			if is_expanded:
 				hessian = hessian.view(-1)
 				gradient = gradient.view(-1)
