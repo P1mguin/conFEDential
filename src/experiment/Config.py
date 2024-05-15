@@ -64,12 +64,11 @@ class Config:
 		else:
 			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 
-		# For each intercepted datapoint, get their gradients, activation functions, loss
-		# attack_dataset = self._get_attack_dataset()
+	# For each intercepted datapoint, get their gradients, activation functions, loss
+	# attack_dataset = self._get_attack_dataset()
 
-		# Get the attack model
-# 		attack_model = AttackNet(self)
-
+	# Get the attack model
+	# 		attack_model = AttackNet(self)
 
 	def _get_attack_dataset(self):
 		# Get the model

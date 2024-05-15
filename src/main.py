@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # Keep at top, so cluster knows which directory to work in
 PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
@@ -70,6 +70,7 @@ def main():
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		config.run_simulation(concurrent_clients, is_online, is_capturing, run_name)
+
 
 if __name__ == '__main__':
 	main()

@@ -21,7 +21,9 @@ class AttackSimulation:
 		result += f"\n\tbatch_size: {self._batch_size}"
 		result += f"\n\toptimizer_name: {self._optimizer_name}"
 		result += "\n\toptimizer_parameters:"
-		result += "\n\t\t{}".format("\n\t\t".join([f"{key}: {value}" for key, value in self._optimizer_parameters.items()]))
+		result += "\n\t\t{}".format(
+			"\n\t\t".join([f"{key}: {value}" for key, value in self._optimizer_parameters.items()])
+		)
 		result += "\n\t{}".format("\n\t".join(str(self._model_architecture).split("\n")))
 		return result
 

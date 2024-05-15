@@ -25,11 +25,3 @@ def set_weights(model: nn.Module, weights: List[npt.NDArray]) -> None:
 	params_dict = zip(model.state_dict().keys(), weights)
 	state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
 	model.load_state_dict(state_dict, strict=True)
-
-
-def main():
-	model = torch.load(".cache/model_architectures/pytorchvision:v0.10.0_resnet18.pth")
-	pass
-
-if __name__ == '__main__':
-	main()

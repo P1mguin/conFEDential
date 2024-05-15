@@ -226,8 +226,6 @@ class Simulation:
 		]
 		return federation_participation
 
-
-
 	def _prepare_loaders(self):
 		"""
 		If the data has been split for the given amount of clients and the given splitter return the cached file.

@@ -86,6 +86,7 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 		value = value[key]
 	return value
 
+
 def get_trainable_layers_indices(model: nn.Module) -> Set[int]:
 	"""
 	Returns the indices of the trainable layers

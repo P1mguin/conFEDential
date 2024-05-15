@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 import src.training as training
 import src.utils as utils
-from src.experiment import AttackSimulation, Simulation
+from src.experiment import AttackSimulation
 
 
 class Attack:
@@ -20,7 +20,7 @@ class Attack:
 			data_access: str,
 			message_access: str,
 			repetitions: int,
-			attack_simulation = None
+			attack_simulation=None
 	):
 		self._data_access = data_access
 		self._message_access = message_access

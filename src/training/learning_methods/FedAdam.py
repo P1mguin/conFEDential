@@ -28,7 +28,6 @@ class FedAdam(Strategy):
 		self.eps = kwargs["global"]["eps"]
 		self.weight_decay = kwargs["global"]["weight_decay"]
 
-
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> SGD:
 		# FedAdam works with SGD at the client
 		return torch.optim.SGD(parameters, **self.kwargs["local"])

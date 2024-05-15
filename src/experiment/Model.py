@@ -43,7 +43,9 @@ class Model:
 		result += "\n\tmodel_architecture:"
 		is_from_hub = isinstance(self._model_architecture, dict)
 		if is_from_hub:
-			result += "\n\t\t{}".format("\n\t\t\t".join([f"{key}: {value}" for key, value in self._model_architecture.items()]))
+			result += "\n\t\t{}".format(
+				"\n\t\t\t".join([f"{key}: {value}" for key, value in self._model_architecture.items()])
+			)
 		else:
 			for layer in self._model_architecture:
 				result += "\n\t\t{}".format("\n\t\t\t".join([f"{key}: {value}" for key, value in layer.items()]))

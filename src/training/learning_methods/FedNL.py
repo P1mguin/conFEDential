@@ -177,7 +177,6 @@ class FedNL(Strategy):
 				inverse_hessian.append(inv_hessian)
 			inverse_hessians.append(np.stack(inverse_hessian))
 
-
 		# Per layer calculate the model update
 		current_weights = parameters_to_ndarrays(self.current_weights)
 		for i in range(len(gradients)):
