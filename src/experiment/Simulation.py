@@ -1,6 +1,7 @@
 import collections
 import hashlib
 import json
+import math
 import multiprocessing
 import os
 import pickle
@@ -137,6 +138,7 @@ class Simulation:
 	def simulate_federation(
 			self,
 			concurrent_clients: int,
+			memory: int | None,
 			is_capturing: bool = False,
 			is_online: bool = False,
 			run_name: str = None
@@ -152,9 +154,9 @@ class Simulation:
 		wandb.init(mode=mode, **wandb_kwargs)
 
 		# Initialize ray
-		ray_init_args = get_ray_init_args(concurrent_clients)
+		ray_init_args = get_ray_init_args(concurrent_clients, memory)
 
-		client_resources = get_client_resources(concurrent_clients)
+		client_resources = get_client_resources(concurrent_clients, memory)
 		log(INFO, "Starting federated learning simulation")
 		try:
 			fl.simulation.start_simulation(
@@ -347,18 +349,22 @@ class Simulation:
 		}
 
 
-def get_client_resources(concurrent_clients: int) -> dict:
+def get_client_resources(concurrent_clients: int, memory: int | None) -> dict:
 	"""
 	Finds the amount of resources available to each client based on the amount of desired concurrent clients and the
 	resources available to the system.
 	"""
 	total_cpus = multiprocessing.cpu_count()
 	total_gpus = torch.cuda.device_count()
-	total_memory = psutil.virtual_memory().total
+
+	if memory is None:
+		memory = psutil.virtual_memory().total
+	else:
+		memory = math.floor(memory * (1024 ** 3))
 
 	client_cpus = total_cpus // concurrent_clients
 	client_gpus = total_gpus / concurrent_clients
-	client_memory = total_memory // (concurrent_clients + 1)
+	client_memory = memory // (concurrent_clients + 1)
 
 	if client_cpus * concurrent_clients < total_cpus:
 		log(WARN, "The amount of clients is not a divisor of the total amount of CPUs,\n"
@@ -367,7 +373,7 @@ def get_client_resources(concurrent_clients: int) -> dict:
 	else:
 		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs, {client_gpus} GPUs, "
 				  f"and {round(client_memory / (1024 ** 3), 1)}GB for the total available {total_cpus} CPUs, {total_gpus} GPUs "
-				  f"and {round(total_memory / (1024 ** 3), 1)}GB.")
+				  f"and {round(memory / (1024 ** 3), 1)}GB.")
 
 	client_resources = {
 		"num_cpus": client_cpus,
@@ -377,13 +383,19 @@ def get_client_resources(concurrent_clients: int) -> dict:
 	return client_resources
 
 
-def get_ray_init_args(concurrent_clients: int) -> dict:
+def get_ray_init_args(concurrent_clients: int, memory: int | None) -> dict:
 	"""
 	Returns the ray init arguments for the type of system the simulation is run on.
 	"""
 	total_cpus = multiprocessing.cpu_count()
 	total_gpus = torch.cuda.device_count()
-	server_memory = psutil.virtual_memory().total // (concurrent_clients + 1)
+
+	if memory is None:
+		memory = psutil.virtual_memory().total
+	else:
+		memory = math.floor(memory * (1024 ** 3))
+
+	server_memory = memory // (concurrent_clients + 1)
 
 	ray_init_args = {
 		"runtime_env": {

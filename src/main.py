@@ -56,6 +56,13 @@ parser.add_argument(
 	help="Whether to save the messages from client to server"
 )
 
+parser.add_argument(
+	"--memory",
+	type=float,
+	default=None,
+	help="Amount of memory to allocate to the simulation in GB"
+)
+
 
 def main():
 	args = parser.parse_args()
@@ -63,14 +70,15 @@ def main():
 	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
 
 	concurrent_clients = args.clients
-	run_name = args.run_name
+	memory = args.memory
 	is_online = args.logging
 	is_capturing = args.capturing
+	run_name = args.run_name
 
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		log(INFO, config)
-		config.run_simulation(concurrent_clients, is_online, is_capturing, run_name)
+		config.run_simulation(concurrent_clients, memory, is_online, is_capturing, run_name)
 
 
 if __name__ == '__main__':
