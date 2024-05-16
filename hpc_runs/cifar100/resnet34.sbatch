@@ -15,6 +15,6 @@ module load slurm/utils
 module load monitor/node
 source venv/bin/activate
 
-srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_adam.yaml --clients 1 --run-name CIFAR100-RESNET34-FEDADAM
-srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_avg.yaml --clients 1 --run-name CIFAR100-RESNET34-FEDAVG
-srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_nag.yaml --clients 1 --run-name CIFAR100-RESNET34-FEDNAG
+srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_adam.yaml --memory 16 --clients 1 --run-name CIFAR100-RESNET34-FEDADAM
+srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_avg.yaml --memory 16 --clients 1 --run-name CIFAR100-RESNET34-FEDAVG
+srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_nag.yaml --memory 16 --clients 1 --run-name CIFAR100-RESNET34-FEDNAG
