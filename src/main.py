@@ -60,7 +60,7 @@ parser.add_argument(
 	"--memory",
 	type=float,
 	default=None,
-	help="Amount of memory to allocate to the simulation in GB"
+	help="Amount of memory to allocate to the simulation in GB, by default takes all memory available"
 )
 
 
