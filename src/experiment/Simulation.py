@@ -139,6 +139,8 @@ class Simulation:
 			self,
 			concurrent_clients: int,
 			memory: int | None,
+			num_cpus: int,
+			num_gpus: int,
 			is_ray_initialised: bool = False,
 			is_capturing: bool = False,
 			is_online: bool = False,
@@ -154,7 +156,7 @@ class Simulation:
 		mode = "online" if is_online else "offline"
 		wandb.init(mode=mode, **wandb_kwargs)
 
-		client_resources = get_client_resources(concurrent_clients, memory)
+		client_resources = get_client_resources(concurrent_clients, memory, num_cpus, num_gpus)
 		log(INFO, "Starting federated learning simulation")
 		try:
 			if is_ray_initialised:
@@ -167,7 +169,7 @@ class Simulation:
 					strategy=strategy
 				)
 			else:
-				ray_init_args = get_ray_init_args(concurrent_clients, memory)
+				ray_init_args = get_ray_init_args(concurrent_clients, memory, num_cpus, num_gpus)
 				fl.simulation.start_simulation(
 					client_fn=client_fn,
 					num_clients=self.client_count,
@@ -358,13 +360,22 @@ class Simulation:
 		}
 
 
-def get_client_resources(concurrent_clients: int, memory: int | None) -> dict:
+def get_client_resources(
+		concurrent_clients: int, memory: int | None, num_cpus: int | None, num_gpus: int | None
+) -> dict:
 	"""
 	Finds the amount of resources available to each client based on the amount of desired concurrent clients and the
 	resources available to the system.
 	"""
-	total_cpus = multiprocessing.cpu_count()
-	total_gpus = torch.cuda.device_count()
+	if num_cpus is None:
+		total_cpus = multiprocessing.cpu_count()
+	else:
+		total_cpus = num_cpus
+
+	if num_gpus is None:
+		total_gpus = torch.cuda.device_count()
+	else:
+		total_gpus = num_gpus
 
 	if memory is None:
 		memory = psutil.virtual_memory().total
@@ -392,12 +403,19 @@ def get_client_resources(concurrent_clients: int, memory: int | None) -> dict:
 	return client_resources
 
 
-def get_ray_init_args(concurrent_clients: int, memory: int | None) -> dict:
+def get_ray_init_args(concurrent_clients: int, memory: int | None, num_cpus: int | None, num_gpus: int | None) -> dict:
 	"""
 	Returns the ray init arguments for the type of system the simulation is run on.
 	"""
-	total_cpus = multiprocessing.cpu_count()
-	total_gpus = torch.cuda.device_count()
+	if num_cpus is None:
+		total_cpus = multiprocessing.cpu_count()
+	else:
+		total_cpus = num_cpus
+
+	if num_gpus is None:
+		total_gpus = torch.cuda.device_count()
+	else:
+		total_gpus = num_gpus
 
 	if memory is None:
 		memory = psutil.virtual_memory().total

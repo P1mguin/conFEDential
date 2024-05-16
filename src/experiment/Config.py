@@ -58,6 +58,8 @@ class Config:
 			self,
 			concurrent_clients: int,
 			memory: int | None,
+			num_cpus: int,
+			num_gpus: int,
 			is_ray_initialised: bool,
 			is_online: bool,
 			is_capturing: bool,
@@ -68,7 +70,9 @@ class Config:
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
 			log(INFO, "No previous federated learning simulation found, starting training simulation...")
-			self.simulation.simulate_federation(concurrent_clients, memory, is_ray_initialised, is_capturing, is_online, run_name)
+			self.simulation.simulate_federation(
+				concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_capturing, is_online, run_name
+			)
 		else:
 			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 

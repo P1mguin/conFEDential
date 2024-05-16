@@ -70,6 +70,21 @@ parser.add_argument(
 	help="Amount of memory to allocate to the simulation in GB, by default takes all memory available"
 )
 
+parser.add_argument(
+	"--num-cpus",
+	type=int,
+	default=None,
+	help="Number of CPUs to allocate to the simulation, by default takes all CPUs available"
+)
+
+parser.add_argument(
+	"--num-gpus",
+	type=int,
+	default=None,
+	help="Number of GPUs to allocate to the simulation, by default takes all GPUs available"
+
+)
+
 
 def main():
 	args = parser.parse_args()
@@ -78,6 +93,8 @@ def main():
 
 	concurrent_clients = args.clients
 	memory = args.memory
+	num_cpus = args.num_cpus
+	num_gpus = args.num_gpus
 	is_ray_initialised = args.ray
 	is_online = args.logging
 	is_capturing = args.capturing
@@ -86,7 +103,9 @@ def main():
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		log(INFO, config)
-		config.run_simulation(concurrent_clients, memory, is_ray_initialised, is_online, is_capturing, run_name)
+		config.run_simulation(
+			concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_online, is_capturing, run_name
+		)
 
 
 if __name__ == '__main__':
