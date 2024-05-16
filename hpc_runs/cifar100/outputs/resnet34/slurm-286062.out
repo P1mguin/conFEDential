@@ -1,0 +1,315 @@
+ctit083
+2024-05-16 16:02:24.577591: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-16 16:02:26.769402: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-16 16:02:35,242 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-16 16:02:35,258 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-16 16:02:42,253 | Simulation.py:37 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-16 16:02:42,259 | Simulation.py:243 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-16 16:02:53,174 | main.py:78 | Loaded 1 configs with name CIFAR100-RESNET34-FEDADAM, running...
+INFO flwr 2024-05-16 16:02:53,175 | main.py:80 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar100
+			batch_size: 128
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": (element["img"] / 255.).transpose(2, 0, 1),
+				    "y": element["fine_label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 1
+			local_rounds: 1
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet34
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.1}
+				global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet34
+					pretrained: False
+					out_features: 100
+	Attack:
+		data_access: all
+		message_access: server
+		repetitions: 10
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv3d
+						out_channels: 1000
+						kernel_size: [1, 1]
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-05-16 16:02:53,175 | Config.py:65 | Starting conFEDential simulation
+INFO flwr 2024-05-16 16:02:53,191 | Config.py:69 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-16 16:02:55,296 | Simulation.py:374 | Created 1 clients with resources 64 CPUs, 1.0 GPUs, and 8.0GB for the total available 64 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-05-16 16:02:55,298 | Simulation.py:160 | Starting federated learning simulation
+INFO flwr 2024-05-16 16:02:55,299 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=1, round_timeout=None)
+2024-05-16 16:02:58,818	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-16 16:02:59,054	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-16 16:02:59,176	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_5c47110613e6f702.zip' (0.16MiB) to Ray cluster...
+2024-05-16 16:02:59,177	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_5c47110613e6f702.zip'.
+[2024-05-16 16:03:29,439 E 3882097 3882097] core_worker.cc:201: Failed to register worker 01000000ffffffffffffffffffffffffffffffffffffffffffffffff to Raylet. IOError: [RayletClient] Unable to register worker with raylet. No such file or directory
+srun: error: ctit083: task 0: Exited with exit code 1
+2024-05-16 16:03:33.358776: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-16 16:03:34.678430: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-16 16:03:39,761 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-16 16:03:39,762 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-16 16:03:41,452 | Simulation.py:37 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-16 16:03:41,453 | Simulation.py:243 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-16 16:03:42,430 | main.py:78 | Loaded 1 configs with name CIFAR100-RESNET34-FEDAVG, running...
+INFO flwr 2024-05-16 16:03:42,431 | main.py:80 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar100
+			batch_size: 128
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": (element["img"] / 255.).transpose(2, 0, 1),
+				    "y": element["fine_label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 1
+			local_rounds: 1
+		Model:
+			optimizer_name: FedAvg
+			model_name: ResNet34
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				lr: 0.1
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet34
+					pretrained: False
+					out_features: 100
+	Attack:
+		data_access: all
+		message_access: server
+		repetitions: 10
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv3d
+						out_channels: 1000
+						kernel_size: [1, 1]
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-05-16 16:03:42,431 | Config.py:65 | Starting conFEDential simulation
+INFO flwr 2024-05-16 16:03:42,432 | Config.py:69 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-16 16:03:44,345 | Simulation.py:374 | Created 1 clients with resources 64 CPUs, 1.0 GPUs, and 8.0GB for the total available 64 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-05-16 16:03:44,346 | Simulation.py:160 | Starting federated learning simulation
+INFO flwr 2024-05-16 16:03:44,348 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=1, round_timeout=None)
+2024-05-16 16:03:48,817	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-16 16:03:48,932	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-16 16:03:49,016	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_5c47110613e6f702.zip' (0.16MiB) to Ray cluster...
+2024-05-16 16:03:49,018	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_5c47110613e6f702.zip'.
+[2024-05-16 16:04:19,295 E 3890857 3890857] core_worker.cc:201: Failed to register worker 01000000ffffffffffffffffffffffffffffffffffffffffffffffff to Raylet. IOError: [RayletClient] Unable to register worker with raylet. No such file or directory
+srun: error: ctit083: task 0: Exited with exit code 1
+2024-05-16 16:04:23.695582: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-16 16:04:25.031248: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-16 16:04:30,164 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-16 16:04:30,164 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-16 16:04:32,001 | Simulation.py:37 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-16 16:04:32,001 | Simulation.py:243 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-16 16:04:32,994 | main.py:78 | Loaded 1 configs with name CIFAR100-RESNET34-FEDNAG, running...
+INFO flwr 2024-05-16 16:04:32,994 | main.py:80 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar100
+			batch_size: 128
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": (element["img"] / 255.).transpose(2, 0, 1),
+				    "y": element["fine_label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 1
+			local_rounds: 1
+		Model:
+			optimizer_name: FedNag
+			model_name: ResNet34
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				lr: 0.1
+				momentum: 0.9
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet34
+					pretrained: False
+					out_features: 100
+	Attack:
+		data_access: all
+		message_access: server
+		repetitions: 10
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv3d
+						out_channels: 1000
+						kernel_size: [1, 1]
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-05-16 16:04:32,994 | Config.py:65 | Starting conFEDential simulation
+INFO flwr 2024-05-16 16:04:32,995 | Config.py:69 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-16 16:04:36,236 | Simulation.py:374 | Created 1 clients with resources 64 CPUs, 1.0 GPUs, and 8.0GB for the total available 64 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-05-16 16:04:36,237 | Simulation.py:160 | Starting federated learning simulation
+INFO flwr 2024-05-16 16:04:36,239 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=1, round_timeout=None)
+2024-05-16 16:04:40,603	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-16 16:04:40,784	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-16 16:04:40,925	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_5c47110613e6f702.zip' (0.16MiB) to Ray cluster...
+2024-05-16 16:04:40,926	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_5c47110613e6f702.zip'.
+[2024-05-16 16:05:11,001 E 3895223 3895223] core_worker.cc:201: Failed to register worker 01000000ffffffffffffffffffffffffffffffffffffffffffffffff to Raylet. IOError: [RayletClient] Unable to register worker with raylet. No such file or directory
+srun: error: ctit083: task 0: Exited with exit code 1
