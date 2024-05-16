@@ -1,8 +1,10 @@
 import collections
+import itertools
 import os
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import flwr as fl
+import h5py
 import numpy as np
 import numpy.typing as npt
 import wandb
@@ -110,22 +112,25 @@ class Server(FedAvg):
 		# and fills in the blanks for the clients that did not participate in the round
 		def reshape_to_federation_capture(messages):
 			# Stack the layers together
-			messages = list(map(np.stack, zip(*messages)))
+			messages = zip(*messages)
 
 			# Create a list of zeros for the clients that did not participate and set the variables for those that did
-			results = [
-				np.expand_dims(np.zeros_like(message[0]), axis=0).repeat(client_count, axis=0) for message in messages
-			]
-			for result, message in zip(results, messages):
-				result[participating_clients] = message
+			def get_expanded_message(message):
+				for i in range(client_count):
+					if i in participating_clients:
+						index = next(j for j in range(len(participating_clients)) if participating_clients[j] == i)
+						yield next(itertools.islice(message, index, None))
+					else:
+						yield np.zeros_like(message[0])
 
-			return results
+			messages = (get_expanded_message(message) for message in messages)
+			return messages
 
 		# Take the parameters, transpose them and stack them
-		parameter_messages = [parameters_to_ndarrays(fitres.parameters) for _, fitres in messages]
+		parameter_messages = (parameters_to_ndarrays(fitres.parameters) for _, fitres in messages)
 		parameter_messages = reshape_to_federation_capture(parameter_messages)
 		self._capture_variable(
-			server_round, parameter_messages, f"{base_path}messages.npz", is_message=True, is_aggregate=True
+			server_round, parameter_messages, f"{base_path}messages.hdf5", is_message=True, is_aggregate=True
 		)
 
 		# Combine the metrics in one dict
@@ -136,8 +141,11 @@ class Server(FedAvg):
 		metrics = dict(metrics)
 
 		for key, value in metrics.items():
+			metric_shapes = [layer.shape for layer in value[0]]
 			value = reshape_to_federation_capture(value)
-			self._capture_variable(server_round, value, f"{base_path}metrics/{key}.npz", is_message=True)
+			self._capture_variable(
+				server_round, value, f"{base_path}metrics/{key}.hdf5", is_message=True, metric_shapes=metric_shapes
+			)
 
 	def _capture_aggregates(self, server_round: int, aggregated_parameters: Parameters, metrics: dict):
 		base_path = self.simulation.get_capture_directory()
@@ -145,19 +153,20 @@ class Server(FedAvg):
 
 		# Convert the aggregated parameters to a list of numpy arrays
 		aggregated_parameters = parameters_to_ndarrays(aggregated_parameters)
-		self._capture_variable(server_round, aggregated_parameters, f"{base_path}aggregates.npz", is_aggregate=True)
+		self._capture_variable(server_round, aggregated_parameters, f"{base_path}aggregates.hdf5", is_aggregate=True)
 
 		# Capture all metrics
 		for key, value in metrics.items():
-			self._capture_variable(server_round, value, f"{base_path}metrics/{key}.npz")
+			self._capture_variable(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
 	def _capture_variable(
 			self,
 			server_round: int,
-			values: List[npt.NDArray],
+			values: Generator[npt.NDArray, None, None] | List[npt.NDArray],
 			path: str,
 			is_aggregate: bool = False,
-			is_message: bool = False
+			is_message: bool = False,
+			metric_shapes: Optional[List[Tuple[int]]] = None
 	):
 		# The axis along which the expansion can happen to account for several iterations
 		expansion_axis = 1 if is_message else 0
@@ -165,29 +174,42 @@ class Server(FedAvg):
 		# If nothing has been captured yet, the file needs to be initialized
 		# The initial parameter is all zeros for the metric and the initial model parameters for an aggregate
 		if server_round == 1:
+			client_count = self.simulation.client_count
+			global_rounds = self.simulation.global_rounds + 1
+
 			if is_aggregate:
-				saved_values = training.get_weights(self.simulation.model)
+				initial_values = training.get_weights(self.simulation.model)
 
 				# For messages repeat the messages for each client
 				if is_message:
-					client_count = self.simulation.client_count
-					saved_values = [
-						np.expand_dims(saved_value, axis=0).repeat(client_count, axis=0)
-						for saved_value in saved_values
-					]
+					initial_values = (
+						np.expand_dims(initial_value, axis=0).repeat(client_count, axis=0)
+						for initial_value in initial_values
+					)
+
+				# Expand everything to account for several iterations
+				initial_values = (
+					np.expand_dims(initial_value, axis=expansion_axis).repeat(global_rounds, axis=expansion_axis)
+					for initial_value in initial_values
+				)
 			else:
-				saved_values = [np.zeros_like(value) for value in values]
+				metric_shapes = (
+					(client_count, *metric_shape) for metric_shape in metric_shapes
+				)
+				initial_values = (
+					np.zeros((metric_shape[0], global_rounds, *metric_shape[1:])) for metric_shape in metric_shapes
+				)
 
-			# Expand everything to account for several iterations
-			saved_values = [np.expand_dims(value, expansion_axis) for value in saved_values]
-		else:
-			# Load in the saved variable
-			saved_values = np.load(path)
-			saved_values = [saved_values[file] for file in saved_values.files]
+			# Save as HDF5 file as the data may be big
+			with h5py.File(path, 'w') as hf:
+				for i, initial_value in enumerate(initial_values):
+					hf.create_dataset(str(i), data=initial_value, chunks=True)
 
-		values = [np.expand_dims(value, expansion_axis) for value in values]
-		values = [
-			np.concatenate((saved_value, value), axis=expansion_axis)
-			for value, saved_value in zip(values, saved_values)
-		]
-		np.savez_compressed(path, *values)
+		# Open the saved HDF5 file in read-write mode
+		with h5py.File(path, 'r+') as hf:
+			for dset, value in zip(hf.values(), values):
+				if is_message:
+					for i, client_value in enumerate(value):
+						dset[i][server_round] = client_value
+				else:
+					dset[server_round] = value
