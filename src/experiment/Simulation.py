@@ -139,6 +139,7 @@ class Simulation:
 			self,
 			concurrent_clients: int,
 			memory: int | None,
+			is_ray_initialised: bool = False,
 			is_capturing: bool = False,
 			is_online: bool = False,
 			run_name: str = None
@@ -153,22 +154,28 @@ class Simulation:
 		mode = "online" if is_online else "offline"
 		wandb.init(mode=mode, **wandb_kwargs)
 
-		# Initialize ray
-		keep_initialised = ray.is_initialized()
-		ray_init_args = get_ray_init_args(concurrent_clients, memory)
-
 		client_resources = get_client_resources(concurrent_clients, memory)
 		log(INFO, "Starting federated learning simulation")
 		try:
-			fl.simulation.start_simulation(
-				client_fn=client_fn,
-				num_clients=self.client_count,
-				client_resources=client_resources,
-				keep_initialised=keep_initialised,
-				ray_init_args=ray_init_args,
-				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
-				strategy=strategy
-			)
+			if is_ray_initialised:
+				fl.simulation.start_simulation(
+					client_fn=client_fn,
+					num_clients=self.client_count,
+					client_resources=client_resources,
+					keep_initialised=is_ray_initialised,
+					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					strategy=strategy
+				)
+			else:
+				ray_init_args = get_ray_init_args(concurrent_clients, memory)
+				fl.simulation.start_simulation(
+					client_fn=client_fn,
+					num_clients=self.client_count,
+					client_resources=client_resources,
+					ray_init_args=ray_init_args,
+					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					strategy=strategy
+				)
 		except Exception as e:
 			log(ERROR, e)
 			wandb.finish(exit_code=1)

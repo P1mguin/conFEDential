@@ -16,8 +16,8 @@ module load monitor/node
 source venv/bin/activate
 
 cd /home/s2240084/conFEDential
-ray start --head --num-cpus 2 --num-gpus 1 --temp-dir /local/ray --memory 214786348
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_adam.yaml --memory 16 --clients 2 --run-name CIFAR10-RESNET18-FEDADAM
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_avg.yaml --memory 16 --clients 2 --run-name CIFAR10-RESNET18-FEDAVG
-srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --memory 16 --clients 2 --run-name CIFAR10-RESNET18-FEDNAG
+ray start --head --num-cpus 64 --num-gpus 1 --temp-dir /local/ray --memory 5726623061
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_adam.yaml --ray --memory 16 --clients 2 --run-name CIFAR10-RESNET18-FEDADAM
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_avg.yaml --ray --memory 16 --clients 2 --run-name CIFAR10-RESNET18-FEDAVG
+srun python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --ray --memory 16 --clients 2 --run-name CIFAR10-RESNET18-FEDNAG
 ray stop

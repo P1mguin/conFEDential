@@ -43,6 +43,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+	"--ray",
+	default=False,
+	action=argparse.BooleanOptionalAction,
+	help="Whether ray has been initialised already"
+)
+
+parser.add_argument(
 	"--logging",
 	default=False,
 	action=argparse.BooleanOptionalAction,
@@ -71,6 +78,7 @@ def main():
 
 	concurrent_clients = args.clients
 	memory = args.memory
+	is_ray_initialised = args.ray
 	is_online = args.logging
 	is_capturing = args.capturing
 	run_name = args.run_name
@@ -78,7 +86,7 @@ def main():
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		log(INFO, config)
-		config.run_simulation(concurrent_clients, memory, is_online, is_capturing, run_name)
+		config.run_simulation(concurrent_clients, memory, is_ray_initialised, is_online, is_capturing, run_name)
 
 
 if __name__ == '__main__':
