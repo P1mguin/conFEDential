@@ -154,6 +154,7 @@ class Simulation:
 		wandb.init(mode=mode, **wandb_kwargs)
 
 		# Initialize ray
+		keep_initialised = ray.is_initialized()
 		ray_init_args = get_ray_init_args(concurrent_clients, memory)
 
 		client_resources = get_client_resources(concurrent_clients, memory)
@@ -163,6 +164,7 @@ class Simulation:
 				client_fn=client_fn,
 				num_clients=self.client_count,
 				client_resources=client_resources,
+				keep_initialised=keep_initialised,
 				ray_init_args=ray_init_args,
 				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
 				strategy=strategy
@@ -406,12 +408,5 @@ def get_ray_init_args(concurrent_clients: int, memory: int | None) -> dict:
 		"num_gpus": total_gpus,
 		"_memory": server_memory,
 	}
-
-	# Cluster admin wants to use local instead of tmp
-	if os.path.exists("/local"):
-		ray_init_args = {
-			**ray_init_args,
-			"_temp_dir": "/local/ray",
-		}
 
 	return ray_init_args
