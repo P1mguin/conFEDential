@@ -160,6 +160,7 @@ class Simulation:
 		log(INFO, "Starting federated learning simulation")
 		try:
 			if is_ray_initialised:
+				ray.init(address='auto')
 				fl.simulation.start_simulation(
 					client_fn=client_fn,
 					num_clients=self.client_count,
