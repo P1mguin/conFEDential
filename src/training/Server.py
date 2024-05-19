@@ -187,9 +187,6 @@ class Server(FedAvg):
 			is_message: bool = False,
 			value_shapes: Optional[List[Tuple[int]]] = None
 	):
-		# The axis along which the expansion can happen to account for several iterations
-		expansion_axis = 1 if is_message else 0
-
 		# If nothing has been captured yet, the file needs to be initialized
 		# The initial parameter is all zeros for the metric and the initial model parameters for an aggregate
 		if server_round == 1:
@@ -215,17 +212,17 @@ class Server(FedAvg):
 			if is_parameters:
 				initial_parameters_values = training.get_weights(self.simulation.model)
 				with h5py.File(path, 'r+') as hf:
-					for dset, initial_layer in zip(hf.values(), initial_parameters_values):
+					for i, initial_layer in enumerate(initial_parameters_values):
 						if is_message:
-							dset[:, 0] = initial_layer
+							hf[str(i)][:, 0] = initial_layer
 						else:
-							dset[0] = initial_layer
+							hf[str(i)][0] = initial_layer
 
 		# Open the saved HDF5 file in read-write mode
 		with h5py.File(path, 'r+') as hf:
-			for dset, value in zip(hf.values(), values):
+			for i, value in enumerate(values):
 				if is_message:
-					for i, client_value in enumerate(value):
-						dset[i, server_round] = client_value
+					for j, client_value in enumerate(value):
+						hf[str(i)][j, server_round] = client_value
 				else:
-					dset[server_round] = value
+					hf[str(i)][server_round] = value
