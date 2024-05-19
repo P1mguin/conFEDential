@@ -173,7 +173,7 @@ class Server(FedAvg):
 		# Capture all metrics
 		for key, value in metrics.items():
 			value = [layer for layer in value]
-			value_shapes = (layer.shape for layer in metrics[key])
+			value_shapes = (layer.shape for layer in value)
 			self._capture_variable(
 				server_round, value, f"{base_path}metrics/{key}.hdf5", value_shapes=value_shapes
 			)
