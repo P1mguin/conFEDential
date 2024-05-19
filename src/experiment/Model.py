@@ -133,7 +133,7 @@ class Model:
 
 	def get_gradient_shapes(self):
 		# Get the shapes of the weights and the biases and then join them together in tuples
-		gradient_shapes = [param.shape for name, param in self.model.named_parameters()]
+		gradient_shapes = [value.shape for value in self.model.state_dict().values()]
 		gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
 		return gradient_shapes
 
