@@ -1,0 +1,170 @@
+ctit080
+2024-05-16 20:19:56,822	INFO usage_lib.py:407 -- Usage stats collection is enabled by default without user confirmation because this terminal is detected to be non-interactive. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-05-16 20:19:56,822	INFO scripts.py:722 -- Local node IP: 10.20.240.10
+2024-05-16 20:20:05,579	SUCC scripts.py:759 -- --------------------
+2024-05-16 20:20:05,579	SUCC scripts.py:760 -- Ray runtime started.
+2024-05-16 20:20:05,579	SUCC scripts.py:761 -- --------------------
+2024-05-16 20:20:05,579	INFO scripts.py:763 -- Next steps
+2024-05-16 20:20:05,579	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-05-16 20:20:05,579	INFO scripts.py:769 --   ray start --address='10.20.240.10:6379'
+2024-05-16 20:20:05,579	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-05-16 20:20:05,579	INFO scripts.py:780 -- import ray
+2024-05-16 20:20:05,579	INFO scripts.py:781 -- ray.init()
+2024-05-16 20:20:05,579	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-05-16 20:20:05,579	INFO scripts.py:813 --   ray stop
+2024-05-16 20:20:05,579	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-05-16 20:20:05,579	INFO scripts.py:817 --   ray status
+2024-05-16 20:21:44.860638: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-16 20:22:18.112390: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-16 20:23:53,074 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-16 20:23:53,125 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-16 20:24:30,950 | Simulation.py:37 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-16 20:24:30,980 | Simulation.py:245 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-16 20:24:47,306 | main.py:78 | Loaded 1 configs with name CIFAR10-RESNET18-FEDADAM, running...
+INFO flwr 2024-05-16 20:24:47,306 | main.py:80 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 32
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": (element["img"] / 255.).transpose(2, 0, 1),
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 1
+			local_rounds: 1
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: all
+		message_access: server
+		repetitions: 10
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv3d
+						out_channels: 1000
+						kernel_size: [1, 1]
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-05-16 20:24:47,306 | Config.py:65 | Starting conFEDential simulation
+INFO flwr 2024-05-16 20:24:47,308 | Config.py:69 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-16 20:24:54,777 | Simulation.py:376 | Created 2 clients with resources 40 CPUs, 0.5 GPUs, and 5.3GB for the total available 80 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-05-16 20:24:54,778 | Simulation.py:161 | Starting federated learning simulation
+INFO flwr 2024-05-16 20:24:54,779 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=1, round_timeout=None)
+2024-05-16 20:24:59,244	INFO worker.py:1621 -- Started a local Ray instance.
+2024-05-16 20:25:01,011	INFO packaging.py:518 -- Creating a file package for local directory '/home/s2240084/conFEDential'.
+2024-05-16 20:25:01,080	INFO packaging.py:346 -- Pushing file package 'gcs://_ray_pkg_2e3d25668113d9df.zip' (0.16MiB) to Ray cluster...
+2024-05-16 20:25:01,082	INFO packaging.py:359 -- Successfully pushed file package 'gcs://_ray_pkg_2e3d25668113d9df.zip'.
+INFO flwr 2024-05-16 20:25:59,839 | app.py:213 | Flower VCE: Ray initialized with resources: {'accelerator_type:P100': 1.0, 'node:__internal_head__': 1.0, 'GPU': 1.0, 'object_store_memory': 153754187366.0, 'CPU': 80.0, 'node:10.20.240.10': 1.0, 'memory': 5726623061.0}
+INFO flwr 2024-05-16 20:25:59,840 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-05-16 20:25:59,840 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 40, 'num_gpus': 0.5, 'memory': 5726623061}
+INFO flwr 2024-05-16 20:25:59,862 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 2 actors
+INFO flwr 2024-05-16 20:25:59,863 | server.py:89 | Initializing global parameters
+INFO flwr 2024-05-16 20:25:59,864 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-05-16 20:25:59,864 | server.py:91 | Evaluating initial parameters
+[2m[36m(pid=1564933)[0m 2024-05-16 20:26:08.494679: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=1564933)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=1564933)[0m 2024-05-16 20:26:10.261829: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-16 20:26:18,103 | server.py:94 | initial parameters (loss, other metrics): 0.0002507773160934448, {'accuracy': 0.0943, 'data_size': 10000}
+INFO flwr 2024-05-16 20:26:18,104 | server.py:104 | FL starting
+DEBUG flwr 2024-05-16 20:26:18,104 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(DefaultActor pid=1564933)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=1564933)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[1m[36m(autoscaler +3m15s)[0m Tip: use `ray status` to view detailed cluster status. To disable these messages, set RAY_SCHEDULER_EVENTS=0.
+[2m[1m[33m(autoscaler +3m15s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +3m55s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +4m30s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +5m5s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +5m40s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +6m15s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +6m50s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +7m25s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +8m0s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +8m35s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +9m10s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +9m45s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +10m20s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +10m55s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +11m30s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +12m6s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +12m41s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +13m16s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +13m51s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +14m26s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +15m1s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +15m36s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +16m11s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +16m46s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +17m21s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+[2m[1m[33m(autoscaler +17m56s)[0m Warning: The following resource request cannot be scheduled right now: {'CPU': 40.0, 'memory': 5726623061.0, 'GPU': 0.5}. This is likely due to all cluster resources being claimed by actors. Consider creating fewer actors or adding more nodes to this Ray cluster.
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit080: error: *** STEP 286165.0 ON ctit080 CANCELLED AT 2024-05-16T20:46:50 ***
+*** SIGTERM received at time=1715885210 on cpu 57 ***
+slurmstepd-ctit080: error: *** JOB 286165 ON ctit080 CANCELLED AT 2024-05-16T20:46:50 ***
+PC: @     0x7f544e71b117  (unknown)  (unknown)
+    @     0x7f544e6cc520  (unknown)  (unknown)
+[2024-05-16 20:46:50,406 E 1486333 1486333] logging.cc:361: *** SIGTERM received at time=1715885210 on cpu 57 ***
+[2024-05-16 20:46:50,406 E 1486333 1486333] logging.cc:361: PC: @     0x7f544e71b117  (unknown)  (unknown)
+[2024-05-16 20:46:50,407 E 1486333 1486333] logging.cc:361:     @     0x7f544e6cc520  (unknown)  (unknown)
