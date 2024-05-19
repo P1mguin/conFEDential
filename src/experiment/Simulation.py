@@ -170,7 +170,7 @@ class Simulation:
 					strategy=strategy
 				)
 			else:
-				ray_init_args = get_ray_init_args(concurrent_clients, memory, num_cpus, num_gpus)
+				ray_init_args = get_ray_init_args(memory, num_cpus, num_gpus)
 				fl.simulation.start_simulation(
 					client_fn=client_fn,
 					num_clients=self.client_count,
@@ -385,7 +385,7 @@ def get_client_resources(
 
 	client_cpus = total_cpus // concurrent_clients
 	client_gpus = total_gpus / concurrent_clients
-	client_memory = memory // (concurrent_clients + 1)
+	client_memory = memory // concurrent_clients
 
 	if client_cpus * concurrent_clients < total_cpus:
 		log(WARN, "The amount of clients is not a divisor of the total amount of CPUs,\n"
@@ -404,35 +404,29 @@ def get_client_resources(
 	return client_resources
 
 
-def get_ray_init_args(concurrent_clients: int, memory: int | None, num_cpus: int | None, num_gpus: int | None) -> dict:
+def get_ray_init_args(memory: int | None, num_cpus: int | None, num_gpus: int | None) -> dict:
 	"""
 	Returns the ray init arguments for the type of system the simulation is run on.
 	"""
 	if num_cpus is None:
-		total_cpus = multiprocessing.cpu_count()
-	else:
-		total_cpus = num_cpus
+		num_cpus = multiprocessing.cpu_count()
 
 	if num_gpus is None:
-		total_gpus = torch.cuda.device_count()
-	else:
-		total_gpus = num_gpus
+		num_gpus = torch.cuda.device_count()
 
 	if memory is None:
 		memory = psutil.virtual_memory().total
 	else:
 		memory = math.floor(memory * (1024 ** 3))
 
-	server_memory = memory // (concurrent_clients + 1)
-
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
 			"excludes": [".git", "hpc_runs"]
 		},
-		"num_cpus": total_cpus,
-		"num_gpus": total_gpus,
-		"_memory": server_memory,
+		"num_cpus": num_cpus,
+		"num_gpus": num_gpus,
+		"_memory": memory,
 	}
 
 	return ray_init_args
