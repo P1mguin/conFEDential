@@ -265,7 +265,7 @@ class Simulation:
 		train_datasets = self._split_data(train_dataset)
 
 		# Convert the test dataset to a tuple
-		test_dataset = [(value["x"], value["y"]) for value in test_dataset]
+		test_dataset = [(torch.tensor(value["x"]), value["y"]) for value in test_dataset]
 
 		# Bundle the information in a dataloader
 		train_loaders = []
@@ -335,7 +335,7 @@ class Simulation:
 				lengths[i] += 1
 
 			subsets = random_split(dataset, lengths)
-			split_data = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
+			split_data = ([(torch.tensor(value["x"]), value["y"]) for value in subset] for subset in subsets)
 
 		return split_data
 

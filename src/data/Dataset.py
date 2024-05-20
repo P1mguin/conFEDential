@@ -2,13 +2,13 @@ import os.path
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-from torch.utils.data import DataLoader
+from datasets import Dataset as HuggingFaceDataset
 
 
 class Dataset(ABC):
 	@staticmethod
 	@abstractmethod
-	def load_dataset() -> Tuple[DataLoader, DataLoader]:
+	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
 		"""
 		Load raw dataset from cache directory, if not found, throws an error
 		"""
