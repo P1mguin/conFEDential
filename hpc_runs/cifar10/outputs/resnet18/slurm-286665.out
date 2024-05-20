@@ -1,0 +1,963 @@
+ctit091
+2024-05-20 04:13:12,056	INFO usage_lib.py:412 -- Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-05-20 04:13:12,056	INFO scripts.py:722 -- Local node IP: 10.20.240.21
+2024-05-20 04:13:34,182	SUCC scripts.py:759 -- --------------------
+2024-05-20 04:13:34,183	SUCC scripts.py:760 -- Ray runtime started.
+2024-05-20 04:13:34,183	SUCC scripts.py:761 -- --------------------
+2024-05-20 04:13:34,183	INFO scripts.py:763 -- Next steps
+2024-05-20 04:13:34,183	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-05-20 04:13:34,183	INFO scripts.py:769 --   ray start --address='10.20.240.21:6379'
+2024-05-20 04:13:34,183	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-05-20 04:13:34,184	INFO scripts.py:780 -- import ray
+2024-05-20 04:13:34,184	INFO scripts.py:781 -- ray.init()
+2024-05-20 04:13:34,184	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-05-20 04:13:34,184	INFO scripts.py:813 --   ray stop
+2024-05-20 04:13:34,185	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-05-20 04:13:34,185	INFO scripts.py:817 --   ray status
+2024-05-20 04:14:33.181959: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-05-20 04:14:34.843216: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-20 04:14:56.614718: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-20 04:15:57,688 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-20 04:15:57,689 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-20 04:16:10,848 | Simulation.py:37 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-20 04:16:10,849 | Simulation.py:255 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-20 04:16:16,582 | main.py:103 | Loaded 1 configs with name CIFAR10-RESNET18-FEDADAM, running...
+INFO flwr 2024-05-20 04:16:16,582 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 32
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": (element["img"] / 255.).transpose(2, 0, 1),
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 200
+			local_rounds: 1
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: all
+		message_access: server
+		repetitions: 10
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv3d
+						out_channels: 1000
+						kernel_size: [1, 1]
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-05-20 04:16:16,582 | Config.py:68 | Starting conFEDential simulation
+INFO flwr 2024-05-20 04:16:16,583 | Config.py:72 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-20 04:16:39,297 | Simulation.py:395 | Created 2 clients with resources 8 CPUs, 0.5 GPUs, and 8.0GB for the total available 16 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-05-20 04:16:39,297 | Simulation.py:160 | Starting federated learning simulation
+2024-05-20 04:16:39,329	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.21:6379...
+2024-05-20 04:16:39,342	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-05-20 04:17:12,489 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=200, round_timeout=None)
+2024-05-20 04:17:13,051	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-05-20 04:17:13,052 | app.py:213 | Flower VCE: Ray initialized with resources: {'GPU': 1.0, 'CPU': 16.0, 'accelerator_type:A40': 1.0, 'object_store_memory': 63904292044.0, 'node:10.20.240.21': 1.0, 'memory': 17179869184.0, 'node:__internal_head__': 1.0}
+INFO flwr 2024-05-20 04:17:13,052 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-05-20 04:17:13,052 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.5, 'memory': 8589934592}
+INFO flwr 2024-05-20 04:17:13,063 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 2 actors
+INFO flwr 2024-05-20 04:17:13,065 | server.py:89 | Initializing global parameters
+INFO flwr 2024-05-20 04:17:13,065 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-05-20 04:17:13,065 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-05-20 04:17:15,564 | server.py:94 | initial parameters (loss, other metrics): 0.0002507822275161743, {'accuracy': 0.0944, 'data_size': 10000}
+INFO flwr 2024-05-20 04:17:15,564 | server.py:104 | FL starting
+DEBUG flwr 2024-05-20 04:17:15,564 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=980387)[0m 2024-05-20 04:17:31.386326: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=980387)[0m 2024-05-20 04:17:31.539981: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=980387)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=980387)[0m 2024-05-20 04:17:35.036189: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[2m[36m(DefaultActor pid=980387)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=980387)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=980386)[0m 2024-05-20 04:17:31.386296: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=980386)[0m 2024-05-20 04:17:31.539682: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=980386)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=980386)[0m 2024-05-20 04:17:35.036150: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+DEBUG flwr 2024-05-20 04:18:04,543 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-05-20 04:42:34,040 | server.py:125 | fit progress: (1, 0.00867448501586914, {'accuracy': 0.0999, 'data_size': 10000}, 1518.4755531791598)
+INFO flwr 2024-05-20 04:42:34,040 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-05-20 04:42:34,041 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+ERROR flwr 2024-05-20 04:42:35,133 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "python/ray/_raylet.pyx", line 687, in ray._raylet.prepare_args_internal
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 468, in serialize
+    return self._serialize_to_msgpack(value)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 446, in _serialize_to_msgpack
+    pickle5_serialized_object = self._serialize_to_pickle5(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 408, in _serialize_to_pickle5
+    raise e
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 403, in _serialize_to_pickle5
+    inband = pickle.dumps(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cloudpickle/cloudpickle_fast.py", line 88, in dumps
+    cp.dump(obj)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cloudpickle/cloudpickle_fast.py", line 733, in dump
+    return Pickler.dump(self, obj)
+TypeError: cannot pickle 'generator' object
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 147, in _submit_job
+    self.actor_pool.submit_client_job(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 271, in submit_client_job
+    self.submit(actor_fn, job)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 249, in submit
+    future = fn(actor, client_fn, job_fn, cid, context)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 148, in <lambda>
+    lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 696, in ray._raylet.prepare_args_internal
+TypeError: Could not serialize the argument <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80> for a task or actor flwr.simulation.ray_transport.ray_actor.DefaultActor.run:
+================================================================================
+Checking Serializability of <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80>
+================================================================================
+[31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+Detected 1 global variables. Checking serializability...
+    Serializing 'Client' <class 'src.training.Client.Client'>...
+Detected 2 nonlocal variables. Checking serializability...
+    Serializing 'simulation' Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10...
+    [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+        Serializing 'from_dict' <function Simulation.from_dict at 0x7f361765e290>...
+        Serializing '_data' Data:
+	dataset_name: cifar10
+	batch_size: 32
+	preprocess_fn:
+		def preprocess_fn(element):
+		  return {
+		    "x": (element["img"] / 255.).transpose(2, 0, 1),
+		    "y": element["label"]
+		  }...
+        Serializing '_federation' Federation:
+	client_count: 100
+	fraction_fit: 0.1
+	global_rounds: 200
+	local_rounds: 1...
+        Serializing '_get_captured_variable' <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>...
+        [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+            Serializing '__func__' <function Simulation._get_captured_variable at 0x7f361765edd0>...
+        WARNING: Did not find non-serializable object in <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>. This may be an oversight.
+================================================================================
+Variable: 
+
+	[1mFailTuple(_get_captured_variable [obj=<bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>, parent=Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10])[0m
+
+was found to be non-serializable. There may be multiple other undetected variables that were non-serializable. 
+Consider either removing the instantiation/imports of these variables or moving the instantiation into the scope of the function/class. 
+================================================================================
+Check https://docs.ray.io/en/master/ray-core/objects/serialization.html#troubleshooting for more information.
+If you have any suggestions on how to improve this error message, please reach out to the Ray developers on github.com/ray-project/ray/issues/
+================================================================================
+
+
+ERROR flwr 2024-05-20 04:42:35,151 | ray_client_proxy.py:162 | Could not serialize the argument <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80> for a task or actor flwr.simulation.ray_transport.ray_actor.DefaultActor.run:
+================================================================================
+Checking Serializability of <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80>
+================================================================================
+[31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+Detected 1 global variables. Checking serializability...
+    Serializing 'Client' <class 'src.training.Client.Client'>...
+Detected 2 nonlocal variables. Checking serializability...
+    Serializing 'simulation' Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10...
+    [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+        Serializing 'from_dict' <function Simulation.from_dict at 0x7f361765e290>...
+        Serializing '_data' Data:
+	dataset_name: cifar10
+	batch_size: 32
+	preprocess_fn:
+		def preprocess_fn(element):
+		  return {
+		    "x": (element["img"] / 255.).transpose(2, 0, 1),
+		    "y": element["label"]
+		  }...
+        Serializing '_federation' Federation:
+	client_count: 100
+	fraction_fit: 0.1
+	global_rounds: 200
+	local_rounds: 1...
+        Serializing '_get_captured_variable' <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>...
+        [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+            Serializing '__func__' <function Simulation._get_captured_variable at 0x7f361765edd0>...
+        WARNING: Did not find non-serializable object in <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>. This may be an oversight.
+================================================================================
+Variable: 
+
+	[1mFailTuple(_get_captured_variable [obj=<bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>, parent=Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10])[0m
+
+was found to be non-serializable. There may be multiple other undetected variables that were non-serializable. 
+Consider either removing the instantiation/imports of these variables or moving the instantiation into the scope of the function/class. 
+================================================================================
+Check https://docs.ray.io/en/master/ray-core/objects/serialization.html#troubleshooting for more information.
+If you have any suggestions on how to improve this error message, please reach out to the Ray developers on github.com/ray-project/ray/issues/
+================================================================================
+
+ERROR flwr 2024-05-20 04:42:35,373 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "python/ray/_raylet.pyx", line 687, in ray._raylet.prepare_args_internal
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 468, in serialize
+    return self._serialize_to_msgpack(value)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 446, in _serialize_to_msgpack
+    pickle5_serialized_object = self._serialize_to_pickle5(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 408, in _serialize_to_pickle5
+    raise e
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/serialization.py", line 403, in _serialize_to_pickle5
+    inband = pickle.dumps(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cloudpickle/cloudpickle_fast.py", line 88, in dumps
+    cp.dump(obj)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cloudpickle/cloudpickle_fast.py", line 733, in dump
+    return Pickler.dump(self, obj)
+TypeError: cannot pickle 'generator' object
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 147, in _submit_job
+    self.actor_pool.submit_client_job(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 271, in submit_client_job
+    self.submit(actor_fn, job)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 249, in submit
+    future = fn(actor, client_fn, job_fn, cid, context)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 148, in <lambda>
+    lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 696, in ray._raylet.prepare_args_internal
+TypeError: Could not serialize the argument <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80> for a task or actor flwr.simulation.ray_transport.ray_actor.DefaultActor.run:
+================================================================================
+Checking Serializability of <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80>
+================================================================================
+[31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+Detected 1 global variables. Checking serializability...
+    Serializing 'Client' <class 'src.training.Client.Client'>...
+Detected 2 nonlocal variables. Checking serializability...
+    Serializing 'simulation' Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10...
+    [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+        Serializing 'from_dict' <function Simulation.from_dict at 0x7f361765e290>...
+        Serializing '_data' Data:
+	dataset_name: cifar10
+	batch_size: 32
+	preprocess_fn:
+		def preprocess_fn(element):
+		  return {
+		    "x": (element["img"] / 255.).transpose(2, 0, 1),
+		    "y": element["label"]
+		  }...
+        Serializing '_federation' Federation:
+	client_count: 100
+	fraction_fit: 0.1
+	global_rounds: 200
+	local_rounds: 1...
+        Serializing '_get_captured_variable' <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>...
+        [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+            Serializing '__func__' <function Simulation._get_captured_variable at 0x7f361765edd0>...
+        WARNING: Did not find non-serializable object in <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>. This may be an oversight.
+================================================================================
+Variable: 
+
+	[1mFailTuple(_get_captured_variable [obj=<bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>, parent=Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10])[0m
+
+was found to be non-serializable. There may be multiple other undetected variables that were non-serializable. 
+Consider either removing the instantiation/imports of these variables or moving the instantiation into the scope of the function/class. 
+================================================================================
+Check https://docs.ray.io/en/master/ray-core/objects/serialization.html#troubleshooting for more information.
+If you have any suggestions on how to improve this error message, please reach out to the Ray developers on github.com/ray-project/ray/issues/
+================================================================================
+
+
+ERROR flwr 2024-05-20 04:42:35,373 | ray_client_proxy.py:162 | Could not serialize the argument <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80> for a task or actor flwr.simulation.ray_transport.ray_actor.DefaultActor.run:
+================================================================================
+Checking Serializability of <function Client.get_client_fn.<locals>.client_fn at 0x7f3617689d80>
+================================================================================
+[31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+Detected 1 global variables. Checking serializability...
+    Serializing 'Client' <class 'src.training.Client.Client'>...
+Detected 2 nonlocal variables. Checking serializability...
+    Serializing 'simulation' Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10...
+    [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+        Serializing 'from_dict' <function Simulation.from_dict at 0x7f361765e290>...
+        Serializing '_data' Data:
+	dataset_name: cifar10
+	batch_size: 32
+	preprocess_fn:
+		def preprocess_fn(element):
+		  return {
+		    "x": (element["img"] / 255.).transpose(2, 0, 1),
+		    "y": element["label"]
+		  }...
+        Serializing '_federation' Federation:
+	client_count: 100
+	fraction_fit: 0.1
+	global_rounds: 200
+	local_rounds: 1...
+        Serializing '_get_captured_variable' <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>...
+        [31m!!! FAIL[39m serialization: cannot pickle 'generator' object
+            Serializing '__func__' <function Simulation._get_captured_variable at 0x7f361765edd0>...
+        WARNING: Did not find non-serializable object in <bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>. This may be an oversight.
+================================================================================
+Variable: 
+
+	[1mFailTuple(_get_captured_variable [obj=<bound method Simulation._get_captured_variable of Simulation(Data(dataset_name=cifar10, batch_size=32), Federation(client_count=100, fraction_fit=0.1, global_rounds=200, local_rounds=1), Model(optimizer=FedAdam(local={'lr': 0.01}, global={'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}), model_name=ResNet18, criterion_name=CrossEntropyLoss))>, parent=Simulation:
+	Data:
+		dataset_name: cifar10
+		batch_size: 32
+		preprocess_fn:
+			def preprocess_fn(element):
+			  return {
+			    "x": (element["img"] / 255.).transpose(2, 0, 1),
+			    "y": element["label"]
+			  }
+	Federation:
+		client_count: 100
+		fraction_fit: 0.1
+		global_rounds: 200
+		local_rounds: 1
+	Model:
+		optimizer_name: FedAdam
+		model_name: ResNet18
+		criterion_name: CrossEntropyLoss
+		optimizer_parameters: 
+			local: {'lr': 0.01}
+			global: {'lr': 0.1, 'betas': [0.9, 0.999], 'eps': 1e-09, 'weight_decay': 0.9999}
+		model_architecture:
+			repo_or_dir: pytorch/vision:v0.10.0
+				model: resnet18
+				pretrained: False
+				out_features: 10])[0m
+
+was found to be non-serializable. There may be multiple other undetected variables that were non-serializable. 
+Consider either removing the instantiation/imports of these variables or moving the instantiation into the scope of the function/class. 
+================================================================================
+Check https://docs.ray.io/en/master/ray-core/objects/serialization.html#troubleshooting for more information.
+If you have any suggestions on how to improve this error message, please reach out to the Ray developers on github.com/ray-project/ray/issues/
+================================================================================
+
+ERROR flwr 2024-05-20 04:42:35,420 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,420 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,422 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,422 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,423 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,424 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,425 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,425 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,427 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,427 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,429 | ray_client_proxy.py:161 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 151, in _submit_job
+    res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 425, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 306, in _fetch_future_result
+    res_cid, res, updated_context = ray.get(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+ERROR flwr 2024-05-20 04:42:35,429 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,430 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,430 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,431 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+ERROR flwr 2024-05-20 04:42:35,432 | ray_client_proxy.py:162 | 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+DEBUG flwr 2024-05-20 04:42:35,435 | server.py:236 | fit_round 2 received 0 results and 10 failures
+ERROR flwr 2024-05-20 04:42:35,436 | app.py:313 | 'NoneType' object has no attribute 'tensors'
+ERROR flwr 2024-05-20 04:42:35,579 | app.py:314 | Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/simulation/app.py", line 308, in start_simulation
+    hist = run_fl(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/app.py", line 225, in run_fl
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/server.py", line 109, in fit
+    res_fit = self.fit_round(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/server/server.py", line 248, in fit_round
+    ] = self.strategy.aggregate_fit(server_round, results, failures)
+  File "/home/s2240084/conFEDential/src/training/Server.py", line 81, in aggregate_fit
+    self._capture_results(server_round, results, aggregated_parameters, config)
+  File "/home/s2240084/conFEDential/src/training/Server.py", line 101, in _capture_results
+    self._capture_aggregates(server_round, aggregated_parameters, metrics)
+  File "/home/s2240084/conFEDential/src/training/Server.py", line 162, in _capture_aggregates
+    aggregated_parameters = parameters_to_ndarrays(aggregated_parameters)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/flwr/common/parameter.py", line 34, in parameters_to_ndarrays
+    return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
+AttributeError: 'NoneType' object has no attribute 'tensors'
+
+ERROR flwr 2024-05-20 04:42:35,580 | app.py:315 | Your simulation crashed :(. This could be because of several reasons. The most common are: 
+	 > Sometimes, issues in the simulation code itself can cause crashes. It's always a good idea to double-check your code for any potential bugs or inconsistencies that might be contributing to the problem. For example: 
+		 - You might be using a class attribute in your clients that hasn't been defined.
+		 - There could be an incorrect method call to a 3rd party library (e.g., PyTorch).
+		 - The return types of methods in your clients/strategies might be incorrect.
+	 > Your system couldn't fit a single VirtualClient: try lowering `client_resources`.
+	 > All the actors in your pool crashed. This could be because: 
+		 - You clients hit an out-of-memory (OOM) error and actors couldn't recover from it. Try launching your simulation with more generous `client_resources` setting (i.e. it seems {'num_cpus': 8, 'num_gpus': 0.5, 'memory': 8589934592} is not enough for your run). Use fewer concurrent actors. 
+		 - You were running a multi-node simulation and all worker nodes disconnected. The head node might still be alive but cannot accommodate any actor with resources: {'num_cpus': 8, 'num_gpus': 0.5, 'memory': 8589934592}.
+Take a look at the Flower simulation examples for guidance <https://flower.dev/docs/framework/how-to-run-simulations.html>.
+ERROR flwr 2024-05-20 04:42:35,580 | Simulation.py:183 | Simulation crashed.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.0999
+wandb:     loss 0.00867
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240520_041638-pv0aal09
+wandb: Find logs at: ./wandb/offline-run-20240520_041638-pv0aal09/logs
+[2m[36m(DefaultActor pid=980386)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=980386)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+2024-05-20 04:44:34.453773: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-05-20 04:44:34.548793: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-20 04:44:36.405605: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-20 04:44:45,936 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-20 04:44:45,937 | Data.py:107 | Found preprocessed data for the given preprocess function, returning
+INFO flwr 2024-05-20 04:44:47,379 | Simulation.py:37 | Preparing datasets for federated learning simulation
+INFO flwr 2024-05-20 04:44:47,380 | Simulation.py:255 | Found previously split dataloaders, loading them
+INFO flwr 2024-05-20 04:44:48,339 | main.py:103 | Loaded 1 configs with name CIFAR10-RESNET18-FEDAVG, running...
+INFO flwr 2024-05-20 04:44:48,339 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 32
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": (element["img"] / 255.).transpose(2, 0, 1),
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 200
+			local_rounds: 1
+		Model:
+			optimizer_name: FedAvg
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				lr: 0.01
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: all
+		message_access: server
+		repetitions: 10
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv3d
+						out_channels: 1000
+						kernel_size: [1, 1]
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-05-20 04:44:48,339 | Config.py:68 | Starting conFEDential simulation
+INFO flwr 2024-05-20 04:44:48,347 | Config.py:72 | No previous federated learning simulation found, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-05-20 04:44:59,701 | Simulation.py:395 | Created 2 clients with resources 8 CPUs, 0.5 GPUs, and 8.0GB for the total available 16 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-05-20 04:44:59,701 | Simulation.py:160 | Starting federated learning simulation
+2024-05-20 04:44:59,737	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.21:6379...
+2024-05-20 04:44:59,749	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-05-20 04:44:59,769 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=200, round_timeout=None)
+2024-05-20 04:44:59,818	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-05-20 04:44:59,819 | app.py:213 | Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'memory': 17179869184.0, 'node:10.20.240.21': 1.0, 'GPU': 1.0, 'CPU': 16.0, 'object_store_memory': 63904292044.0, 'accelerator_type:A40': 1.0}
+INFO flwr 2024-05-20 04:44:59,819 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-05-20 04:44:59,819 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 8, 'num_gpus': 0.5, 'memory': 8589934592}
+INFO flwr 2024-05-20 04:44:59,830 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 2 actors
+INFO flwr 2024-05-20 04:44:59,830 | server.py:89 | Initializing global parameters
+INFO flwr 2024-05-20 04:44:59,831 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-05-20 04:44:59,831 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-05-20 04:45:00,759 | server.py:94 | initial parameters (loss, other metrics): 0.0002507822275161743, {'accuracy': 0.0944, 'data_size': 10000}
+INFO flwr 2024-05-20 04:45:00,759 | server.py:104 | FL starting
+DEBUG flwr 2024-05-20 04:45:00,760 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=985144)[0m 2024-05-20 04:45:11.491542: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=985144)[0m 2024-05-20 04:45:11.562742: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=985144)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=985144)[0m 2024-05-20 04:45:14.493616: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[2m[36m(DefaultActor pid=985144)[0m /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/torch/utils/data/_utils/collate.py:183: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+[2m[36m(DefaultActor pid=985144)[0m   return collate([torch.as_tensor(b) for b in batch], collate_fn_map=collate_fn_map)
+[2m[36m(pid=985143)[0m 2024-05-20 04:45:11.693285: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=985143)[0m 2024-05-20 04:45:11.802423: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=985143)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=985143)[0m 2024-05-20 04:45:14.505071: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+DEBUG flwr 2024-05-20 04:45:37,876 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-05-20 05:10:10,081 | server.py:125 | fit progress: (1, 0.00022496984004974365, {'accuracy': 0.1694, 'data_size': 10000}, 1509.321122652851)
+INFO flwr 2024-05-20 05:10:10,081 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-05-20 05:10:10,126 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 05:10:27,006 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-05-20 05:32:30,480 | server.py:125 | fit progress: (2, 0.00021291172504425048, {'accuracy': 0.2189, 'data_size': 10000}, 2849.7206855588593)
+INFO flwr 2024-05-20 05:32:30,481 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-05-20 05:32:30,481 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 05:32:45,333 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-05-20 05:52:25,601 | server.py:125 | fit progress: (3, 0.000206170654296875, {'accuracy': 0.2403, 'data_size': 10000}, 4044.8417405500077)
+INFO flwr 2024-05-20 05:52:25,602 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-05-20 05:52:25,602 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 05:52:39,083 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-05-20 06:15:33,300 | server.py:125 | fit progress: (4, 0.00019572861194610595, {'accuracy': 0.2862, 'data_size': 10000}, 5432.540537164081)
+INFO flwr 2024-05-20 06:15:33,301 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-05-20 06:15:33,301 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 06:15:46,716 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-05-20 06:38:02,635 | server.py:125 | fit progress: (5, 0.00018813560009002685, {'accuracy': 0.3114, 'data_size': 10000}, 6781.875642765779)
+INFO flwr 2024-05-20 06:38:02,636 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-05-20 06:38:02,636 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 06:38:16,241 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-05-20 07:00:21,244 | server.py:125 | fit progress: (6, 0.00018150824308395386, {'accuracy': 0.3363, 'data_size': 10000}, 8120.484596848022)
+INFO flwr 2024-05-20 07:00:21,245 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-05-20 07:00:21,245 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 07:00:34,892 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-05-20 07:31:03,442 | server.py:125 | fit progress: (7, 0.0001773375630378723, {'accuracy': 0.3538, 'data_size': 10000}, 9962.682609063108)
+INFO flwr 2024-05-20 07:31:03,443 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-05-20 07:31:03,443 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 07:31:17,446 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-05-20 08:07:09,658 | server.py:125 | fit progress: (8, 0.00017294751405715943, {'accuracy': 0.373, 'data_size': 10000}, 12128.898907720111)
+INFO flwr 2024-05-20 08:07:09,659 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-05-20 08:07:09,659 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 08:07:22,759 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-05-20 08:37:29,487 | server.py:125 | fit progress: (9, 0.0001704148769378662, {'accuracy': 0.3773, 'data_size': 10000}, 13948.727545961738)
+INFO flwr 2024-05-20 08:37:29,488 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-05-20 08:37:29,488 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 08:37:43,101 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-05-20 09:16:28,492 | server.py:125 | fit progress: (10, 0.00016750004291534424, {'accuracy': 0.3836, 'data_size': 10000}, 16287.732698473148)
+INFO flwr 2024-05-20 09:16:28,493 | server.py:171 | evaluate_round 10: no clients selected, cancel
+DEBUG flwr 2024-05-20 09:16:28,493 | server.py:222 | fit_round 11: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 09:16:42,207 | server.py:236 | fit_round 11 received 10 results and 0 failures
+INFO flwr 2024-05-20 09:48:12,963 | server.py:125 | fit progress: (11, 0.00016394119262695312, {'accuracy': 0.4029, 'data_size': 10000}, 18192.20301081892)
+INFO flwr 2024-05-20 09:48:12,963 | server.py:171 | evaluate_round 11: no clients selected, cancel
+DEBUG flwr 2024-05-20 09:48:12,963 | server.py:222 | fit_round 12: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 09:48:27,104 | server.py:236 | fit_round 12 received 10 results and 0 failures
+INFO flwr 2024-05-20 10:12:23,818 | server.py:125 | fit progress: (12, 0.0001614653468132019, {'accuracy': 0.4068, 'data_size': 10000}, 19643.058652075008)
+INFO flwr 2024-05-20 10:12:23,819 | server.py:171 | evaluate_round 12: no clients selected, cancel
+DEBUG flwr 2024-05-20 10:12:23,819 | server.py:222 | fit_round 13: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 10:12:37,357 | server.py:236 | fit_round 13 received 10 results and 0 failures
+INFO flwr 2024-05-20 10:24:22,070 | server.py:125 | fit progress: (13, 0.00015954132080078125, {'accuracy': 0.4157, 'data_size': 10000}, 20361.310783986002)
+INFO flwr 2024-05-20 10:24:22,071 | server.py:171 | evaluate_round 13: no clients selected, cancel
+DEBUG flwr 2024-05-20 10:24:22,071 | server.py:222 | fit_round 14: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 10:24:35,103 | server.py:236 | fit_round 14 received 10 results and 0 failures
+INFO flwr 2024-05-20 10:56:14,597 | server.py:125 | fit progress: (14, 0.0001585702896118164, {'accuracy': 0.42, 'data_size': 10000}, 22273.837619815953)
+INFO flwr 2024-05-20 10:56:14,598 | server.py:171 | evaluate_round 14: no clients selected, cancel
+DEBUG flwr 2024-05-20 10:56:14,598 | server.py:222 | fit_round 15: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 10:56:27,932 | server.py:236 | fit_round 15 received 10 results and 0 failures
+INFO flwr 2024-05-20 11:35:06,526 | server.py:125 | fit progress: (15, 0.0001560559868812561, {'accuracy': 0.4239, 'data_size': 10000}, 24605.766745986883)
+INFO flwr 2024-05-20 11:35:06,527 | server.py:171 | evaluate_round 15: no clients selected, cancel
+DEBUG flwr 2024-05-20 11:35:06,527 | server.py:222 | fit_round 16: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 11:35:19,476 | server.py:236 | fit_round 16 received 10 results and 0 failures
+INFO flwr 2024-05-20 12:29:10,106 | server.py:125 | fit progress: (16, 0.0001545231580734253, {'accuracy': 0.4327, 'data_size': 10000}, 27849.346097306814)
+INFO flwr 2024-05-20 12:29:10,106 | server.py:171 | evaluate_round 16: no clients selected, cancel
+DEBUG flwr 2024-05-20 12:29:10,106 | server.py:222 | fit_round 17: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 12:29:23,302 | server.py:236 | fit_round 17 received 10 results and 0 failures
+INFO flwr 2024-05-20 13:15:22,842 | server.py:125 | fit progress: (17, 0.0001529195785522461, {'accuracy': 0.4402, 'data_size': 10000}, 30622.082300203852)
+INFO flwr 2024-05-20 13:15:22,842 | server.py:171 | evaluate_round 17: no clients selected, cancel
+DEBUG flwr 2024-05-20 13:15:22,842 | server.py:222 | fit_round 18: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-05-20 13:15:36,339 | server.py:236 | fit_round 18 received 10 results and 0 failures
