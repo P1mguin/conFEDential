@@ -19,7 +19,7 @@ class Texas(Dataset):
 		def convert_to_array_and_int64(entry):
 			return {
 				"label": entry["label"],
-				"features": np.array(entry["features"].strip("[]").split()).astype(np.uint8)
+				"features": np.array(entry["features"].strip("[]").split()).astype(np.float64)
 			}
 
 		train_dataset = train_dataset.map(convert_to_array_and_int64)
