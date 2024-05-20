@@ -5,7 +5,10 @@ simulation:
     batch_size: 8
     preprocess_fn: |
       def preprocess_fn(element):
-        return element
+        return {
+          "x": element["features"],
+          "y": element["label"]
+        }
   federation:
     client_count: 100
     fraction_fit: 0.1
