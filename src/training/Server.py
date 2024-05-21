@@ -1,7 +1,6 @@
 import collections
-import itertools
 import os
-from typing import Any, Dict, Generator, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import h5py
@@ -105,54 +104,19 @@ class Server(FedAvg):
 		base_path = self.simulation.get_capture_directory()
 		base_path = f"{base_path}messages/"
 
-		participating_clients = [int(client_proxy.cid) for client_proxy, _ in messages]
-		client_count = self.simulation.client_count
-
-		# Function that converts the received messages to the format (client_count, iteration, *shape)
-		# and fills in the blanks for the clients that did not participate in the round
-		def reshape_to_federation_capture(messages):
-			# Stack the layers together
-			messages = zip(*messages)
-
-			# Create a list of zeros for the clients that did not participate and set the variables for those that did
-			def get_expanded_message(message):
-				for i in range(client_count):
-					if i in participating_clients:
-						index = next(j for j in range(len(participating_clients)) if participating_clients[j] == i)
-						yield next(itertools.islice(message, index, None))
-					else:
-						yield np.zeros_like(message[0])
-
-			messages = (get_expanded_message(message) for message in messages)
-			return messages
-
-		# Take the parameters, transpose them and stack them
-		parameter_messages = (parameters_to_ndarrays(fitres.parameters) for _, fitres in messages)
-		parameter_messages = reshape_to_federation_capture(parameter_messages)
-		value_shapes = self.simulation.model_config.get_gradient_shapes()
-		value_shapes = (tuple(layer_shape) for value_shape in value_shapes for layer_shape in value_shape)
-		self._capture_variable(
-			server_round,
-			parameter_messages,
-			f"{base_path}messages.hdf5",
-			is_message=True,
-			is_parameters=True,
-			value_shapes=value_shapes
-		)
+		parameter_messages = {
+			client_proxy.cid: parameters_to_ndarrays(fitres.parameters) for client_proxy, fitres in messages
+		}
+		self._capture_message_round(server_round, parameter_messages, f"{base_path}messages.hdf5")
 
 		# Combine the metrics in one dict
-		metrics = collections.defaultdict(list)
-		for _, fitres in messages:
+		metrics = collections.defaultdict(dict)
+		for client_proxy, fitres in messages:
 			for key, value in fitres.metrics.items():
-				metrics[key].append(value)
-		metrics = dict(metrics)
+				metrics[key][client_proxy.cid] = value
 
 		for key, value in metrics.items():
-			value_shapes = (layer.shape for layer in value[0])
-			value = reshape_to_federation_capture(value)
-			self._capture_variable(
-				server_round, value, f"{base_path}metrics/{key}.hdf5", is_message=True, value_shapes=value_shapes
-			)
+			self._capture_message_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
 	def _capture_aggregates(self, server_round: int, aggregated_parameters: Parameters, metrics: dict):
 		base_path = self.simulation.get_capture_directory()
@@ -160,69 +124,84 @@ class Server(FedAvg):
 
 		# Convert the aggregated parameters to a list of numpy arrays
 		aggregated_parameters = parameters_to_ndarrays(aggregated_parameters)
-		value_shapes = self.simulation.model_config.get_gradient_shapes()
-		value_shapes = (tuple(layer_shape) for value_shape in value_shapes for layer_shape in value_shape)
-		self._capture_variable(
+		self._capture_aggregate_round(
 			server_round,
 			aggregated_parameters,
 			f"{base_path}aggregates.hdf5",
-			is_parameters=True,
-			value_shapes=value_shapes
+			is_parameters=True
 		)
 
 		# Capture all metrics
 		for key, value in metrics.items():
 			value = [layer for layer in value]
-			value_shapes = (layer.shape for layer in value)
-			self._capture_variable(
-				server_round, value, f"{base_path}metrics/{key}.hdf5", value_shapes=value_shapes
-			)
+			self._capture_aggregate_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
-	def _capture_variable(
+	def _capture_message_round(
 			self,
 			server_round: int,
-			values: Generator[npt.NDArray, None, None] | List[npt.NDArray],
+			values: Dict[int, List[npt.NDArray]],
 			path: str,
-			is_parameters: bool = False,
-			is_message: bool = False,
-			value_shapes: Optional[List[Tuple[int]]] = None
 	):
 		# If nothing has been captured yet, the file needs to be initialized
 		# The initial parameter is all zeros for the metric and the initial model parameters for an aggregate
 		if server_round == 1:
-			# Add the global round before the value shapes
-			global_rounds = self.simulation.global_rounds + 1
-			value_shapes = (
-				(global_rounds, *value_shape) for value_shape in value_shapes
-			)
+			# Create the values that are put in the hdf5 file initial row, they are always 0
+			value_shapes = [value.shape for value in next(iter(values.values()))]
+			initial_values = [np.zeros((1, *value_shape)) for value_shape in value_shapes]
 
-			# If it is a message capture, add the client to the shape
 			client_count = self.simulation.client_count
-			if is_message:
-				value_shapes = (
-					(client_count, *value_shape) for value_shape in value_shapes
-				)
-
-			# Create an hdf5 file with the correct shape and fill with variables
+			global_rounds = self.simulation.global_rounds
 			with h5py.File(path, 'w') as hf:
-				for i, value_shape in enumerate(value_shapes):
-					hf.create_dataset(str(i), shape=value_shape, chunks=True, dtype=np.float32)
+				for client_id in range(client_count):
+					client_group = hf.create_group(str(client_id))
+					for i, (initial_value, value_shape) in enumerate(zip(initial_values, value_shapes)):
+						# Create a subgroup for each client, so it can hold which rounds the client participated in
+						# and the values that were sent
+						client_layer_group = client_group.create_group(str(i))
 
-			# If it is a parameter capture, set the initial model parameters
+						client_layer_group.create_dataset(
+							"server_rounds", data=np.array([0]), maxshape=(global_rounds,), chunks=True
+						)
+						max_layer_shape = (global_rounds + 1, *value_shape)
+						client_layer_group.create_dataset(
+							"values", data=initial_value, maxshape=max_layer_shape, chunks=True
+						)
+
+		with h5py.File(path, 'r+') as hf:
+			for client_id in values.keys():
+				client_group = hf[str(client_id)]
+				for i, value in enumerate(values[client_id]):
+					client_layer_group = client_group[str(i)]
+					client_layer_group["values"].resize((server_round + 1, *value.shape))
+					client_layer_group["server_rounds"].resize((server_round + 1,))
+
+					client_layer_group["values"][-1] = value
+					client_layer_group["server_rounds"][-1] = server_round
+
+	def _capture_aggregate_round(
+			self,
+			server_round: int,
+			values: List[npt.NDArray],
+			path: str,
+			is_parameters: bool = False,
+	):
+		# If nothing has been captured yet, the file needs to be initialized
+		# The initial parameter is all zeros for the metric and the initial model parameters for an aggregate
+		if server_round == 1:
+			# Create the values that are put in the hdf5 file initial row
+			value_shapes = [value.shape for value in values]
 			if is_parameters:
-				initial_parameters_values = training.get_weights(self.simulation.model)
-				with h5py.File(path, 'r+') as hf:
-					for i, initial_layer in enumerate(initial_parameters_values):
-						if is_message:
-							hf[str(i)][:, 0] = initial_layer
-						else:
-							hf[str(i)][0] = initial_layer
+				initial_values = [np.array([layer]) for layer in training.get_weights(self.simulation.model)]
+			else:
+				initial_values = [np.zeros((1, *value_shape)) for value_shape in value_shapes]
 
-		# Open the saved HDF5 file in read-write mode
+			global_rounds = self.simulation.global_rounds
+			with h5py.File(path, 'w') as hf:
+				for i, (initial_value, value_shape) in enumerate(zip(initial_values, value_shapes)):
+					max_shape = (global_rounds + 1, *value_shape)
+					hf.create_dataset(str(i), data=initial_value, maxshape=max_shape, chunks=True)
+
 		with h5py.File(path, 'r+') as hf:
 			for i, value in enumerate(values):
-				if is_message:
-					for j, client_value in enumerate(value):
-						hf[str(i)][j, server_round] = client_value
-				else:
-					hf[str(i)][server_round] = value
+				hf[str(i)].resize((server_round + 1, *value.shape))
+				hf[str(i)][server_round] = value
