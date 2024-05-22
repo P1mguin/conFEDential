@@ -9,12 +9,12 @@ simulation:
           "y": element["label"]
         }
   federation:
-    client_count: 100
-    fraction_fit: 0.1
-    global_rounds: 10
-    local_rounds: 10
+    client_count: 10
+    fraction_fit: 1.0
+    global_rounds: 1
+    local_rounds: 1
   model:
-    optimizer_name: FedNL
+    optimizer_name: SingleLayerFedNL
     model_name: Logistic Regression
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
