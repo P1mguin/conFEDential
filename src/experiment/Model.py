@@ -3,6 +3,7 @@ from functools import reduce
 from typing import Iterator, List
 
 import flwr as fl
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -137,6 +138,12 @@ class Model:
 		gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
 		return gradient_shapes
 
+	def get_initial_parameters(self):
+		model = self.model
+		model_weights = [np.zeros_like(layer.detach()) for layer in model.parameters()]
+		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
+		return initial_parameters
+
 	def _prepare_model(self):
 		is_from_hub = isinstance(self._model_architecture, dict)
 		if is_from_hub:
@@ -185,7 +192,5 @@ class Model:
 		learning_method = learning_method_class(**self._optimizer_parameters)
 		self._learning_method = learning_method
 
-		model = self.model
-		model_weights = training.get_weights(model)
-		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
+		initial_parameters = self.get_initial_parameters()
 		self._learning_method.set_parameters(initial_parameters)

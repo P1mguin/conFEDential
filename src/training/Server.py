@@ -22,9 +22,7 @@ class Server(FedAvg):
 		fraction_fit = simulation.fraction_fit
 		min_available_clients = max(int(simulation.client_count * fraction_fit), 1)
 
-		model = simulation.model
-		model_weights = training.get_weights(model)
-		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
+		initial_parameters = simulation.model_config.get_initial_parameters()
 
 		evaluate_fn = Server.get_evaluate_fn(simulation)
 		super(Server, self).__init__(
