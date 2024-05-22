@@ -20,4 +20,5 @@ ray start --head --num-cpus 16 --num-gpus 1 --temp-dir /local/ray --memory 17179
 srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_adam.yaml --ray --memory 16 --num-cpus 16 --num-gpus 1 --clients 1 --run-name PURCHASE-LOG_RES-FEDADAM
 srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_avg.yaml --ray --memory 16 --num-cpus 16 --num-gpus 1 --clients 1 --run-name PURCHASE-LOG_RES-FEDAVG
 srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_nag.yaml --ray --memory 16 --num-cpus 16 --num-gpus 1 --clients 1 --run-name PURCHASE-LOG_RES-FEDNAG
+srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_nl.yaml --ray --memory 16 --num-cpus 16 --num-gpus 1 --clients 1 --run-name PURCHASE-LOG_RES-FEDNL
 ray stop
