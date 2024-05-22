@@ -1,0 +1,242 @@
+ctit088
+2024-05-22 09:26:09,748	INFO usage_lib.py:412 -- Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-05-22 09:26:09,748	INFO scripts.py:722 -- Local node IP: 10.20.240.18
+2024-05-22 09:26:21,876	SUCC scripts.py:759 -- --------------------
+2024-05-22 09:26:21,876	SUCC scripts.py:760 -- Ray runtime started.
+2024-05-22 09:26:21,876	SUCC scripts.py:761 -- --------------------
+2024-05-22 09:26:21,877	INFO scripts.py:763 -- Next steps
+2024-05-22 09:26:21,877	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-05-22 09:26:21,877	INFO scripts.py:769 --   ray start --address='10.20.240.18:6379'
+2024-05-22 09:26:21,877	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-05-22 09:26:21,877	INFO scripts.py:780 -- import ray
+2024-05-22 09:26:21,877	INFO scripts.py:781 -- ray.init()
+2024-05-22 09:26:21,877	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-05-22 09:26:21,877	INFO scripts.py:813 --   ray stop
+2024-05-22 09:26:21,879	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-05-22 09:26:21,879	INFO scripts.py:817 --   ray status
+2024-05-22 09:26:48.899957: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-05-22 09:26:53.932310: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-22 09:26:56.347342: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-22 09:27:06,078 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-22 09:27:06,158 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit088: task 0: Exited with exit code 1
+2024-05-22 09:28:37.410952: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-05-22 09:28:37.475710: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-22 09:28:38.914565: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-22 09:28:44,396 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-22 09:28:44,396 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit088: task 0: Exited with exit code 1
+2024-05-22 09:30:14.585441: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-05-22 09:30:14.664124: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-22 09:30:15.943092: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-22 09:30:22,211 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-22 09:30:22,212 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit088: task 0: Exited with exit code 1
+2024-05-22 09:31:50,455	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --store_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.18 --maximum_startup_concurrency=16 --static_resource_list=node:10.20.240.18,1.0,node:__internal_head__,1.0,accelerator_type:G,1,CPU,16,GPU,1,memory,17179869184,object_store_memory,60172883558 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.18 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=58808 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.18:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.18 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs -Dray.session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --log_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --resource_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --metrics-agent-port=58808 --metrics_export_port=60154 --object_store_memory=60172883558 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --labels= --head --num_prestart_python_workers=16 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.18 --metrics-export-port=60154 --dashboard-agent-port=58808 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --runtime-env-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-05-22_09-26-09_830079_527034 --gcs-address=10.20.240.18:6379 --minimal"` (via SIGTERM)
+2024-05-22 09:31:50,457	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/autoscaler/_private/monitor.py --logs-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --monitor-ip=10.20.240.18` (via SIGTERM)
+2024-05-22 09:31:50,457	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/log_monitor.py --logs-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --gcs-address=10.20.240.18:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5` (via SIGTERM)
+2024-05-22 09:31:50,459	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -m ray.util.client.server --address=10.20.240.18:6379 --host=0.0.0.0 --port=10001 --mode=proxy --metrics-agent-port=58808` (via SIGTERM)
+2024-05-22 09:31:50,464	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --store_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.18 --maximum_startup_concurrency=16 --static_resource_list=node:10.20.240.18,1.0,node:__internal_head__,1.0,accelerator_type:G,1,CPU,16,GPU,1,memory,17179869184,object_store_memory,60172883558 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.18 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=58808 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.18:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.18 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs -Dray.session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --log_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --resource_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --metrics-agent-port=58808 --metrics_export_port=60154 --object_store_memory=60172883558 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --labels= --head --num_prestart_python_workers=16 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.18 --metrics-export-port=60154 --dashboard-agent-port=58808 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --runtime-env-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-05-22_09-26-09_830079_527034 --gcs-address=10.20.240.18:6379 --minimal"` (via SIGTERM)
+2024-05-22 09:31:50,467	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --store_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.18 --maximum_startup_concurrency=16 --static_resource_list=node:10.20.240.18,1.0,node:__internal_head__,1.0,accelerator_type:G,1,CPU,16,GPU,1,memory,17179869184,object_store_memory,60172883558 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.18 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=58808 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.18:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.18 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs -Dray.session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --log_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --resource_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --metrics-agent-port=58808 --metrics_export_port=60154 --object_store_memory=60172883558 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --labels= --head --num_prestart_python_workers=16 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.18 --metrics-export-port=60154 --dashboard-agent-port=58808 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --runtime-env-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-05-22_09-26-09_830079_527034 --gcs-address=10.20.240.18:6379 --minimal"` (via SIGTERM)
+2024-05-22 09:31:50,471	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --store_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.18 --maximum_startup_concurrency=16 --static_resource_list=node:10.20.240.18,1.0,node:__internal_head__,1.0,accelerator_type:G,1,CPU,16,GPU,1,memory,17179869184,object_store_memory,60172883558 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.18 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=58808 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.18:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.18 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs -Dray.session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --log_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --resource_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --metrics-agent-port=58808 --metrics_export_port=60154 --object_store_memory=60172883558 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --labels= --head --num_prestart_python_workers=16 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.18 --metrics-export-port=60154 --dashboard-agent-port=58808 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --runtime-env-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-05-22_09-26-09_830079_527034 --gcs-address=10.20.240.18:6379 --minimal"` (via SIGTERM)
+2024-05-22 09:31:50,474	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/log_monitor.py --logs-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --gcs-address=10.20.240.18:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5` (via SIGTERM)
+2024-05-22 09:31:50,480	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --store_socket_name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.18 --maximum_startup_concurrency=16 --static_resource_list=node:10.20.240.18,1.0,node:__internal_head__,1.0,accelerator_type:G,1,CPU,16,GPU,1,memory,17179869184,object_store_memory,60172883558 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.18 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=58808 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.18:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.18 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs -Dray.session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --log_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --resource_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --metrics-agent-port=58808 --metrics_export_port=60154 --object_store_memory=60172883558 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.18:6379 --session-name=session_2024-05-22_09-26-09_830079_527034 --labels= --head --num_prestart_python_workers=16 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.18 --metrics-export-port=60154 --dashboard-agent-port=58808 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --runtime-env-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-05-22_09-26-09_830079_527034 --gcs-address=10.20.240.18:6379 --minimal"` (via SIGTERM)
+2024-05-22 09:31:50,480	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.18 --metrics-export-port=60154 --dashboard-agent-port=58808 --listen-port=52365 --node-manager-port=42007 --object-store-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/plasma_store --raylet-name=/local/ray/session_2024-05-22_09-26-09_830079_527034/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --runtime-env-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/runtime_resources --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-05-22_09-26-09_830079_527034 --gcs-address=10.20.240.18:6379 --minimal --agent-id 424238335` (via SIGTERM)
+2024-05-22 09:31:50,484	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/dashboard.py --host=127.0.0.1 --port=8265 --port-retries=0 --temp-dir=/local/ray --log-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --session-dir=/local/ray/session_2024-05-22_09-26-09_830079_527034 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.18:6379 --node-ip-address=10.20.240.18 --minimal` (via SIGTERM)
+2024-05-22 09:31:50,500	INFO scripts.py:1098 -- 1/6 stopped.2024-05-22 09:31:50,593	INFO scripts.py:1098 -- 2/6 stopped.2024-05-22 09:31:50,593	INFO scripts.py:1098 -- 3/6 stopped.2024-05-22 09:31:50,593	INFO scripts.py:1098 -- 4/6 stopped.2024-05-22 09:31:50,766	INFO scripts.py:1098 -- 5/6 stopped.2024-05-22 09:31:51,100	INFO scripts.py:1098 -- 6/6 stopped.2024-05-22 09:31:51,186	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_dir=/local/ray/session_2024-05-22_09-26-09_830079_527034/logs --config_list=eyJvYmplY3Rfc3BpbGxpbmdfY29uZmlnIjogIntcInR5cGVcIjogXCJmaWxlc3lzdGVtXCIsIFwicGFyYW1zXCI6IHtcImRpcmVjdG9yeV9wYXRoXCI6IFwiL2xvY2FsL3JheS9zZXNzaW9uXzIwMjQtMDUtMjJfMDktMjYtMDlfODMwMDc5XzUyNzAzNFwifX0iLCAiaXNfZXh0ZXJuYWxfc3RvcmFnZV90eXBlX2ZzIjogdHJ1ZX0= --gcs_server_port=6379 --metrics-agent-port=58808 --node-ip-address=10.20.240.18 --session-name=session_2024-05-22_09-26-09_830079_527034` (via SIGTERM)
+2024-05-22 09:31:51,399	INFO scripts.py:1098 -- 1/1 stopped.2024-05-22 09:31:51,399	SUCC scripts.py:1142 -- Stopped all 7 Ray processes.
