@@ -160,7 +160,7 @@ class Server(FedAvg):
 						client_layer_group = client_group.create_group(str(i))
 
 						client_layer_group.create_dataset(
-							"server_rounds", data=np.array([0]), maxshape=(global_rounds,), chunks=True
+							"server_rounds", data=np.array([0]), maxshape=(global_rounds + 1,), chunks=True
 						)
 						max_layer_shape = (global_rounds + 1, *value_shape)
 						client_layer_group.create_dataset(
