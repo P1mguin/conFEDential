@@ -199,67 +199,54 @@ class Simulation:
 		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
 
 		# Get and return the variables
-		aggregates = self._get_captured_aggregate_round(aggregate_file)
+		aggregates = self._get_captured_aggregates(aggregate_file)
 		metrics = {}
 		for metric_file in metric_files:
 			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
-			metrics[metric_name] = self._get_captured_aggregate_round(metric_file)
+			metrics[metric_name] = self._get_captured_aggregates(metric_file)
 		return aggregates, metrics
 
-	def _get_captured_aggregate_round(self, path):
+	def _get_captured_aggregates(self, path):
 		aggregate_rounds = []
 		with h5py.File(path, 'r') as hf:
 			for values in hf.values():
 				aggregate_rounds.append(values[:])
 		return aggregate_rounds
 
-	def get_messages(self):
+	def get_messages(self, intercepted_client_ids):
 		"""
 		Returns the messages of the simulation.
 		"""
-		messages, metrics = self._get_captured_variable("messages")
+		# Get the file names of the aggregates and metrics
+		base_path = self.get_capture_directory()
+		base_path = f"{base_path}messages/"
+		messages_file = f"{base_path}messages.hdf5"
+		metric_directory = f"{base_path}metrics/"
+		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
+
+		# Get the clients to which messages the attacker has access
+		messages = self._get_captured_messages(messages_file, intercepted_client_ids)
+		metrics = {}
+		for metric_file in metric_files:
+			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
+			metrics[metric_name] = self._get_captured_messages(metric_file, intercepted_client_ids)
 		return messages, metrics
 
-	def _get_captured_variable(self, variable_name: str):
-		"""
-		Helper method to retrieve information that has been saved
-		"""
-		capture_directory = self.get_capture_directory()
-		variable_directory = f"{capture_directory}{variable_name}/"
-		variable_path = f"{variable_directory}{variable_name}.npz"
+	def _get_captured_messages(self, path, intercepted_client_ids):
+		def get_client_messages(client_id):
+			with h5py.File(path, 'r') as hf:
+				client_group = hf[str(client_id)]
+				client_layers = []
+				server_rounds = None
+				for client_layer_group in client_group.values():
+					if server_rounds is None:
+						server_rounds = client_layer_group["server_rounds"][:]
 
-		variables = []
-		with open(variable_path, "rb") as f:
-			saved_variables = np.load(f)
-
-			for file in saved_variables.files:
-				variables.append(saved_variables[file])
-
-		metric_directory = f"{variable_directory}metrics/"
-		metrics = collections.defaultdict(list)
-		for metric_file in os.listdir(metric_directory):
-			metric_name = ".".join(metric_file.split(".")[:-1])
-			with open(metric_directory + metric_file, "rb") as f:
-				metric = np.load(f)
-
-				metric_values = []
-				for file in metric.files:
-					metric_values.append(metric[file])
-				metrics[metric_name] = metric_values
-		return variables, dict(metrics)
-
-	def get_client_participation(self):
-		"""
-		Returns the client participation of the simulation, i.e. if client i participated in round j. We expect the
-		resulting set of the result list to include client i at index j.
-		"""
-		messages, _ = self.get_messages()
-		tool_round = messages[0]
-		total_rounds = len(tool_round[0])
-		federation_participation = [
-			set(i for i, message in enumerate(tool_round[:, i]) if (message != 0).all()) for i in range(total_rounds)
-		]
-		return federation_participation
+					values = client_layer_group["values"][:]
+					client_layers.append(values)
+				yield server_rounds, client_layers
+		captured_messages = [list(get_client_messages(id)) for id in intercepted_client_ids]
+		return captured_messages
 
 	def _prepare_loaders(self):
 		"""

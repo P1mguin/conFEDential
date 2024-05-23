@@ -79,11 +79,13 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def get_data_access_indices(self, client_count) -> List[int]:
-		if self._data_access == "client":
+	def get_message_access_indices(self, client_count) -> List[int]:
+		if self._message_access == "client":
 			return [self._client_id]
-		elif self._data_access == "all":
+		elif self._message_access == "server":
 			return list(range(client_count))
+		else:
+			return []
 
 	def get_target_sample(self, simulation):
 		"""

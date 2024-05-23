@@ -85,6 +85,10 @@ class Config:
 		# Get the captured server aggregates
 		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
 
+		# Get the captured messages
+		intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)
+		model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
+
 		# Get the data to which the attacker has access
 		attack_data = self._get_intercepted_samples()
 		attack_dataset = self.attack.get_attack_dataset(server_aggregates, attack_data, self.simulation)
