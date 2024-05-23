@@ -89,19 +89,19 @@ class FedAdam(Strategy):
 			self.second_momentum = (np.zeros_like(layer) for layer in deltas_aggregated)
 
 		# Calculate the new momenta
-		self.first_momentum = (
+		self.first_momentum = [
 			self.betas[0] * x + (1 - self.betas[0]) * y
 			for x, y in zip(self.first_momentum, deltas_aggregated)
-		)
-		self.second_momentum = (
+		]
+		self.second_momentum = [
 			self.betas[1] * x + (1 - self.betas[1]) * (y * y)
 			for x, y in zip(self.second_momentum, deltas_aggregated)
-		)
+		]
 
 		# Update and return the new weights based on the momenta
-		self.current_weights = (
+		self.current_weights = [
 			x + self.global_lr * (y / (np.sqrt(z) + self.eps))
 			for x, y, z in zip(current_weights, self.first_momentum, self.second_momentum)
-		)
+		]
 		self.current_weights = ndarrays_to_parameters(self.current_weights)
 		return self.current_weights, {}
