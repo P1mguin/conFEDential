@@ -87,33 +87,25 @@ class Attack:
 
 	def get_target_sample(self, simulation):
 		"""
-		Function that selects the target to attack based on the configuration. In case the attacker has access to all
-		data, it will be any sample from the dataset. If they only have access to one client, the sample will come from
-		anything but the client. Returns the federation client id from which the attack target was taken, and the
-		attack target
+		Function that selects the target to attack based on the configuration. Samples one random target from all the
+		data, returns the target, whether it was taken from the training data (if it is a member), and which client
+		index the sample was taken from. In case the target is not a member, the client index will be None.
 		"""
 		if self._target is not None:
-			return self._target
+			return self._target, self._is_target_member, self._target_client
 
-		# If the attacker has access to all data, pick any random sample
-		# Otherwise pick any random sample from anything other than the client
-		train_loaders = simulation.train_loaders
-		test_loader = simulation.test_loader
-
+		# Generate whether the victim is a member, and if so what client they originate from
 		if self._is_target_member:
-			# Select a client to target and then a sample
-			possible_targets = list(range(len(train_loaders)))
-			if self.data_access == "client":
-				possible_targets.remove(self._client_id)
-			self._target_client = random.choice(possible_targets)
-
+			train_loaders = simulation.train_loaders
+			self._target_client = random.randint(0, len(train_loaders) - 1)
 			self._target = random.choice(train_loaders[self._target_client].dataset)
 		else:
 			# Pick any value from the test dataset
+			test_loader = simulation.test_loader
 			self._target_client = None
 			self._target = random.choice(test_loader.dataset)
 
-		return self._target_client, self._target
+		return self._target, self._is_target_member, self._target_client
 
 	def get_attack_dataset(
 			self,
