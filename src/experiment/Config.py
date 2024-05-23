@@ -2,8 +2,6 @@ import os
 import random
 from logging import INFO
 
-import numpy as np
-import torch
 import yaml
 from flwr.common import log
 
@@ -93,55 +91,18 @@ class Config:
 		return attack_dataset
 
 	def _get_intercepted_samples(self):
-		# Get which client participated in which round
-		client_participation = self.simulation.get_client_participation()
+		# Get a target from all possible data
+		target, _, _ = self.attack.get_target_sample(self.simulation)
 
-		# Get the data loaders to which the attacker has access
-		client_count = self.simulation.client_count
-		data_access_indices = self.attack.get_data_access_indices(client_count)
-
-		# Get the train_loaders with the corresponding indices
-		all_train_loaders = self.simulation.train_loaders
+		# Combine the data in one big dataset, annotated with the client origin and if it is trained on
+		train_loaders = self.simulation.train_loaders
 		test_loader = self.simulation.test_loader
-		data_loaders = np.array(all_train_loaders)[data_access_indices]
-
-		# Get the target sample
-		_, target = self.attack.get_target_sample(self.simulation)
-
-		# If the attacker has all-access add the test data as well
-		global_rounds = self.simulation.global_rounds
-		if self.attack.data_access == "all":
-			# The attack would be trivial if the attacker also had access to the sample. So remove that
-			test_samples = [
-				[(*item, False)] * global_rounds for item in test_loader.dataset if item is not target
-			]
-		# Otherwise, assume the client has a similar ratio of test data as they have train data
-		else:
-			test_data_size = int(len(test_loader.dataset) / client_count)
-			start = test_data_size * self.attack.client_id
-			end = test_data_size * (self.attack.client_id + 1)
-			test_samples = [[(*item, False)] * global_rounds for item in test_loader.dataset[start:end]]
-
-		training_samples = []
-		for i, dataloader in enumerate(data_loaders):
-			for item in dataloader.dataset:
-				# The attack would be trivial if the attacker also had access to the sample. So remove that
-				if item is target:
-					continue
-
-				if self.attack.data_access == "all":
-					training_round_items = [(*item, i in client_participation[j]) for j in range(global_rounds)]
-				else:
-					training_round_items = [(*item, self.attack.client_id in client_participation[j]) for j in
-											range(global_rounds)]
-				training_samples.append(training_round_items)
-
-		intercepted_samples = training_samples + test_samples
-
-		# Convert to torch tensors
-		intercepted_samples = [
-			tuple(torch.tensor(value) for value in zip(*intercepted_sample)) for intercepted_sample in
-			intercepted_samples
+		training_data = [
+			(sample, True, client_id) for client_id, train_loader in enumerate(train_loaders)
+			for sample in train_loader.dataset if sample is not target
 		]
-
+		testing_data = [(sample, False, None) for sample in test_loader.dataset if sample is not target]
+		data = [*training_data, *testing_data]
+		num_elements = round(self.attack.data_access * len(data))
+		intercepted_samples = random.sample(data, num_elements)
 		return intercepted_samples

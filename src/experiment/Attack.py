@@ -17,7 +17,7 @@ from src.experiment import AttackSimulation
 class Attack:
 	def __init__(
 			self,
-			data_access: str,
+			data_access: float,
 			message_access: str,
 			repetitions: int,
 			attack_simulation=None
@@ -68,7 +68,7 @@ class Attack:
 		self._client_id = client_id
 
 	@property
-	def data_access(self) -> str:
+	def data_access(self) -> float:
 		return self._data_access
 
 	@property
