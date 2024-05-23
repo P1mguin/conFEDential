@@ -170,8 +170,9 @@ class Server(FedAvg):
 				client_group = hf[str(client_id)]
 				for i, value in enumerate(values[client_id]):
 					client_layer_group = client_group[str(i)]
-					client_layer_group["values"].resize((server_round + 1, *value.shape))
-					client_layer_group["server_rounds"].resize((server_round + 1,))
+					included_round_total = client_layer_group["server_rounds"].shape[0]
+					client_layer_group["values"].resize((included_round_total + 1, *value.shape))
+					client_layer_group["server_rounds"].resize((included_round_total + 1,))
 
 					client_layer_group["values"][-1] = value
 					client_layer_group["server_rounds"][-1] = server_round
