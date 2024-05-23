@@ -13,16 +13,20 @@ class Texas(Dataset):
 		Dataset.is_data_downloaded("texas")
 
 		# Get the file from the locally downloaded files
-		train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
-		test_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[-15%:]")
+		train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.csv", split="train[:85%]")
+		test_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.csv", split="train[-15%:]")
 
-		def convert_to_array_and_int64(entry):
+		train_dataset.set_format(type="np")
+		test_dataset.set_format(type="np")
+
+		def split_label_and_features(entry):
+			entry = np.array(list(entry.values()))
 			return {
-				"label": entry["label"],
-				"features": np.array(entry["features"].strip("[]").split()).astype(np.float64)
+				"label": entry[0],
+				"features": entry[1:]
 			}
 
-		train_dataset = train_dataset.map(convert_to_array_and_int64)
-		test_dataset = test_dataset.map(convert_to_array_and_int64)
+		train_dataset = train_dataset.map(split_label_and_features)
+		test_dataset = test_dataset.map(split_label_and_features)
 
 		return train_dataset, test_dataset
