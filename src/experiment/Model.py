@@ -140,7 +140,7 @@ class Model:
 
 	def get_initial_parameters(self):
 		model = self.model
-		model_weights = [np.zeros_like(layer.detach()) for layer in model.parameters()]
+		model_weights = [np.zeros(val.shape) for val in model.state_dict().values()]
 		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
 		return initial_parameters
 
