@@ -9,6 +9,7 @@ from logging import ERROR, INFO, WARN
 from typing import Generator, List
 
 import flwr as fl
+import h5py
 import numpy as np
 import psutil
 import ray
@@ -188,10 +189,29 @@ class Simulation:
 
 	def get_server_aggregates(self):
 		"""
-		Returns the server traffic of the simulation.
+		Returns the aggregates of the model parameters and metrics of the simulation over all global rounds.
 		"""
-		aggregates, metrics = self._get_captured_variable("aggregates")
-		return aggregates, dict(metrics)
+		# Get the file names of the aggregates and metrics
+		base_path = self.get_capture_directory()
+		base_path = f"{base_path}aggregates/"
+		aggregate_file = f"{base_path}aggregates.hdf5"
+		metric_directory = f"{base_path}metrics/"
+		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
+
+		# Get and return the variables
+		aggregates = self._get_captured_aggregate_round(aggregate_file)
+		metrics = {}
+		for metric_file in metric_files:
+			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
+			metrics[metric_name] = self._get_captured_aggregate_round(metric_file)
+		return aggregates, metrics
+
+	def _get_captured_aggregate_round(self, path):
+		aggregate_rounds = []
+		with h5py.File(path, 'r') as hf:
+			for values in hf.values():
+				aggregate_rounds.append(values[:])
+		return aggregate_rounds
 
 	def get_messages(self):
 		"""

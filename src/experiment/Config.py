@@ -82,8 +82,8 @@ class Config:
 		attack_model = AttackNet(self)
 
 	def _get_attack_dataset(self):
-		# Get the model
-		server_aggregates = self.simulation.get_server_aggregates()
+		# Get the captured server aggregates
+		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
 
 		# Get the data to which the attacker has access
 		attack_data = self._get_intercepted_samples()
