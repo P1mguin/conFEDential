@@ -1,5 +1,6 @@
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
+import flwr as fl
 import numpy as np
 import torch
 from flwr.common import FitRes, ndarrays_to_parameters, Parameters, parameters_to_ndarrays
@@ -16,6 +17,13 @@ from src.training.learning_methods.Strategy import Strategy
 class SingleLayerFedNL(Strategy):
 	def __init__(self, **kwargs):
 		super(SingleLayerFedNL, self).__init__(**kwargs)
+
+	@staticmethod
+	def get_initial_parameters(model):
+		model_weights = [np.zeros(val.shape) for val in model.state_dict().values()]
+		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
+		return initial_parameters
+
 
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# The newton method makes use of our custom newton optimizer

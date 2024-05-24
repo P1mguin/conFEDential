@@ -3,7 +3,6 @@ from functools import reduce
 from typing import Iterator, List
 
 import flwr as fl
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -140,9 +139,13 @@ class Model:
 
 	def get_initial_parameters(self):
 		model = self.model
-		model_weights = [np.zeros(val.shape) for val in model.state_dict().values()]
-		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
-		return initial_parameters
+		learning_method_class = getattr(training.learning_methods, self._optimizer_name)
+		# The learning method may require some specific initial parameters which can be implemented as a class method
+		if hasattr(learning_method_class, "get_initial_parameters"):
+			return learning_method_class.get_initial_parameters(model)
+		else:
+			weights = training.get_weights(model)
+			return fl.common.ndarrays_to_parameters(weights)
 
 	def _prepare_model(self):
 		is_from_hub = isinstance(self._model_architecture, dict)
