@@ -18,7 +18,7 @@ simulation:
     model_name: ResNet18
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
-      lr: 0.01
+      lr: 0.1
       momentum: 0.9
     model_architecture:
       repo_or_dir: 'pytorch/vision:v0.10.0'
