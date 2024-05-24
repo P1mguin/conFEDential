@@ -23,8 +23,8 @@ class Purchase(Dataset):
 		def split_label_and_features(entry):
 			entry = np.array(list(entry.values()))
 			return {
-				"label": entry[-1],
-				"features": entry[:-1]
+				"label": entry[-1].astype(np.int64),
+				"features": entry[:-1].astype('uint8')
 			}
 
 		train_dataset = train_dataset.map(split_label_and_features)
