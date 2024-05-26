@@ -97,45 +97,8 @@ class Model:
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		return self._learning_method.get_optimizer(parameters)
 
-	def get_layer_shapes(self, input_shape):
-		layer_output_shapes = []
-		layer_shape = input_shape
-
-		layer_output_shapes.append(layer_shape)
-		for layer in self.model.layers:
-			if hasattr(layer, "kernel_size"):
-				# MaxPoolLayer does not have the out channels attribute fall back to the input amount of channels
-				out_channels = getattr(layer, "out_channels", layer_shape[0])
-				layer_shape = utils.compute_convolution_output_size(
-					layer_shape[1:],  # Remove the out channels dimension of the previous layer
-					out_channels,
-					layer.kernel_size,
-					layer.stride,
-					layer.padding
-				)
-			elif isinstance(layer, nn.Linear):
-				layer_shape = (layer.out_features,)
-			elif isinstance(layer, nn.Flatten):
-				start_dim = layer.start_dim
-				end_dim = layer.end_dim
-				if end_dim == -1:
-					end_dim = len(layer_shape)
-				flattened_shape = reduce(operator.mul, layer_shape[start_dim:end_dim], 1)
-
-				layer_shape = (
-					*layer_shape[0:start_dim], flattened_shape, *layer_shape[end_dim:len(layer_shape)]
-				)
-			layer_output_shapes.append(layer_shape)
-		return layer_output_shapes
-
 	def get_trainable_layer_indices(self):
-		return set(int(name.split(".")[1]) for name in self.model.state_dict().keys())
-
-	def get_gradient_shapes(self):
-		# Get the shapes of the weights and the biases and then join them together in tuples
-		gradient_shapes = [value.shape for value in self.model.state_dict().values()]
-		gradient_shapes = list(zip(gradient_shapes[::2], gradient_shapes[1::2]))
-		return gradient_shapes
+		return set(int(name.split(".")[1]) for name in self.model.named_parameters().keys())
 
 	def get_initial_parameters(self):
 		model = self.model

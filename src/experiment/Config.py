@@ -85,8 +85,16 @@ class Config:
 			# For each intercepted datapoint, get their gradients, activation functions, loss
 			attack_dataset = self._get_attack_dataset()
 
+			(gradient, activation_value, metrics, loss_value, label), is_value_member, value_origin = next(iter(attack_dataset))
+
+			# Construct the attack model from all the shapes
+			gradient_shapes = [gradient.shape[1:] for gradient in gradient]
+			activation_shapes = [activation.shape[1:] for activation in activation_value]
+			metrics_shapes = {key: [layer.shape[1:] for layer in metric] for key, metric in metrics.items()}
+			label_shape = label.shape[1:]
+
 			# Get the attack model
-			attack_model = AttackNet(self)
+			attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
 
 	def _get_attack_dataset(self):
 		# Get the captured server aggregates

@@ -7,7 +7,7 @@ from typing import List
 import numpy.typing as npt
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 import src.training as training
 from src.experiment import AttackSimulation
@@ -136,7 +136,7 @@ class Attack:
 		features = torch.stack([torch.tensor(value[0][0]) for value in intercepted_data])
 		labels = torch.stack([torch.tensor(value[0][1]) for value in intercepted_data])
 		is_member = torch.stack([torch.tensor(value[1]) for value in intercepted_data])
-		member_origins = [value[2] for value in intercepted_data]
+		member_origins = torch.tensor([value[2] if value[2] else -1 for value in intercepted_data])
 
 		# Translate the boolean to an integer
 		is_member = is_member.int()
@@ -178,10 +178,10 @@ class Attack:
 					loss_value = loss[j]
 					is_value_member = batch_is_member[j]
 					value_origin = batch_member_origins[j]
-					yield ((gradient, activation_value, list(metrics.values()), loss_value, label),
+					yield ((gradient, activation_value, metrics, loss_value, label),
 						   is_value_member, value_origin)
 
-		attack_dataset = list(attack_dataset_generator())
+		attack_dataset = attack_dataset_generator()
 		dataset = GeneratorDataset(attack_dataset, dataset_size)
 		attack_dataloader = DataLoader(dataset, batch_size=self._attack_simulation.batch_size)
 		return attack_dataloader
@@ -277,7 +277,7 @@ class Attack:
 		return gradients
 
 
-class GeneratorDataset:
+class GeneratorDataset(Dataset):
 	def __init__(self, generator, length):
 		self._generator = generator
 		self._length = length

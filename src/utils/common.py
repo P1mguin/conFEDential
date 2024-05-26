@@ -1,43 +1,9 @@
-from typing import Any, Callable, List, Tuple, Type
+from typing import Any, List, Tuple, Type
 
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-
-
-def compute_convolution_output_size(
-		input_size: Tuple[int, ...],
-		out_channels: int,
-		kernel_size: Tuple[int, int] | int,
-		stride: Tuple[int, int] | int = 1,
-		padding: Tuple[int, int] | int = 0,
-) -> Tuple[int, ...]:
-	"""
-	Computes the output size of a convolutional layer given the input size and the parameters of the convolutional layer
-	:param input_size: the input size that is expected of the convolution layer
-	:param out_channels: the amount of out channels
-	:param kernel_size: the size of the kernel
-	:param stride: the step size of the kernel
-	:param padding: the size of the padding
-	"""
-	# Convert all ints to tuples
-	if isinstance(kernel_size, int):
-		kernel_size = (kernel_size,) * len(input_size)
-
-	if isinstance(stride, int):
-		stride = (stride,) * len(input_size)
-
-	if isinstance(padding, int):
-		padding = (padding,) * len(input_size)
-
-	# Compute the output size for each dimension separately
-	output_shape = []
-	for i in range(len(input_size)):
-		output_size = ((input_size[i] - kernel_size[i] + 2 * padding[i]) // stride[i]) + 1
-		output_shape.append(output_size)
-
-	return out_channels, *output_shape
 
 
 def compute_weighted_average(values, counts) -> Any:
@@ -82,17 +48,6 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	for key in path:
 		value = value[key]
 	return value
-
-
-def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:
-	"""
-	Loads and parses a python function described as string
-	:param function_string: python function with correct indentation
-	:param function_name: the name of the function in the string
-	"""
-	namespace = {}
-	exec(function_string, namespace)
-	return namespace[function_name]
 
 
 def get_net_class_from_layers(layers: List[Type[nn.Module]]) -> Type[nn.Module]:
