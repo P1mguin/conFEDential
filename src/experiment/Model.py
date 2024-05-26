@@ -129,7 +129,7 @@ class Model:
 		return layer_output_shapes
 
 	def get_trainable_layer_indices(self):
-		return set(int(name.split(".")[1]) for name, param in self.model.named_parameters() if param.requires_grad)
+		return set(int(name.split(".")[1]) for name in self.model.state_dict().keys())
 
 	def get_gradient_shapes(self):
 		# Get the shapes of the weights and the biases and then join them together in tuples

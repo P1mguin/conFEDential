@@ -26,7 +26,7 @@ simulation:
       pretrained: False
       out_features: 10
 attack:
-  data_access: all
+  data_access: 1.0
   message_access: server
   repetitions: 10
   attack_simulation:

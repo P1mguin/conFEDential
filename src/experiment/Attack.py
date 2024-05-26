@@ -2,7 +2,7 @@ import copy
 import itertools
 import math
 import random
-from typing import List, Tuple
+from typing import List
 
 import numpy.typing as npt
 import torch
@@ -10,7 +10,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 import src.training as training
-import src.utils as utils
 from src.experiment import AttackSimulation
 
 
@@ -79,6 +78,12 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
+	def reset_variables(self):
+		self._client_id = None
+		self._is_target_member = bool(random.getrandbits(1))
+		self._target = None
+		self._target_client = None
+
 	def get_message_access_indices(self, client_count) -> List[int]:
 		if self._message_access == "client":
 			return [self._client_id]
@@ -109,10 +114,11 @@ class Attack:
 
 		return self._target, self._is_target_member, self._target_client
 
-	def get_attack_dataset(
+	def get_membership_inference_attack_dataset(
 			self,
-			server_aggregates: Tuple[List[npt.NDArray], dict],
-			attack_data: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]],
+			models,
+			metrics,
+			intercepted_data,
 			simulation
 	) -> DataLoader:
 		"""
@@ -123,21 +129,29 @@ class Attack:
 		whether the model was trained on the client
 		:return:
 		"""
-		model_iterations = server_aggregates[0]
-		metric_iterations = server_aggregates[1]
+		# Helper variables for clarity
+		dataset_size = len(intercepted_data)
 
-		# Reshape each value in the metrics to be 5D
-		for key, value in metric_iterations.items():
+		# Extract the value that will be used in the attack dataset into separate variables
+		features = torch.stack([torch.tensor(value[0][0]) for value in intercepted_data])
+		labels = torch.stack([torch.tensor(value[0][1]) for value in intercepted_data])
+		is_member = torch.stack([torch.tensor(value[1]) for value in intercepted_data])
+		member_origins = [value[2] for value in intercepted_data]
+
+		# Translate the boolean to an integer
+		is_member = is_member.int()
+
+		# Translate the labels to be one-hot-encoded
+		labels = nn.functional.one_hot(labels)
+
+		# Reshape the metrics so they are 5D and can fit in a gradient component
+		for key, value in metrics.items():
 			for i, layer in enumerate(value):
 				layer_value = torch.tensor(layer)
 				while layer_value.ndim < 5:
 					layer_value = layer_value.unsqueeze(1)
 
-				metric_iterations[key][i] = layer_value.float()
-
-		features = torch.stack([value[0] for value in attack_data])
-		labels = torch.stack([value[1] for value in attack_data])
-		is_member = torch.stack([value[2] for value in attack_data])
+				metrics[key][i] = layer_value.float()
 
 		batch_size = self._attack_simulation.batch_size
 		batch_amount = math.ceil(len(features) / batch_size)
@@ -151,74 +165,76 @@ class Attack:
 				batch_features = features[start:end]
 				batch_labels = labels[start:end]
 				batch_is_member = is_member[start:end]
+				batch_member_origins = member_origins[start:end]
 
-				activation_values, gradients, loss = self._get_model_information_from_iterations(
-					batch_features, batch_labels, model_iterations, simulation
+				activation_values, gradients, loss = self._precompute_attack_features(
+					batch_features, batch_labels, models, simulation
 				)
 
 				for j in range(batch_size):
-					activation_value = [layer[j] for layer in activation_values]
+					label = batch_labels[j]
 					gradient = [layer[j] for layer in gradients]
+					activation_value = [layer[j] for layer in activation_values]
 					loss_value = loss[j]
 					is_value_member = batch_is_member[j]
-					label = batch_labels[j].float()
-					yield (activation_value, gradient, loss_value, label, metric_iterations), is_value_member
+					value_origin = batch_member_origins[j]
+					yield ((gradient, activation_value, list(metrics.values()), loss_value, label),
+						   is_value_member, value_origin)
 
-		attack_dataset = attack_dataset_generator()
-		dataset = GeneratorDataset(attack_dataset, len(attack_data))
+		attack_dataset = list(attack_dataset_generator())
+		dataset = GeneratorDataset(attack_dataset, dataset_size)
 		attack_dataloader = DataLoader(dataset, batch_size=self._attack_simulation.batch_size)
 		return attack_dataloader
 
-	def _get_model_information_from_iterations(self, features, labels, model_iterations, simulation):
+	def _precompute_attack_features(self, features, labels, model_iterations, simulation):
 		"""
 		Gets the loss, activation functions and gradients for a list of parameters
 		"""
-		features, labels = torch.tensor(features).to(training.DEVICE), torch.tensor(labels).to(training.DEVICE)
-
 		# Get the models from the parameter iterations
 		batch_size = len(features)
 		models = self._get_models(model_iterations, batch_size, simulation)
-		activation_values = self._get_activation_values(models, features)
+		activation_values = self._get_activation_values(models, features, simulation)
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
-		gradient_values = self._get_gradient_values(losses, models)
+		gradient_values = self._get_gradient_values(losses, models, simulation)
 		return activation_values, gradient_values, losses
 
 	def _get_models(self, model_iterations: List[npt.NDArray], batch_size: int, simulation) -> List[List[nn.Module]]:
 		"""
 		Creates a list of models from a list of parameters from the model iterations
 		"""
-		iteration_count = model_iterations[0].shape[0]
+		global_rounds = simulation.global_rounds
 
+		# Get the aggregated models and the initial model from the iterations
 		models = []
-		for i in range(iteration_count):
+		for i in range(global_rounds + 1):
 			model = copy.deepcopy(simulation.model)
-			new_state_dict = {
-				key: torch.tensor(parameter[i]) for key, parameter in zip(model.state_dict().keys(), model_iterations)
-			}
-			model.load_state_dict(new_state_dict)
+			model_parameters = [layer[i] for layer in model_iterations]
+			training.set_weights(model, model_parameters)
 			models.append(model.to(training.DEVICE))
 		models = [[copy.deepcopy(model) for model in models] for _ in range(batch_size)]
 		return models
 
-	def _get_activation_values(self, models, features):
+	def _get_activation_values(self, models, features, simulation):
 		"""
 		Gets the activation values from a list of model iterations and features
 		"""
-		trainable_indices = utils.get_trainable_layers_indices(models[0][0])
+		# Expand the features once, so it accounts for several model iterations
+		global_rounds = simulation.global_rounds
+		features = features.unsqueeze(1).repeat_interleave(global_rounds + 1, dim=1)
+
+		trainable_indices = simulation.model_config.get_trainable_layer_indices()
 		layer_count = len(models[0][0].layers)
 
 		def get_activation_values():
-			value = features
+			values = features
 			for i in range(layer_count):
-				value = torch.stack(
-					[
-						torch.stack([iteration.layers[i](value[j][k]) for k, iteration in enumerate(iterations)])
-						for j, iterations in enumerate(models)
-					]
-				)
+				values = torch.stack([
+					torch.stack([model.layers[i](value) for model, value in zip(model_iterations, value_iterations)])
+					for model_iterations, value_iterations in zip(models, values)
+				])
 				if i not in trainable_indices:
-					yield value
+					yield values
 
 		activation_values = list(get_activation_values())
 		return activation_values
@@ -227,31 +243,33 @@ class Attack:
 		"""
 		Gets the losses of a list of predictions and a list of labels
 		"""
-		iteration_count = predictions.shape[1]
+		global_rounds = simulation.global_rounds
 		criterion = simulation.criterion
 		criterion.reduction = "none"
-		loss = torch.stack([criterion(predictions[i], label[i]) for i in range(predictions.shape[0])])
+		loss = torch.stack([criterion(predictions[:, i, :], label.float()) for i in range(global_rounds + 1)])
+		loss = loss.view(-1, global_rounds + 1)
 		return loss
 
-	def _get_gradient_values(self, losses, models):
+	def _get_gradient_values(self, losses, models, simulation):
 		"""
 		Gets the gradients from a list of model iterations and features
 		"""
 		losses.sum().backward()
-		trainable_layer_count = len(list(models[0][0].parameters()))
+
+		template_model = simulation.model
 
 		def get_gradients():
-			for i in range(trainable_layer_count):
+			for i in range(len(list(template_model.parameters()))):
 				def reshape_to_4d(input_tensor: torch.Tensor) -> torch.Tensor:
 					while input_tensor.ndim < 4:
 						input_tensor = input_tensor.unsqueeze(0)
 					return input_tensor
 
 				layer_gradients = torch.stack([
-					torch.stack(
-						[reshape_to_4d(next(itertools.islice(iteration.parameters(), i, None)).grad)
-						 for iteration in iterations]
-					) for iterations in models
+					torch.stack([
+						reshape_to_4d(next(itertools.islice(model.parameters(), i, None)).grad)
+						for model in model_iterations
+					]) for model_iterations in models
 				])
 				yield layer_gradients
 

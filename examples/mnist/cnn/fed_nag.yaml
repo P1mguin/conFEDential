@@ -12,8 +12,8 @@ simulation:
   federation:
     client_count: 100
     fraction_fit: 0.1
-    global_rounds: 10
-    local_rounds: 20
+    global_rounds: 2
+    local_rounds: 1
   model:
     optimizer_name: FedNAG
     model_name: CNN
@@ -53,7 +53,7 @@ simulation:
       - type: Softmax
         dim: -1
 attack:
-  data_access: all
+  data_access: 1.0
   message_access: server
   repetitions: 10
   attack_simulation:

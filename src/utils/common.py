@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Set, Tuple, Type
+from typing import Any, Callable, List, Tuple, Type
 
 import numpy as np
 import torch
@@ -82,14 +82,6 @@ def get_dict_value_from_path(dictionary: dict, *path: Tuple[str]) -> Any:
 	for key in path:
 		value = value[key]
 	return value
-
-
-def get_trainable_layers_indices(model: nn.Module) -> Set[int]:
-	"""
-	Returns the indices of the trainable layers
-	:param model: the model to get the trainable layers from
-	"""
-	return set(int(name.split(".")[1]) for name, param in model.named_parameters() if param.requires_grad)
 
 
 def load_func_from_function_string(function_string: str, function_name: str) -> Callable[[Any], Any]:

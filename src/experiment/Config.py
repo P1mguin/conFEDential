@@ -75,11 +75,18 @@ class Config:
 		else:
 			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 
-		# For each intercepted datapoint, get their gradients, activation functions, loss
-		attack_dataset = self._get_attack_dataset()
+		for _ in range(self.attack.repetitions):
+			# Clean the variables of the attack
+			self.attack.reset_variables()
 
-		# Get the attack model
-		attack_model = AttackNet(self)
+			# Get the victim of the attack
+			(victim_features, victim_label), is_member, origin_id = self.attack.get_target_sample(self.simulation)
+
+			# For each intercepted datapoint, get their gradients, activation functions, loss
+			attack_dataset = self._get_attack_dataset()
+
+			# Get the attack model
+			attack_model = AttackNet(self)
 
 	def _get_attack_dataset(self):
 		# Get the captured server aggregates
@@ -87,11 +94,19 @@ class Config:
 
 		# Get the captured messages
 		intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)
-		model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
+		# model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
 
-		# Get the data to which the attacker has access
-		attack_data = self._get_intercepted_samples()
-		attack_dataset = self.attack.get_attack_dataset(server_aggregates, attack_data, self.simulation)
+		# Get the intercepted samples
+		intercepted_data = self._get_intercepted_samples()
+
+		# Get the attacker dataset
+		attack_dataset = self.attack.get_membership_inference_attack_dataset(
+			aggregated_models,
+			aggregated_metrics,
+			intercepted_data,
+			self.simulation
+		)
+
 		return attack_dataset
 
 	def _get_intercepted_samples(self):
