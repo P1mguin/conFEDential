@@ -23,7 +23,7 @@ class Texas(Dataset):
 			entry = np.array(list(entry.values()))
 			return {
 				"label": entry[-1].astype(np.int64),
-				"features": entry[:-1].astype('uint8')
+				"features": entry[:-1].astype(np.float32)
 			}
 
 		train_dataset = train_dataset.map(split_label_and_features)
