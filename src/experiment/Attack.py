@@ -172,10 +172,10 @@ class Attack:
 				)
 
 				for j in range(batch_size):
-					label = batch_labels[j]
+					label = batch_labels[j].float()
 					gradient = [layer[j] for layer in gradients]
 					activation_value = [layer[j] for layer in activation_values]
-					loss_value = loss[j]
+					loss_value = loss[j].unsqueeze(-1)
 					is_value_member = batch_is_member[j]
 					value_origin = batch_member_origins[j]
 					yield ((gradient, activation_value, metrics, loss_value, label),

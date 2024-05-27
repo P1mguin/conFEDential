@@ -98,7 +98,7 @@ class Model:
 		return self._learning_method.get_optimizer(parameters)
 
 	def get_trainable_layer_indices(self):
-		return set(int(name.split(".")[1]) for name in self.model.named_parameters().keys())
+		return set(int(name.split(".")[1]) for name, _ in self.model.named_parameters())
 
 	def get_initial_parameters(self):
 		model = self.model
