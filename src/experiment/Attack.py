@@ -145,13 +145,9 @@ class Attack:
 		labels = nn.functional.one_hot(labels)
 
 		# Reshape the metrics so they are 5D and can fit in a gradient component
-		for key, value in metrics.items():
-			for i, layer in enumerate(value):
-				layer_value = torch.tensor(layer)
-				while layer_value.ndim < 5:
-					layer_value = layer_value.unsqueeze(1)
-
-				metrics[key][i] = layer_value.float()
+		metrics = {
+			key: [reshape_to_4d(torch.tensor(layer), True).float() for layer in value] for key, value in metrics.items()
+		}
 
 		batch_size = self._attack_simulation.batch_size
 		batch_amount = math.ceil(len(features) / batch_size)
@@ -179,11 +175,11 @@ class Attack:
 					is_value_member = batch_is_member[j]
 					value_origin = batch_member_origins[j]
 					yield ((gradient, activation_value, metrics, loss_value, label),
-						   is_value_member, value_origin)
+						   is_value_member.float(), value_origin)
 
 		attack_dataset = attack_dataset_generator()
 		dataset = GeneratorDataset(attack_dataset, dataset_size)
-		attack_dataloader = DataLoader(dataset, batch_size=self._attack_simulation.batch_size)
+		attack_dataloader = DataLoader(dataset, batch_size=self._attack_simulation.batch_size, shuffle=True)
 		return attack_dataloader
 
 	def _precompute_attack_features(self, features, labels, model_iterations, simulation):
@@ -260,11 +256,6 @@ class Attack:
 
 		def get_gradients():
 			for i in range(len(list(template_model.parameters()))):
-				def reshape_to_4d(input_tensor: torch.Tensor) -> torch.Tensor:
-					while input_tensor.ndim < 4:
-						input_tensor = input_tensor.unsqueeze(0)
-					return input_tensor
-
 				layer_gradients = torch.stack([
 					torch.stack([
 						reshape_to_4d(next(itertools.islice(model.parameters(), i, None)).grad)
@@ -276,6 +267,20 @@ class Attack:
 		gradients = list(get_gradients())
 		return gradients
 
+
+def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Tensor:
+	if batched:
+		unsqueeze_dim = 2
+		target_dim = 5
+	else:
+		unsqueeze_dim = 1
+		target_dim = 4
+
+	while input_tensor.ndim > target_dim:
+		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim-1)], -1)
+	while input_tensor.ndim < target_dim:
+		input_tensor = input_tensor.unsqueeze(unsqueeze_dim)
+	return input_tensor
 
 class GeneratorDataset(Dataset):
 	def __init__(self, generator, length):
