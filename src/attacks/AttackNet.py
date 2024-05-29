@@ -151,10 +151,11 @@ class AttackNet(nn.Module):
 						 * gradient_output_size * round_multiplier)
 
 		# Size of the metric components
-		metric_output_size = get_output_size(next(iter(self.metric_components.values()))[0])
-		encoder_size += sum(
-			sum(metric_shapes[-4] for metric_shapes in metrics_shapes[key]) for key in metrics_shapes.keys()
-		) * metric_output_size * round_multiplier
+		if metrics_shapes != {}:
+			metric_output_size = get_output_size(next(iter(self.metric_components.values()))[0])
+			encoder_size += sum(
+				sum(metric_shapes[-4] for metric_shapes in metrics_shapes[key]) for key in metrics_shapes.keys()
+			) * metric_output_size * round_multiplier
 
 		layers = []
 		in_features_set = False
