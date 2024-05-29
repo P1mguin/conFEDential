@@ -2,12 +2,15 @@ import copy
 import itertools
 import math
 import random
+from logging import INFO
 from typing import List
 
 import numpy.typing as npt
 import torch
 import torch.nn as nn
+from flwr.common import log
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 import src.training as training
 from src.experiment import AttackSimulation
@@ -129,8 +132,8 @@ class Attack:
 		whether the model was trained on the client
 		:return:
 		"""
-		# Helper variables for clarity
-		dataset_size = len(intercepted_data)
+		# Choose either 8 or 16
+		process_batch_size = 8
 
 		# Extract the value that will be used in the attack dataset into separate variables
 		features = torch.stack([torch.tensor(value[0][0]) for value in intercepted_data])
@@ -149,13 +152,12 @@ class Attack:
 			key: [reshape_to_4d(torch.tensor(layer), True).float() for layer in value] for key, value in metrics.items()
 		}
 
-		batch_size = self._attack_simulation.batch_size
-		batch_amount = math.ceil(len(features) / batch_size)
+		process_amount = math.ceil(len(features) / process_batch_size)
 
 		def attack_dataset_generator():
-			for i in range(batch_amount):
-				start = i * batch_size
-				end = (i + 1) * batch_size
+			for i in range(process_amount):
+				start = i * process_batch_size
+				end = (i + 1) * process_batch_size
 
 				# Stack the information of the shadow_model_simulation in tensors
 				batch_features = features[start:end]
@@ -167,7 +169,7 @@ class Attack:
 					batch_features, batch_labels, models, simulation
 				)
 
-				for j in range(batch_size):
+				for j in range(process_batch_size):
 					label = batch_labels[j].float()
 					gradient = [layer[j] for layer in gradients]
 					activation_value = [layer[j] for layer in activation_values]
@@ -177,9 +179,16 @@ class Attack:
 					yield ((gradient, activation_value, metrics, loss_value, label),
 						   is_value_member.float(), value_origin)
 
+		# Helper variables for clarity
+		dataset_size = len(intercepted_data)
+
 		attack_dataset = attack_dataset_generator()
 		dataset = GeneratorDataset(attack_dataset, dataset_size)
-		attack_dataloader = DataLoader(dataset, batch_size=self._attack_simulation.batch_size, shuffle=True)
+
+		batch_size = self._attack_simulation.batch_size
+		if batch_size == -1:
+			batch_size = dataset_size
+		attack_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 		return attack_dataloader
 
 	def _precompute_attack_features(self, features, labels, model_iterations, simulation):
@@ -286,9 +295,17 @@ class GeneratorDataset(Dataset):
 	def __init__(self, generator, length):
 		self._generator = generator
 		self._length = length
+		self.data_cache = [None] * length
+		self._initialize_cache()
+
+	def _initialize_cache(self):
+		gen = self._generator
+		log(INFO, "Initializing generator cache")
+		for i in tqdm(range(self._length)):
+			self.data_cache[i] = next(gen)
 
 	def __len__(self):
 		return self._length
 
 	def __getitem__(self, index):
-		return next(self._generator)
+		return self.data_cache[index]
