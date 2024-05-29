@@ -1,3 +1,4 @@
+from src import training
 from src.experiment import ModelArchitecture
 
 
@@ -51,3 +52,7 @@ class AttackSimulation:
 	@property
 	def model_architecture(self):
 		return self._model_architecture
+
+	def get_optimizer(self, parameters):
+		learning_method = getattr(training.learning_methods, self._optimizer_name)(**self._optimizer_parameters)
+		return learning_method.get_optimizer(parameters)
