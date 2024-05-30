@@ -124,6 +124,11 @@ class Attack:
 				loss = criterion(prediction, is_value_member)
 				loss.backward()
 				optimizer.step()
+
+			# Remove the gradients before testing performance
+			predictions = predictions.detach()
+			is_members = is_members.detach()
+
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
 			train_roc_auc = auc(train_fpr, train_tpr)
 			test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
@@ -234,7 +239,8 @@ class Attack:
 
 		# Reshape the metrics so they are 5D and can fit in a gradient component
 		metrics = {
-			key: [reshape_to_4d(torch.tensor(layer), True).float() for layer in value] for key, value in metrics.items()
+			key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
+			metrics.items()
 		}
 
 		process_amount = math.ceil(len(features) / process_batch_size)
@@ -255,12 +261,12 @@ class Attack:
 				)
 
 				for j in range(process_batch_size):
-					label = batch_labels[j].float()
-					gradient = [layer[j] for layer in gradients]
-					activation_value = [layer[j] for layer in activation_values]
-					loss_value = loss[j].unsqueeze(-1)
-					is_value_member = batch_is_member[j]
-					value_origin = batch_member_origins[j]
+					label = batch_labels[j].detach().float()
+					gradient = [layer[j].detach() for layer in gradients]
+					activation_value = [layer[j].detach() for layer in activation_values]
+					loss_value = loss[j].detach().unsqueeze(-1)
+					is_value_member = batch_is_member[j].detach()
+					value_origin = batch_member_origins[j].detach()
 					yield ((gradient, activation_value, metrics, loss_value, label),
 						   is_value_member.float(), value_origin)
 
