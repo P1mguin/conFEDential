@@ -118,7 +118,7 @@ class Attack:
 		total_buffer_iterations = 10
 		buffer_iterations = total_buffer_iterations
 		while val_roc_auc > previous_val_roc_auc or buffer_iterations > 0:
-			if val_roc_auc <= previous_val_roc_auc:
+			if val_roc_auc <= previous_val_roc_auc or buffer_iterations < total_buffer_iterations:
 				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
 				buffer_iterations -= 1
 
@@ -168,8 +168,7 @@ class Attack:
 			)
 
 			i += 1
-			if buffer_iterations < total_buffer_iterations:
-				buffer_iterations -= 1
+		wandb.finish()
 
 	def _test_model(self, model, dataloader):
 		# Test the model on the dataloader
