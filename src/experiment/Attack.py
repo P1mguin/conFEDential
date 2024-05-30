@@ -9,10 +9,12 @@ import numpy.typing as npt
 import torch
 import torch.nn as nn
 from flwr.common import log
+from sklearn.metrics import auc, roc_curve
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 import src.training as training
+from src import utils
 from src.experiment import AttackSimulation
 
 
@@ -80,6 +82,89 @@ class Attack:
 	@property
 	def attack_simulation(self):
 		return self._attack_simulation
+
+	def membership_inference_attack_model(self, attack_model, attack_loader, test_loader):
+		# Split the dataset into training, validation and testing
+		train_loader, validation_loader = utils.split_dataloader(attack_loader, 0.85)
+
+		# Set initial parameters and get initial performance
+		val_roc_auc, i = float("inf"), 0
+		previous_val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
+		test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
+		log(INFO, f"Initial performance: validation auc {previous_val_roc_auc}, test auc {test_roc_auc}")
+
+		# TODO: Plot validation and test roc to W&B
+
+		attack_model = attack_model.to(training.DEVICE)
+		attack_model.train()
+		criterion = nn.BCELoss()
+		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
+		while val_roc_auc > previous_val_roc_auc:
+			predictions = torch.Tensor()
+			is_members = torch.Tensor()
+			log(INFO, f"Starting epoch: {i}")
+			for (
+					gradient,
+					activation_value,
+					metrics,
+					loss_value,
+					label
+			), is_value_member, _ in tqdm(train_loader, leave=True):
+				gradient = [layer.to(training.DEVICE) for layer in gradient]
+				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
+				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
+				loss_value = loss_value.to(training.DEVICE)
+				label = label.to(training.DEVICE)
+
+				prediction = attack_model(gradient, activation_value, metrics, loss_value, label)
+				predictions = torch.cat((predictions, prediction))
+				is_members = torch.cat((is_members, is_value_member))
+
+				optimizer.zero_grad()
+				loss = criterion(prediction, is_value_member)
+				loss.backward()
+				optimizer.step()
+			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
+			train_roc_auc = auc(train_fpr, train_tpr)
+			test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
+			val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
+
+			log(INFO, f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc}")
+
+			# TODO: Plot train, test and validation results to W&B
+
+			i += 1
+
+	def _test_model(self, model, dataloader):
+		# Test the model on the dataloader
+		model = model.to(training.DEVICE)
+		model.eval()
+
+		predictions = torch.Tensor()
+		is_members = torch.Tensor()
+		with torch.no_grad():
+			for (
+					gradient,
+					activation_value,
+					metrics,
+					loss_value,
+					label
+			), is_value_member, _ in tqdm(dataloader, leave=True):
+				gradient = [layer.to(training.DEVICE) for layer in gradient]
+				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
+				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
+				loss_value = loss_value.to(training.DEVICE)
+				label = label.to(training.DEVICE)
+
+				prediction = model(gradient, activation_value, metrics, loss_value, label)
+
+				predictions = torch.cat((predictions, prediction))
+				is_members = torch.cat((is_members, is_value_member))
+
+		fpr, tpr, _ = roc_curve(is_members, predictions)
+		roc_auc = auc(fpr, tpr)
+		return roc_auc, fpr, tpr
+
 
 	def reset_variables(self):
 		self._client_id = None
@@ -301,7 +386,7 @@ class GeneratorDataset(Dataset):
 	def _initialize_cache(self):
 		gen = self._generator
 		log(INFO, "Initializing generator cache")
-		for i in tqdm(range(self._length)):
+		for i in tqdm(range(self._length), leave=True):
 			self.data_cache[i] = next(gen)
 
 	def __len__(self):

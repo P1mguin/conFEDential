@@ -79,33 +79,44 @@ class Config:
 			# Clean the variables of the attack
 			self.attack.reset_variables()
 
-			# Get the victim of the attack
-			(victim_features, victim_label), is_member, origin_id = self.attack.get_target_sample(self.simulation)
-
 			# For each intercepted datapoint, get their gradients, activation functions, loss
-			attack_dataset = self._get_attack_dataset()
+			# Add fraction eval for debugging purposes
+			fraction_eval = 0.025
+			attack_dataset, test_dataset = self._get_attack_dataset(fraction_eval)
 
-			(gradient, activation_value, metrics, loss_value, label), is_value_member, value_origin = next(iter(attack_dataset))
+			# Get the template model and train it
+			attack_model = self._get_attack_model(attack_dataset)
+			self.attack.membership_inference_attack_model(attack_model, attack_dataset, test_dataset)
 
-			# Construct the attack model from all the shapes
-			gradient_shapes = [gradient.shape[1:] for gradient in gradient]
-			activation_shapes = [activation.shape[1:] for activation in activation_value]
-			metrics_shapes = {key: [layer.shape[1:] for layer in metric] for key, metric in metrics.items()}
-			label_shape = label.shape[1:]
+	def _get_attack_model(self, attack_dataset):
+		(
+			gradient,
+			activation_value,
+			metrics,
+			loss_value,
+			label
+		), is_value_member, value_origin = attack_dataset.dataset[0]
 
-			# Get the attack model
-			attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
+		# Construct the attack model from all the shapes
+		gradient_shapes = [gradient.shape for gradient in gradient]
+		activation_shapes = [activation.shape for activation in activation_value]
+		metrics_shapes = {key: [layer.shape for layer in metric] for key, metric in metrics.items()}
+		label_shape = label.shape
 
-	def _get_attack_dataset(self):
+		# Get the attack model
+		attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
+		return attack_model
+
+	def _get_attack_dataset(self, fraction_eval: float = 1.0):
 		# Get the captured server aggregates
 		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
 
 		# Get the captured messages
-		intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)
+		# intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)
 		# model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
 
 		# Get the intercepted samples
-		intercepted_data = self._get_intercepted_samples()
+		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_eval)
 
 		# Get the attacker dataset
 		attack_dataset = self.attack.get_membership_inference_attack_dataset(
@@ -115,11 +126,18 @@ class Config:
 			self.simulation
 		)
 
-		return attack_dataset
+		test_dataset = self.attack.get_membership_inference_attack_dataset(
+			aggregated_models,
+			aggregated_metrics,
+			remaining_data,
+			self.simulation
+		)
 
-	def _get_intercepted_samples(self):
+		return attack_dataset, test_dataset
+
+	def _get_intercepted_samples(self, fraction_eval: float = 1.0):
 		# Get a target from all possible data
-		target, _, _ = self.attack.get_target_sample(self.simulation)
+		target, is_target_member, target_origin = self.attack.get_target_sample(self.simulation)
 
 		# Combine the data in one big dataset, annotated with the client origin and if it is trained on
 		train_loaders = self.simulation.train_loaders
@@ -131,5 +149,13 @@ class Config:
 		testing_data = [(sample, False, None) for sample in test_loader.dataset if sample is not target]
 		data = [*training_data, *testing_data]
 		num_elements = round(self.attack.data_access * len(data))
-		intercepted_samples = random.sample(data, num_elements)
-		return intercepted_samples
+
+		intercepted_indices = set(random.sample(range(len(data)), num_elements))
+		remaining_indices = set(range(len(data))) - intercepted_indices
+		remaining_indices = random.sample(remaining_indices, round(fraction_eval * len(remaining_indices)))
+
+		intercepted_samples = [data[i] for i in intercepted_indices]
+		remaining_samples = [data[i] for i in remaining_indices]
+		remaining_samples += [(target, is_target_member, target_origin)]
+
+		return intercepted_samples, remaining_samples
