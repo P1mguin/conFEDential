@@ -22,9 +22,11 @@ class AttackNet(nn.Module):
 
 		self._initialize_components(gradient_shapes, activation_shapes, metrics_shapes, label_shape)
 
-	def forward(self, gradients, activation_values, metrics, loss_value, label):
+	def forward(self, gradients, activation_values, metrics, loss, label):
+		batch_size = loss.size(0)
+
 		label = self.label_component(label)
-		loss = self.loss_component(loss_value)
+		loss = self.loss_component(loss)
 		activation = torch.cat([
 			activation_component(activation_value)
 			for activation_component, activation_value in zip(self.activation_components, activation_values)
@@ -32,7 +34,6 @@ class AttackNet(nn.Module):
 
 		# The input shape of the gradients and metrics is:
 		# (in_channels/in_features, out_channels/1, kernel_width/1, kernel_height/out_features)
-		batch_size = self.config.attack.attack_simulation.batch_size
 		gradients = [gradient.view(-1, *gradient.shape[-3:]) for gradient in gradients]
 		gradients = torch.cat([
 			gradient_component(gradient).view(batch_size, -1)
