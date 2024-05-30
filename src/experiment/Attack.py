@@ -93,14 +93,18 @@ class Attack:
 		train_loader, validation_loader = utils.split_dataloader(attack_loader, 0.85)
 
 		# Set initial parameters and get initial performance
-		val_roc_auc, i = float("inf"), 0
-		previous_val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
+		i = 0
+		val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
 		test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
 
 		# Log the initial performance
-		log(INFO, f"Initial performance: validation auc {previous_val_roc_auc}, test auc {test_roc_auc}")
+		log(INFO, f"Initial performance: validation auc {val_roc_auc}, test auc {test_roc_auc}")
 		self._log_results(
-			[previous_val_roc_auc, test_roc_auc], [val_fpr, test_fpr], [val_tpr, test_tpr], ["Validation", "Test"]
+			[val_roc_auc, test_roc_auc],
+			[val_fpr, test_fpr],
+			[val_tpr, test_tpr],
+			["Validation", "Test"],
+			step=-1
 		)
 
 		# Get training algorithm variables
@@ -110,10 +114,17 @@ class Attack:
 		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
 
 		# Training loop with early stopping
-		while val_roc_auc > previous_val_roc_auc:
+		previous_val_roc_auc = 0.
+		total_buffer_iterations = 10
+		buffer_iterations = total_buffer_iterations
+		while val_roc_auc >= previous_val_roc_auc or buffer_iterations > 0:
+			if val_roc_auc < previous_val_roc_auc:
+				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
+				buffer_iterations -= 1
+
+			previous_val_roc_auc = val_roc_auc
 			predictions = torch.Tensor()
 			is_members = torch.Tensor()
-			log(INFO, f"Starting epoch: {i}")
 			for (
 					gradient,
 					activation_value,
@@ -152,10 +163,13 @@ class Attack:
 				[train_roc_auc, val_roc_auc, test_roc_auc],
 				[train_fpr, val_fpr, test_fpr],
 				[train_tpr, val_tpr, test_tpr],
-				["Train", "Validation", "Test"]
+				["Train", "Validation", "Test"],
+				step=i
 			)
 
 			i += 1
+			if buffer_iterations < total_buffer_iterations:
+				buffer_iterations -= 1
 
 	def _test_model(self, model, dataloader):
 		# Test the model on the dataloader
@@ -187,15 +201,25 @@ class Attack:
 		roc_auc = auc(fpr, tpr)
 		return roc_auc, fpr, tpr
 
-	def _log_results(self, roc_aucs, fprs, tprs, titles):
+	def _log_results(self, roc_aucs, fprs, tprs, titles, step: int):
 		wandb_log = {}
-		for roc_auc, fpr, tpr, title in zip(roc_aucs, fprs, tprs, titles):
+		# Add the auc to the wandb log
+		for i in range(len(roc_aucs)):
+			roc_auc = roc_aucs[i]
+			title = titles[i]
 			wandb_log[f"{title} ROC AUC"] = roc_auc
-			roc_data = np.stack((fpr, tpr), axis=1)
-			table = wandb.Table(data=roc_data, columns=["False Positive Rate", "True Positive Rate"])
-			wandb_log[f"{title} ROC Curve"] = wandb.plot.line(
-				table, x="False Positive Rate", y="True Positive Rate", title=f"{title} ROC Curve"
-			)
+			titles[i] = f"{title} (area = {round(roc_auc, 2)})"
+
+		# Add guessing as a line to the plot
+		fprs += [np.array([0., 1.])]
+		tprs += [np.array([0., 1.])]
+		titles += ["Guessing (area = 0.50)"]
+
+		# Add the roc curve to the wandb log
+		plot_title = f"ROC AUCs at epoch {step}"
+		wandb_log[plot_title] = wandb.plot.line_series(
+			xs=fprs, ys=tprs, keys=titles, title=plot_title, xname="False Positive Rate"
+		)
 		wandb.log(wandb_log)
 
 
