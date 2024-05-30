@@ -5,9 +5,11 @@ import random
 from logging import INFO
 from typing import List
 
+import numpy as np
 import numpy.typing as npt
 import torch
 import torch.nn as nn
+import wandb
 from flwr.common import log
 from sklearn.metrics import auc, roc_curve
 from torch.utils.data import DataLoader, Dataset
@@ -83,7 +85,10 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def membership_inference_attack_model(self, attack_model, attack_loader, test_loader):
+	def membership_inference_attack_model(self, attack_model, attack_loader, test_loader, wandb_kwargs):
+		wandb_kwargs = self._get_wandb_kwargs("membership-inference", wandb_kwargs)
+		wandb.init(**wandb_kwargs)
+
 		# Split the dataset into training, validation and testing
 		train_loader, validation_loader = utils.split_dataloader(attack_loader, 0.85)
 
@@ -91,14 +96,20 @@ class Attack:
 		val_roc_auc, i = float("inf"), 0
 		previous_val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
 		test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
+
+		# Log the initial performance
 		log(INFO, f"Initial performance: validation auc {previous_val_roc_auc}, test auc {test_roc_auc}")
+		self._log_results(
+			[previous_val_roc_auc, test_roc_auc], [val_fpr, test_fpr], [val_tpr, test_tpr], ["Validation", "Test"]
+		)
 
-		# TODO: Plot validation and test roc to W&B
-
+		# Get training algorithm variables
 		attack_model = attack_model.to(training.DEVICE)
 		attack_model.train()
 		criterion = nn.BCELoss()
 		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
+
+		# Training loop with early stopping
 		while val_roc_auc > previous_val_roc_auc:
 			predictions = torch.Tensor()
 			is_members = torch.Tensor()
@@ -129,14 +140,20 @@ class Attack:
 			predictions = predictions.detach()
 			is_members = is_members.detach()
 
+			# Get the performance after the epoch
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
 			train_roc_auc = auc(train_fpr, train_tpr)
 			test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
 			val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
 
+			# Log the performance
 			log(INFO, f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc}")
-
-			# TODO: Plot train, test and validation results to W&B
+			self._log_results(
+				[train_roc_auc, val_roc_auc, test_roc_auc],
+				[train_fpr, val_fpr, test_fpr],
+				[train_tpr, val_tpr, test_tpr],
+				["Train", "Validation", "Test"]
+			)
 
 			i += 1
 
@@ -169,6 +186,17 @@ class Attack:
 		fpr, tpr, _ = roc_curve(is_members, predictions)
 		roc_auc = auc(fpr, tpr)
 		return roc_auc, fpr, tpr
+
+	def _log_results(self, roc_aucs, fprs, tprs, titles):
+		wandb_log = {}
+		for roc_auc, fpr, tpr, title in zip(roc_aucs, fprs, tprs, titles):
+			wandb_log[f"{title} ROC AUC"] = roc_auc
+			roc_data = np.stack((fpr, tpr), axis=1)
+			table = wandb.Table(data=roc_data, columns=["False Positive Rate", "True Positive Rate"])
+			wandb_log[f"{title} ROC Curve"] = wandb.plot.line(
+				table, x="False Positive Rate", y="True Positive Rate", title=f"{title} ROC Curve"
+			)
+		wandb.log(wandb_log)
 
 
 	def reset_variables(self):
@@ -367,6 +395,18 @@ class Attack:
 		gradients = list(get_gradients())
 		return gradients
 
+	def _get_wandb_kwargs(self, attack_type, simulation_wandb_kwargs):
+		simulation_wandb_kwargs["tags"][0] = f"Attack-{attack_type}"
+		simulation_wandb_kwargs["config"] = {"simulation": simulation_wandb_kwargs["config"]}
+		simulation_wandb_kwargs["config"]["attack"] = {
+			"data_access": self._data_access,
+			"message_access": self._message_access,
+			"batch_size": self._attack_simulation.batch_size,
+			"optimizer": self._attack_simulation.optimizer_name,
+			**self._attack_simulation.optimizer_parameters
+		}
+		return simulation_wandb_kwargs
+
 
 def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Tensor:
 	if batched:
@@ -391,7 +431,6 @@ class GeneratorDataset(Dataset):
 
 	def _initialize_cache(self):
 		gen = self._generator
-		log(INFO, "Initializing generator cache")
 		for i in tqdm(range(self._length), leave=True):
 			self.data_cache[i] = next(gen)
 

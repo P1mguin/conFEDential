@@ -153,7 +153,7 @@ class Simulation:
 		client_fn = Client.get_client_fn(self)
 		strategy = Server(self, is_capturing)
 
-		wandb_kwargs = self._get_wandb_kwargs(run_name)
+		wandb_kwargs = self.get_wandb_kwargs(run_name)
 		mode = "online" if is_online else "offline"
 		wandb.init(mode=mode, **wandb_kwargs)
 
@@ -346,11 +346,11 @@ class Simulation:
 
 		return split_data
 
-	def _get_wandb_kwargs(self, run_name: str = None):
+	def get_wandb_kwargs(self, run_name: str = None):
 		if run_name is None:
-			tags = []
+			tags = ["Training"]
 		else:
-			tags = [run_name]
+			tags = ["Training", run_name]
 
 		return {
 			"project": "conFEDential",

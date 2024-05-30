@@ -86,7 +86,11 @@ class Config:
 
 			# Get the template model and train it
 			attack_model = self._get_attack_model(attack_dataset)
-			self.attack.membership_inference_attack_model(attack_model, attack_dataset, test_dataset)
+
+			wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
+			mode = "online" if is_online else "offline"
+			wandb_kwargs = {**wandb_kwargs, "mode": mode}
+			self.attack.membership_inference_attack_model(attack_model, attack_dataset, test_dataset, wandb_kwargs)
 
 	def _get_attack_model(self, attack_dataset):
 		(
@@ -119,6 +123,7 @@ class Config:
 		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_eval)
 
 		# Get the attacker dataset
+		log(INFO, "Initializing attack data cache")
 		attack_dataset = self.attack.get_membership_inference_attack_dataset(
 			aggregated_models,
 			aggregated_metrics,
@@ -126,6 +131,7 @@ class Config:
 			self.simulation
 		)
 
+		log(INFO, "Initializing test data cache")
 		test_dataset = self.attack.get_membership_inference_attack_dataset(
 			aggregated_models,
 			aggregated_metrics,

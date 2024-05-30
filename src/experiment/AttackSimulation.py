@@ -53,6 +53,14 @@ class AttackSimulation:
 	def model_architecture(self):
 		return self._model_architecture
 
+	@property
+	def optimizer_name(self):
+		return self._optimizer_name
+
+	@property
+	def optimizer_parameters(self):
+		return self._optimizer_parameters
+
 	def get_optimizer(self, parameters):
 		learning_method = getattr(training.learning_methods, self._optimizer_name)(**self._optimizer_parameters)
 		return learning_method.get_optimizer(parameters)
