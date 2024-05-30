@@ -17,7 +17,7 @@ class AttackNet(nn.Module):
 		self.loss_component = None
 		self.metric_components = None
 		self.activation_components = None
-		self.gradient_component = None
+		self.gradient_components = None
 		self.encoder_component = None
 
 		self._initialize_components(gradient_shapes, activation_shapes, metrics_shapes, label_shape)
