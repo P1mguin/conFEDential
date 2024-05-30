@@ -117,8 +117,8 @@ class Attack:
 		previous_val_roc_auc = 0.
 		total_buffer_iterations = 10
 		buffer_iterations = total_buffer_iterations
-		while val_roc_auc >= previous_val_roc_auc or buffer_iterations > 0:
-			if val_roc_auc < previous_val_roc_auc:
+		while val_roc_auc > previous_val_roc_auc or buffer_iterations > 0:
+			if val_roc_auc <= previous_val_roc_auc:
 				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
 				buffer_iterations -= 1
 
