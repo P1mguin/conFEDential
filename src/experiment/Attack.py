@@ -1,12 +1,9 @@
-import copy
-import itertools
 import math
 import random
 from logging import INFO
 from typing import List
 
 import numpy as np
-import numpy.typing as npt
 import torch
 import torch.nn as nn
 import wandb
@@ -221,7 +218,6 @@ class Attack:
 		)
 		wandb.log(wandb_log)
 
-
 	def reset_variables(self):
 		self._client_id = None
 		self._is_target_member = bool(random.getrandbits(1))
@@ -281,12 +277,10 @@ class Attack:
 		labels = torch.stack([torch.tensor(value[0][1]) for value in intercepted_data])
 		is_member = torch.stack([torch.tensor(value[1]) for value in intercepted_data])
 		member_origins = torch.tensor([value[2] if value[2] else -1 for value in intercepted_data])
+		num_classes = simulation.model_config.get_num_classes()
 
 		# Translate the boolean to an integer
 		is_member = is_member.int()
-
-		# Translate the labels to be one-hot-encoded
-		labels = nn.functional.one_hot(labels)
 
 		# Reshape the metrics so they are 5D and can fit in a gradient component
 		metrics = {
@@ -311,15 +305,24 @@ class Attack:
 					batch_features, batch_labels, models, simulation
 				)
 
+				# One-hot encode the labels
+				batch_labels = torch.nn.functional.one_hot(batch_labels, num_classes=num_classes)
+
 				for j in range(process_batch_size):
-					label = batch_labels[j].detach().float()
-					gradient = [layer[j].detach() for layer in gradients]
+					# Make label float as it is the input for another component
+					label = batch_labels[j].float()
+
+					# Gradient, activation values and loss values have a grad_fn detach the tensor from it
+					gradient = [layer[j] for layer in gradients]
 					activation_value = [layer[j].detach() for layer in activation_values]
 					loss_value = loss[j].detach().unsqueeze(-1)
+
 					is_value_member = batch_is_member[j].detach()
 					value_origin = batch_member_origins[j].detach()
-					yield ((gradient, activation_value, metrics, loss_value, label),
-						   is_value_member.float(), value_origin)
+
+					yield (
+						(gradient, activation_value, metrics, loss_value, label), is_value_member.float(), value_origin
+					)
 
 		# Helper variables for clarity
 		dataset_size = len(intercepted_data)
@@ -338,84 +341,80 @@ class Attack:
 		Gets the loss, activation functions and gradients for a list of parameters
 		"""
 		# Get the models from the parameter iterations
-		batch_size = len(features)
-		models = self._get_models(model_iterations, batch_size, simulation)
-		activation_values = self._get_activation_values(models, features, simulation)
+		template_model = simulation.model
+		global_rounds = simulation.global_rounds + 1
+
+		# Convert model iterations to state dicts
+		keys = template_model.state_dict().keys()
+		state_dicts = [{key: torch.tensor(model_iterations[j][i], requires_grad=True) for j, key in enumerate(keys)} for
+					   i in range(global_rounds)]
+
+		# Get the activation values
+		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
-		gradient_values = self._get_gradient_values(losses, models, simulation)
-		return activation_values, gradient_values, losses
+		gradients = self._get_gradients(losses, state_dicts, simulation)
+		return activation_values, gradients, losses
 
-	def _get_models(self, model_iterations: List[npt.NDArray], batch_size: int, simulation) -> List[List[nn.Module]]:
-		"""
-		Creates a list of models from a list of parameters from the model iterations
-		"""
-		global_rounds = simulation.global_rounds
+	def _get_activation_values(self, model_state_dicts, features, simulation):
+		# Helper variables
+		template_model = simulation.model
+		global_rounds = simulation.global_rounds + 1
 
-		# Get the aggregated models and the initial model from the iterations
-		models = []
-		for i in range(global_rounds + 1):
-			model = copy.deepcopy(simulation.model)
-			model_parameters = [layer[i] for layer in model_iterations]
-			training.set_weights(model, model_parameters)
-			models.append(model.to(training.DEVICE))
-		models = [[copy.deepcopy(model) for model in models] for _ in range(batch_size)]
-		return models
+		# Attach the hooks that will get the intermediate value of each layer
+		activation = {}
 
-	def _get_activation_values(self, models, features, simulation):
-		"""
-		Gets the activation values from a list of model iterations and features
-		"""
-		# Expand the features once, so it accounts for several model iterations
-		global_rounds = simulation.global_rounds
-		features = features.unsqueeze(1).repeat_interleave(global_rounds + 1, dim=1)
+		def get_activation(name):
+			def hook(model, input, output):
+				activation[name] = output.detach()
 
-		trainable_indices = simulation.model_config.get_trainable_layer_indices()
-		layer_count = len(models[0][0].layers)
+			return hook
 
-		def get_activation_values():
-			values = features
-			for i in range(layer_count):
-				values = torch.stack([
-					torch.stack([model.layers[i](value) for model, value in zip(model_iterations, value_iterations)])
-					for model_iterations, value_iterations in zip(models, values)
-				])
-				if i not in trainable_indices:
-					yield values
+		# Attack activation hook to all leaf modules
+		hooks = [
+			module.register_forward_hook(get_activation(name)) for name, module in template_model.named_modules()
+			if len(list(module.children())) == 0
+		]
 
-		activation_values = list(get_activation_values())
+		# Predict the features for each model iteration and capture the activation values from the dict
+		activation_values = []
+		for i in range(global_rounds):
+			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
+
+			# Append prediction separately so grad_fn stays intact
+			activation_values.append(list(activation.values())[:-1])
+			activation_values[-1].append(prediction)
+
+		# Remove the hooks
+		[h.remove() for h in hooks]
+
+		# Transpose the activations so that they are bundled per layer per batch sample instead of per model iteration
+
+		# Transpose the activations so that they are bundled per layer instead of per model iteration
+		activation_values = [torch.stack(layers, dim=1) for layers in zip(*activation_values)]
 		return activation_values
 
 	def _get_losses(self, predictions, label, simulation):
 		"""
 		Gets the losses of a list of predictions and a list of labels
 		"""
-		global_rounds = simulation.global_rounds
+		global_rounds = simulation.global_rounds + 1
 		criterion = simulation.criterion
 		criterion.reduction = "none"
-		loss = torch.stack([criterion(predictions[:, i, :], label.float()) for i in range(global_rounds + 1)])
-		loss = loss.view(-1, global_rounds + 1)
-		return loss
+		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
+		return losses
 
-	def _get_gradient_values(self, losses, models, simulation):
-		"""
-		Gets the gradients from a list of model iterations and features
-		"""
-		losses.sum().backward()
+	def _get_gradients(self, losses, model_state_dicts, simulation):
+		gradients = []
+		for i, state_dict in enumerate(model_state_dicts):
+			model_gradients = []
+			for loss in losses[i]:
+				loss.backward(retain_graph=True)
+				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in state_dict.keys()))
+			gradients.append((torch.stack(layers) for layers in zip(*model_gradients)))
 
-		template_model = simulation.model
-
-		def get_gradients():
-			for i in range(len(list(template_model.parameters()))):
-				layer_gradients = torch.stack([
-					torch.stack([
-						reshape_to_4d(next(itertools.islice(model.parameters(), i, None)).grad)
-						for model in model_iterations
-					]) for model_iterations in models
-				])
-				yield layer_gradients
-
-		gradients = list(get_gradients())
+		# Transpose the gradients so that they are bundled per layer instead of per model iteration
+		gradients = [torch.stack(layers, dim=1) for layers in zip(*gradients)]
 		return gradients
 
 	def _get_wandb_kwargs(self, attack_type, simulation_wandb_kwargs):
@@ -439,10 +438,14 @@ def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Te
 		unsqueeze_dim = 1
 		target_dim = 4
 
-	while input_tensor.ndim > target_dim:
+	if input_tensor.ndim > target_dim:
 		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim-1)], -1)
-	while input_tensor.ndim < target_dim:
-		input_tensor = input_tensor.unsqueeze(unsqueeze_dim)
+	elif input_tensor.ndim < target_dim:
+		tensor_shape = input_tensor.shape
+		target_shape = (
+			*tensor_shape[:unsqueeze_dim], *(1,) * (target_dim - input_tensor.ndim), *tensor_shape[unsqueeze_dim:]
+		)
+		input_tensor = input_tensor.view(target_shape)
 	return input_tensor
 
 class GeneratorDataset(Dataset):

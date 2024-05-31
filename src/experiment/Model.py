@@ -1,5 +1,3 @@
-import operator
-from functools import reduce
 from typing import Iterator, List
 
 import flwr as fl
@@ -109,6 +107,11 @@ class Model:
 		else:
 			weights = training.get_weights(model)
 			return fl.common.ndarrays_to_parameters(weights)
+
+	def get_num_classes(self):
+		return next(
+			layer.out_features for layer in reversed(list(self._model.modules())) if hasattr(layer, "out_features")
+		)
 
 	def _prepare_model(self):
 		is_from_hub = isinstance(self._model_architecture, dict)
