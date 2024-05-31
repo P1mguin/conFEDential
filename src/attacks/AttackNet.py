@@ -5,7 +5,7 @@ from functools import reduce
 import torch
 import torch.nn as nn
 
-from src import training, utils
+from src import utils
 
 
 class AttackNet(nn.Module):
@@ -28,7 +28,7 @@ class AttackNet(nn.Module):
 		label = self.label_component(label)
 		loss = self.loss_component(loss)
 		activation = torch.cat([
-			activation_component(activation_value)
+			activation_component(activation_value).view(batch_size, -1)
 			for activation_component, activation_value in zip(self.activation_components, activation_values)
 		], dim=1)
 
@@ -65,27 +65,26 @@ class AttackNet(nn.Module):
 
 	def _initialize_label_component(self, label_shape):
 		layers = self._get_fcn_layers(label_shape[0])
-		label_component = utils.get_net_class_from_layers(layers)
-		self.label_component = label_component().to(training.DEVICE)
+		label_component = nn.Sequential(*layers)
+		self.label_component = label_component
 
 	def _initialize_loss_component(self):
 		layers = self._get_fcn_layers(1)
 		layers.append(nn.Flatten(start_dim=1))
-		loss_component = utils.get_net_class_from_layers(layers)
-		self.loss_component = loss_component().to(training.DEVICE)
+		loss_component = nn.Sequential(*layers)
+		self.loss_component = loss_component
 
 	def _initialize_activation_component(self, activation_shapes):
+		# Flatten the activation components along the second axis, the first is the global rounds. They go into an
+		# FCN so need flattening
 		activation_components = [[nn.Flatten(start_dim=2)] for _ in activation_shapes]
 		activation_shapes = [shape[1:] for shape in activation_shapes]
 		activation_shapes = [reduce(operator.mul, shape, 1) for shape in activation_shapes]
 
-		for i, activation_shape in enumerate(activation_shapes):
-			activation_component = self._get_fcn_layers(activation_shape)
-			activation_components[i].extend(activation_component)
-			activation_components[i].append(nn.Flatten(start_dim=1))
-			activation_components[i] = utils.get_net_class_from_layers(activation_components[i])
+		for activation_shape, activation_component in zip(activation_shapes, activation_components):
+			activation_component.extend(self._get_fcn_layers(activation_shape))
 
-		self.activation_components = [component().to(training.DEVICE) for component in activation_components]
+		self.activation_components = nn.ModuleList([nn.Sequential(*component) for component in activation_components])
 
 	def _initialize_gradient_component(self, gradient_shapes):
 		gradient_components = [self._get_convolution_layers(gradient_shape) for gradient_shape in gradient_shapes]
@@ -99,11 +98,7 @@ class AttackNet(nn.Module):
 			gradient_component.append(nn.Flatten(start_dim=-3))
 			gradient_component.extend(self._get_fcn_layers(out_channels))
 
-		# Make the gradient component
-		gradient_components = [
-			utils.get_net_class_from_layers(gradient_component) for gradient_component in gradient_components
-		]
-		self.gradient_components = [component().to(training.DEVICE) for component in gradient_components]
+		self.gradient_components = nn.ModuleList([nn.Sequential(*component) for component in gradient_components])
 
 	def _initialize_metric_component(self, metrics_shapes):
 		# Get the metrics from the config and then copy with equal shape as the
@@ -120,11 +115,8 @@ class AttackNet(nn.Module):
 				metric_component.append(nn.Flatten(start_dim=-3))
 				metric_component.extend(self._get_fcn_layers(out_channels))
 
-			# Make the metric component
-			metric_components = [
-				utils.get_net_class_from_layers(metric_component) for metric_component in metric_components
-			]
-			self.metric_components[key] = [component().to(training.DEVICE) for component in metric_components]
+			self.metric_components[key] = nn.ModuleList([nn.Sequential(*component) for component in metric_components])
+		self.metric_components = nn.ModuleDict(self.metric_components)
 
 	def _initialize_encoder_component(self, activation_shapes, gradient_shapes, metrics_shapes):
 		# Keep track of the size that the encoder needs to take
@@ -133,7 +125,7 @@ class AttackNet(nn.Module):
 		# Helper variable and helper function
 		round_multiplier = self.config.simulation.global_rounds + 1
 		get_output_size = lambda component: next(
-			layer.out_features for layer in reversed(component.layers) if hasattr(layer, "out_features")
+			layer.out_features for layer in reversed(component) if hasattr(layer, "out_features")
 		)
 
 		# Size of the label component
@@ -158,6 +150,7 @@ class AttackNet(nn.Module):
 				sum(metric_shapes[-4] for metric_shapes in metrics_shapes[key]) for key in metrics_shapes.keys()
 			) * metric_output_size * round_multiplier
 
+		# Construct the encoder component knowing the size of the input
 		layers = []
 		in_features_set = False
 		raw_encoder_copy = copy.deepcopy(self.config.attack.attack_simulation.model_architecture.encoder)
@@ -172,8 +165,8 @@ class AttackNet(nn.Module):
 
 			layer = layer_type(**parameters)
 			layers.append(layer)
-		encoder_component = utils.get_net_class_from_layers(layers)
-		self.encoder_component = encoder_component().to(training.DEVICE)
+		encoder_component = nn.Sequential(*layers)
+		self.encoder_component = encoder_component
 
 	def _get_fcn_layers(self, input_size: int):
 		layers = []

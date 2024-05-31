@@ -81,7 +81,7 @@ class Config:
 
 			# For each intercepted datapoint, get their gradients, activation functions, loss
 			# Add fraction eval for debugging purposes
-			fraction_eval = 0.025
+			fraction_eval = 0.0025
 			attack_dataset, test_dataset = self._get_attack_dataset(fraction_eval)
 
 			# Get the template model and train it

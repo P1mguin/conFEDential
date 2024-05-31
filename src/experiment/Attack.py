@@ -107,7 +107,7 @@ class Attack:
 			step=-1
 		)
 
-		# Get training algorithm variables
+		# Get training algorithm variables and set model in training mode
 		attack_model = attack_model.to(training.DEVICE)
 		attack_model.train()
 		criterion = nn.BCELoss()
@@ -115,7 +115,7 @@ class Attack:
 
 		# Training loop with early stopping
 		previous_val_roc_auc = 0.
-		total_buffer_iterations = 10
+		total_buffer_iterations = 5
 		buffer_iterations = total_buffer_iterations
 		while val_roc_auc > previous_val_roc_auc or buffer_iterations > 0:
 			if val_roc_auc <= previous_val_roc_auc or buffer_iterations < total_buffer_iterations:
@@ -171,7 +171,7 @@ class Attack:
 		wandb.finish()
 
 	def _test_model(self, model, dataloader):
-		# Test the model on the dataloader
+		# Set the model on the right device and put it in testing mode
 		model = model.to(training.DEVICE)
 		model.eval()
 
