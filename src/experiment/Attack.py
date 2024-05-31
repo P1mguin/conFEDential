@@ -301,6 +301,8 @@ class Attack:
 				batch_is_member = is_member[start:end]
 				batch_member_origins = member_origins[start:end]
 
+				iteration_batch_size = len(batch_features)
+
 				activation_values, gradients, loss = self._precompute_attack_features(
 					batch_features, batch_labels, models, simulation
 				)
@@ -308,7 +310,7 @@ class Attack:
 				# One-hot encode the labels
 				batch_labels = torch.nn.functional.one_hot(batch_labels, num_classes=num_classes)
 
-				for j in range(process_batch_size):
+				for j in range(iteration_batch_size):
 					# Make label float as it is the input for another component
 					label = batch_labels[j].float()
 
@@ -354,6 +356,7 @@ class Attack:
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
 		gradients = self._get_gradients(losses, state_dicts, simulation)
+		losses = losses.T
 		return activation_values, gradients, losses
 
 	def _get_activation_values(self, model_state_dicts, features, simulation):
