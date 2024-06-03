@@ -333,9 +333,10 @@ class Attack:
 		dataset = GeneratorDataset(attack_dataset, dataset_size)
 
 		batch_size = self._attack_simulation.batch_size
-		if batch_size == -1:
-			batch_size = dataset_size
-		attack_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+		if batch_size < 0:
+			batch_size = dataset_size // abs(batch_size)
+
+		attack_dataloader = DataLoader(dataset, batch_size=batch_size)
 		return attack_dataloader
 
 	def _precompute_attack_features(self, features, labels, model_iterations, simulation):

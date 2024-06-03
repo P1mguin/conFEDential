@@ -277,8 +277,8 @@ class Simulation:
 		# Bundle the information in a dataloader
 		train_loaders = []
 		for train_dataset in train_datasets:
-			if self._data.batch_size == -1:
-				batch_size = len(train_dataset)
+			if self._data.batch_size < 0:
+				batch_size = len(train_dataset) // abs(self._data.batch_size)
 			else:
 				batch_size = self._data.batch_size
 			data_loader = DataLoader(train_dataset, batch_size=batch_size)
