@@ -89,30 +89,47 @@ class Attack:
 
 		# Set initial parameters and get initial performance
 		i = 0
-		val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
-		test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
+		test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
+		val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
 
 		# Log the initial performance
-		log(INFO, f"Initial performance: validation auc {val_roc_auc}, test auc {test_roc_auc}")
-		self._log_results(
-			[val_roc_auc, test_roc_auc],
-			[val_fpr, test_fpr],
-			[val_tpr, test_tpr],
-			["Validation", "Test"],
-			step=-1
+		log(
+			INFO,
+			f"Initial performance: validation auc {val_roc_auc}, test auc {test_roc_auc},"
+			f" validation loss {val_loss}, test loss {test_loss}"
 		)
+		if len(test_loader.dataset) == 1:
+			self._log_aucs(
+				[val_roc_auc],
+				[val_fpr],
+				[val_tpr],
+				[val_loss, test_loss],
+				["Validation", "Test"],
+				step=-1
+			)
+		else:
+			self._log_aucs(
+				[val_roc_auc, test_roc_auc],
+				[val_fpr, test_fpr],
+				[val_tpr, test_tpr],
+				[val_loss, test_loss],
+				["Validation", "Test"],
+				step=-1
+			)
 
 		# Get training algorithm variables and set model in training mode
 		attack_model = attack_model.to(training.DEVICE)
 		attack_model.train()
-		criterion = nn.BCELoss()
+		criterion = nn.MSELoss()
 		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
 
 		# Training loop with early stopping
 		previous_val_roc_auc = 0.
 		total_buffer_iterations = 5
 		buffer_iterations = total_buffer_iterations
-		while val_roc_auc > previous_val_roc_auc or buffer_iterations > 0:
+		while buffer_iterations > 0 or (
+				val_roc_auc > previous_val_roc_auc and buffer_iterations == total_buffer_iterations
+		):
 			if val_roc_auc <= previous_val_roc_auc or buffer_iterations < total_buffer_iterations:
 				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
 				buffer_iterations -= 1
@@ -127,6 +144,7 @@ class Attack:
 					loss_value,
 					label
 			), is_value_member, _ in tqdm(train_loader, leave=True):
+				optimizer.zero_grad()
 				gradient = [layer.to(training.DEVICE) for layer in gradient]
 				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
 				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
@@ -134,33 +152,50 @@ class Attack:
 				label = label.to(training.DEVICE)
 
 				prediction = attack_model(gradient, activation_value, metrics, loss_value, label)
-				predictions = torch.cat((predictions, prediction))
-				is_members = torch.cat((is_members, is_value_member))
 
-				optimizer.zero_grad()
+				# Delete memory heavy objects
+				del gradient, activation_value, metrics, loss_value, label
+
+				predictions = torch.cat((predictions, prediction.detach()))
+				is_members = torch.cat((is_members, is_value_member.detach()))
 				loss = criterion(prediction, is_value_member)
+
+				del prediction
+
 				loss.backward()
 				optimizer.step()
-
-			# Remove the gradients before testing performance
-			predictions = predictions.detach()
-			is_members = is_members.detach()
 
 			# Get the performance after the epoch
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
 			train_roc_auc = auc(train_fpr, train_tpr)
-			test_roc_auc, test_fpr, test_tpr = self._test_model(attack_model, test_loader)
-			val_roc_auc, val_fpr, val_tpr = self._test_model(attack_model, validation_loader)
+			train_loss = criterion(predictions, is_members)
+			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
+			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
 
 			# Log the performance
-			log(INFO, f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc}")
-			self._log_results(
-				[train_roc_auc, val_roc_auc, test_roc_auc],
-				[train_fpr, val_fpr, test_fpr],
-				[train_tpr, val_tpr, test_tpr],
-				["Train", "Validation", "Test"],
-				step=i
+			log(
+				INFO,
+				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
+				f"train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
 			)
+			if len(test_loader.dataset) == 1:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc],
+					[train_fpr, val_fpr],
+					[train_tpr, val_fpr],
+					[train_loss, val_loss, test_loss],
+					["Train", "Validation", "Test"],
+					step=i
+				)
+			else:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc, test_roc_auc],
+					[train_fpr, val_fpr, test_fpr],
+					[train_tpr, val_tpr, test_tpr],
+					[train_loss, val_loss, test_loss],
+					["Train", "Validation", "Test"],
+					step=i
+				)
 
 			i += 1
 		wandb.finish()
@@ -169,6 +204,8 @@ class Attack:
 		# Set the model on the right device and put it in testing mode
 		model = model.to(training.DEVICE)
 		model.eval()
+
+		criterion = nn.MSELoss()
 
 		predictions = torch.Tensor()
 		is_members = torch.Tensor()
@@ -193,16 +230,27 @@ class Attack:
 
 		fpr, tpr, _ = roc_curve(is_members, predictions)
 		roc_auc = auc(fpr, tpr)
-		return roc_auc, fpr, tpr
+		loss = criterion(predictions, is_members)
+		return roc_auc, fpr, tpr, loss
 
-	def _log_results(self, roc_aucs, fprs, tprs, titles, step: int):
+	def _log_aucs(self, roc_aucs, fprs, tprs, losses, titles, step: int):
 		wandb_log = {}
+
+		# Add the losses to the wandb log
+		for i in range(len(losses)):
+			loss = losses[i]
+			title = titles[i]
+			wandb_log[f"{title} loss"] = loss
+
 		# Add the auc to the wandb log
 		for i in range(len(roc_aucs)):
 			roc_auc = roc_aucs[i]
 			title = titles[i]
 			wandb_log[f"{title} ROC AUC"] = roc_auc
 			titles[i] = f"{title} (area = {round(roc_auc, 2)})"
+
+		# Remove the titles that do not have a roc auc
+		titles = titles[:len(roc_aucs)]
 
 		# Add guessing as a line to the plot
 		fprs += [np.array([0., 1.])]
@@ -268,7 +316,7 @@ class Attack:
 		:return:
 		"""
 		# Choose either 8 or 16
-		process_batch_size = 8
+		process_batch_size = 16
 
 		# Extract the value that will be used in the attack dataset into separate variables
 		features = torch.stack([torch.tensor(value[0][0]) for value in intercepted_data])
