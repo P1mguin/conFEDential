@@ -81,21 +81,3 @@ def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]
 
 	dictionary[path[-1]] = new_value
 	return dictionary
-
-
-def split_dataloader(dataloader: DataLoader, percentage: float) -> Tuple[DataLoader, DataLoader]:
-	"""
-	Splits a dataloader into two dataloaders based on a given percentage
-	:param dataloader: the dataloder to split
-	:param percentage: the percentage the first dataloader will receive
-	"""
-	dataset = dataloader.dataset
-	batch_size = dataloader.batch_size
-	total_length = len(dataset)
-	first_length = int(total_length * percentage)
-	second_length = total_length - first_length
-
-	first_dataset, second_dataset = torch.utils.data.random_split(dataset, [first_length, second_length])
-	first_loader = DataLoader(first_dataset, batch_size=batch_size, shuffle=True)
-	second_loader = DataLoader(second_dataset, batch_size=batch_size, shuffle=True)
-	return first_loader, second_loader

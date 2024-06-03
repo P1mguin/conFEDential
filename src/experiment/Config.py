@@ -81,16 +81,24 @@ class Config:
 
 			# For each intercepted datapoint, get their gradients, activation functions, loss
 			# Add fraction eval for debugging purposes
-			fraction_eval = 0.0025
-			attack_dataset, test_dataset = self._get_attack_dataset(fraction_eval)
+			# TODO: Remove fraction_test
+			fraction_test = 0.0025
+			fraction_train = 0.85
+			(
+				train_dataset,
+				validation_dataset,
+				test_dataset
+			) = self._get_attack_datasets(fraction_train, fraction_test)
 
 			# Get the template model and train it
-			attack_model = self._get_attack_model(attack_dataset)
+			attack_model = self._get_attack_model(train_dataset)
 
 			wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
 			mode = "online" if is_online else "offline"
 			wandb_kwargs = {**wandb_kwargs, "mode": mode}
-			self.attack.membership_inference_attack_model(attack_model, attack_dataset, test_dataset, wandb_kwargs)
+			self.attack.membership_inference_attack_model(
+				attack_model, train_dataset, validation_dataset, test_dataset, wandb_kwargs
+			)
 
 	def _get_attack_model(self, attack_dataset):
 		(
@@ -112,7 +120,7 @@ class Config:
 		attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
 		return attack_model
 
-	def _get_attack_dataset(self, fraction_eval: float = 1.0):
+	def _get_attack_datasets(self, fraction_train: float = 0.85, fraction_test: float = 1.0):
 		# Get the captured server aggregates
 		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
 
@@ -121,18 +129,28 @@ class Config:
 		# model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
 
 		# Get the intercepted samples
-		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_eval)
+		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_test)
 
-		# Get the attacker dataset
-		log(INFO, "Initializing attack data cache")
-		attack_dataset = self.attack.get_membership_inference_attack_dataset(
+		# Split the intercepted data in training and validation
+		training_length = int(len(intercepted_data) * fraction_train)
+		training_data = intercepted_data[:training_length]
+		validation_data = intercepted_data[training_length:]
+
+		# Get the datasets
+		training_dataset = self.attack.get_membership_inference_attack_dataset(
 			aggregated_models,
 			aggregated_metrics,
-			intercepted_data,
+			training_data,
 			self.simulation
 		)
 
-		log(INFO, "Initializing test data cache")
+		validation_dataset = self.attack.get_membership_inference_attack_dataset(
+			aggregated_models,
+			aggregated_metrics,
+			validation_data,
+			self.simulation
+		)
+
 		test_dataset = self.attack.get_membership_inference_attack_dataset(
 			aggregated_models,
 			aggregated_metrics,
@@ -140,7 +158,7 @@ class Config:
 			self.simulation
 		)
 
-		return attack_dataset, test_dataset
+		return training_dataset, validation_dataset, test_dataset
 
 	def _get_intercepted_samples(self, fraction_eval: float = 1.0):
 		# Get a target from all possible data

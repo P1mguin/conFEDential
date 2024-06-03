@@ -84,12 +84,9 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def membership_inference_attack_model(self, attack_model, attack_loader, test_loader, wandb_kwargs):
+	def membership_inference_attack_model(self, attack_model, train_loader, validation_loader, test_loader, wandb_kwargs):
 		wandb_kwargs = self._get_wandb_kwargs("membership-inference", wandb_kwargs)
 		wandb.init(**wandb_kwargs)
-
-		# Split the dataset into training, validation and testing
-		train_loader, validation_loader = utils.split_dataloader(attack_loader, 0.85)
 
 		# Set initial parameters and get initial performance
 		i = 0
@@ -176,14 +173,14 @@ class Attack:
 
 		predictions = torch.Tensor()
 		is_members = torch.Tensor()
-		with torch.no_grad():
-			for (
-					gradient,
-					activation_value,
-					metrics,
-					loss_value,
-					label
-			), is_value_member, _ in tqdm(dataloader, leave=True):
+		for (
+				gradient,
+				activation_value,
+				metrics,
+				loss_value,
+				label
+		), is_value_member, _ in tqdm(dataloader, leave=True):
+			with torch.no_grad():
 				gradient = [layer.to(training.DEVICE) for layer in gradient]
 				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
 				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
@@ -365,7 +362,7 @@ class Attack:
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
-		gradients = self._get_gradients(losses, state_dicts, simulation)
+		gradients = self._get_gradients(losses, state_dicts)
 		losses = losses.T
 		return activation_values, gradients, losses
 
@@ -417,7 +414,7 @@ class Attack:
 		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
 		return losses
 
-	def _get_gradients(self, losses, model_state_dicts, simulation):
+	def _get_gradients(self, losses, model_state_dicts):
 		gradients = []
 		for i, state_dict in enumerate(model_state_dicts):
 			model_gradients = []
