@@ -15,7 +15,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import src.training as training
-from src import utils
 from src.experiment import AttackSimulation
 
 
@@ -296,7 +295,7 @@ class Attack:
 			indices = set(range(len(features)))
 			for i in range(process_amount):
 				try:
-					batch_indices = random.sample(indices, process_batch_size)
+					batch_indices = random.sample(list(indices), process_batch_size)
 				except ValueError:
 					batch_indices = list(indices)
 

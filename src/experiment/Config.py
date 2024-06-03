@@ -177,7 +177,7 @@ class Config:
 
 		intercepted_indices = set(random.sample(range(len(data)), num_elements))
 		remaining_indices = set(range(len(data))) - intercepted_indices
-		remaining_indices = random.sample(remaining_indices, round(fraction_eval * len(remaining_indices)))
+		remaining_indices = random.sample(list(remaining_indices), round(fraction_eval * len(remaining_indices)))
 
 		intercepted_samples = [data[i] for i in intercepted_indices]
 		remaining_samples = [data[i] for i in remaining_indices]
