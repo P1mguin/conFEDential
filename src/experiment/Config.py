@@ -133,8 +133,11 @@ class Config:
 
 		# Split the intercepted data in training and validation
 		training_length = int(len(intercepted_data) * fraction_train)
-		training_data = intercepted_data[:training_length]
-		validation_data = intercepted_data[training_length:]
+		intercepted_indices = set(range(len(intercepted_data)))
+		training_indices = set(random.sample(list(intercepted_indices), training_length))
+		validation_indices = intercepted_indices - training_indices
+		training_data = [intercepted_data[i] for i in training_indices]
+		validation_data = [intercepted_data[i] for i in validation_indices]
 
 		# Get the datasets
 		training_dataset = self.attack.get_membership_inference_attack_dataset(
