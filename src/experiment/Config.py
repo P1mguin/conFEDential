@@ -81,8 +81,7 @@ class Config:
 
 			# For each intercepted datapoint, get their gradients, activation functions, loss
 			# Add fraction eval for debugging purposes
-			# TODO: Remove fraction_test
-			fraction_test = 0.0025
+			fraction_test = 1.0
 			fraction_train = 0.85
 			(
 				train_dataset,
