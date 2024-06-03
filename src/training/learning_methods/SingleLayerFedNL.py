@@ -65,7 +65,7 @@ class SingleLayerFedNL(Strategy):
 				model_weights -= gradient @ inverse_hessian
 
 		data_size = len(train_loader.dataset)
-		return [gradient.numpy()], data_size, {"hessian": [hessian.numpy()]}
+		return [gradient.cpu().numpy()], data_size, {"hessian": [hessian.cpu().numpy()]}
 
 	def aggregate_fit(
 			self,
