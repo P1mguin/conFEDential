@@ -3,13 +3,15 @@ import random
 from logging import INFO
 from typing import List
 
+import more_itertools
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.utils.data as data
 import wandb
 from flwr.common import log
 from sklearn.metrics import auc, roc_curve
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import src.training as training
@@ -290,18 +292,26 @@ class Attack:
 
 		process_amount = math.ceil(len(features) / process_batch_size)
 
-		def attack_dataset_generator():
+		def attack_dataset_generator(random_seed=None):
+			if random_seed is not None:
+				random.seed(random_seed)
+
+			indices = set(range(len(features)))
 			for i in range(process_amount):
-				start = i * process_batch_size
-				end = (i + 1) * process_batch_size
+				try:
+					batch_indices = random.sample(indices, process_batch_size)
+				except ValueError:
+					batch_indices = list(indices)
+
+				indices = indices - set(batch_indices)
 
 				# Stack the information of the shadow_model_simulation in tensors
-				batch_features = features[start:end]
-				batch_labels = labels[start:end]
-				batch_is_member = is_member[start:end]
-				batch_member_origins = member_origins[start:end]
+				batch_features = features[batch_indices]
+				batch_labels = labels[batch_indices]
+				batch_is_member = is_member[batch_indices]
+				batch_member_origins = member_origins[batch_indices]
 
-				iteration_batch_size = len(batch_features)
+				iteration_batch_size = len(batch_indices)
 
 				activation_values, gradients, loss = self._precompute_attack_features(
 					batch_features, batch_labels, models, simulation
@@ -329,8 +339,7 @@ class Attack:
 		# Helper variables for clarity
 		dataset_size = len(intercepted_data)
 
-		attack_dataset = attack_dataset_generator()
-		dataset = GeneratorDataset(attack_dataset, dataset_size)
+		dataset = IterableDataset(attack_dataset_generator, dataset_size)
 
 		batch_size = self._attack_simulation.batch_size
 		if batch_size < 0:
@@ -452,20 +461,26 @@ def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Te
 		input_tensor = input_tensor.view(target_shape)
 	return input_tensor
 
-class GeneratorDataset(Dataset):
-	def __init__(self, generator, length):
-		self._generator = generator
-		self._length = length
-		self.data_cache = [None] * length
-		self._initialize_cache()
 
-	def _initialize_cache(self):
-		gen = self._generator
-		for i in tqdm(range(self._length), leave=True):
-			self.data_cache[i] = next(gen)
+class IterableDataset(data.IterableDataset):
+	def __init__(self, generator_fn, length):
+		self._generator_fn = generator_fn
+		self._generator = None
+		self.reset_generator()
+
+		self._length = length
+
+	def __iter__(self):
+		# See if an item is available from the generator, if not reset generator
+		try:
+			self._generator.peek()
+		except StopIteration:
+			self.reset_generator()
+
+		return iter(self._generator)
 
 	def __len__(self):
 		return self._length
 
-	def __getitem__(self, index):
-		return self.data_cache[index]
+	def reset_generator(self):
+		self._generator = more_itertools.peekable(self._generator_fn())

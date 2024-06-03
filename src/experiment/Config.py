@@ -99,7 +99,8 @@ class Config:
 			metrics,
 			loss_value,
 			label
-		), is_value_member, value_origin = attack_dataset.dataset[0]
+		), is_value_member, value_origin = next(iter(attack_dataset))
+		attack_dataset.dataset.reset_generator()
 
 		# Construct the attack model from all the shapes
 		gradient_shapes = [gradient.shape for gradient in gradient]
