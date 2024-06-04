@@ -1,7 +1,10 @@
 simulation:
   data:
     dataset_name: CIFAR10
-    batch_size: 32
+    batch_size:
+      values:
+        - 32
+        - 64
     preprocess_fn: |
       def preprocess_fn(element):
         return {
@@ -19,13 +22,20 @@ simulation:
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
       local:
-        lr: 0.1
+        lr:
+          values:
+            - 1e-1
+            - 1e-2
+            - 1e-3
       global:
-        lr: 0.1
+        lr:
+          values:
+            - 1e-1
+            - 1e-2
         betas:
           - 0.9
-          - 0.999
-        eps: 0.000000001
+          - 0.99
+        eps: 0.0001
     model_architecture:
       repo_or_dir: 'pytorch/vision:v0.10.0'
       model: 'resnet18'
