@@ -1,9 +1,10 @@
 from typing import Tuple
 
 from datasets import Dataset as HuggingFaceDataset, load_dataset
+from torchvision import transforms
 
 from src.data.Dataset import Dataset
-from torchvision import transforms
+
 
 class CIFAR10(Dataset):
 	@staticmethod
@@ -39,8 +40,8 @@ class CIFAR10(Dataset):
 			x["img"] = test_transformations(x["img"])
 			return x
 
-		train_dataset.map(train_augmentation)
-		test_dataset.map(test_augmentation)
+		train_dataset = train_dataset.map(train_augmentation)
+		test_dataset = test_dataset.map(test_augmentation)
 
 		# Convert the pytorch tensor to NumPy such FedArtML can convert the data to non-iid
 		train_dataset.set_format(type="np")
