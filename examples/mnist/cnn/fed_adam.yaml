@@ -27,7 +27,6 @@ simulation:
           - 0.9
           - 0.999
         eps: 0.00000001
-        weight_decay: 0.9999
     model_architecture:
       - type: Conv2d
         in_channels: 1

@@ -26,7 +26,6 @@ class FedAdam(Strategy):
 		self.global_lr = kwargs["global"]["lr"]
 		self.betas = kwargs["global"]["betas"]
 		self.eps = kwargs["global"]["eps"]
-		self.weight_decay = kwargs["global"]["weight_decay"]
 
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> SGD:
 		# FedAdam works with SGD at the client

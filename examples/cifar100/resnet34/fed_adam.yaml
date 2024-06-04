@@ -26,7 +26,6 @@ simulation:
           - 0.9
           - 0.999
         eps: 0.000000001
-        weight_decay: 0.9999
     model_architecture:
       repo_or_dir: 'pytorch/vision:v0.10.0'
       model: 'resnet34'
