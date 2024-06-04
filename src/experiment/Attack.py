@@ -402,7 +402,7 @@ class Attack:
 
 		# Convert model iterations to state dicts
 		keys = template_model.state_dict().keys()
-		state_dicts = [{key: torch.tensor(model_iterations[j][i], requires_grad=True) for j, key in enumerate(keys)} for
+		state_dicts = [{key: torch.tensor(model_iterations[j][i], dtype=torch.float32, requires_grad=True) for j, key in enumerate(keys)} for
 					   i in range(global_rounds)]
 
 		# Get the activation values
