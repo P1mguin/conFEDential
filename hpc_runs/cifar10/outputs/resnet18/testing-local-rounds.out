@@ -1,0 +1,906 @@
+ctit090
+2024-06-06 13:01:44,473	INFO usage_lib.py:412 -- Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-06-06 13:01:44,474	INFO scripts.py:722 -- Local node IP: 10.20.240.20
+2024-06-06 13:01:50,526	SUCC scripts.py:759 -- --------------------
+2024-06-06 13:01:50,526	SUCC scripts.py:760 -- Ray runtime started.
+2024-06-06 13:01:50,526	SUCC scripts.py:761 -- --------------------
+2024-06-06 13:01:50,526	INFO scripts.py:763 -- Next steps
+2024-06-06 13:01:50,526	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-06-06 13:01:50,527	INFO scripts.py:769 --   ray start --address='10.20.240.20:6379'
+2024-06-06 13:01:50,527	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-06-06 13:01:50,527	INFO scripts.py:780 -- import ray
+2024-06-06 13:01:50,527	INFO scripts.py:781 -- ray.init()
+2024-06-06 13:01:50,527	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-06-06 13:01:50,527	INFO scripts.py:813 --   ray stop
+2024-06-06 13:01:50,527	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-06-06 13:01:50,527	INFO scripts.py:817 --   ray status
+2024-06-06 13:02:10.800695: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2024-06-06 13:02:14.524735: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-06-06 13:02:20.681706: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-06-06 13:02:57,086 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 13:02:57,088 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 13:03:01,052 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 13:03:01,053 | Simulation.py:264 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 13:03:14,085 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 13:03:14,089 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 13:03:14,198 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 13:03:14,198 | Simulation.py:264 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 13:03:20,216 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 13:03:20,220 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 13:03:20,335 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 13:03:20,336 | Simulation.py:264 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 13:03:26,637 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 13:03:26,639 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 13:03:26,748 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 13:03:26,748 | Simulation.py:264 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 13:03:32,529 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 13:03:32,533 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 13:03:32,641 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 13:03:32,642 | Simulation.py:264 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 13:03:38,835 | main.py:103 | Loaded 5 configs with name CIFAR10-RESNET18-FEDADAM, running...
+INFO flwr 2024-06-06 13:03:38,838 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 2
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 13:03:38,845 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 13:03:38,846 | Config.py:77 | Found previous federated learning simulation with hash 52f5188f510be21dab2674c6b367eac7498ebc8f83657e1d42d868dde118eedc, continuing to attack simulation...
+INFO flwr 2024-06-06 13:03:38,846 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 4
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 13:03:38,846 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 13:03:38,847 | Config.py:72 | No previous federated learning simulation found with hash 84013f3202fd5c5dfe212568b61e4b1a5f5834d930d71cc29f9a209177e96f72, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 13:03:41,423 | Simulation.py:404 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 13:03:41,423 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 13:03:41,460	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.20:6379...
+2024-06-06 13:03:41,472	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-06-06 13:03:42,767 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=20, round_timeout=None)
+2024-06-06 13:03:42,862	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-06-06 13:03:42,863 | app.py:213 | Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'accelerator_type:A40': 1.0, 'memory': 17179869184.0, 'object_store_memory': 66912669696.0, 'GPU': 1.0, 'node:10.20.240.20': 1.0, 'CPU': 2.0}
+INFO flwr 2024-06-06 13:03:42,864 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-06-06 13:03:42,864 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 2, 'num_gpus': 1.0, 'memory': 17179869184}
+INFO flwr 2024-06-06 13:03:42,872 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 1 actors
+INFO flwr 2024-06-06 13:03:42,873 | server.py:89 | Initializing global parameters
+INFO flwr 2024-06-06 13:03:42,874 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-06-06 13:03:42,874 | server.py:91 | Evaluating initial parameters
+[2m[36m(pid=2585482)[0m 2024-06-06 13:03:44.821321: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=2585482)[0m 2024-06-06 13:03:44.880467: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=2585482)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=2585482)[0m 2024-06-06 13:03:46.097983: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-06-06 13:03:52,620 | server.py:94 | initial parameters (loss, other metrics): 0.0002533486604690552, {'accuracy': 0.1022, 'data_size': 10000}
+INFO flwr 2024-06-06 13:03:52,620 | server.py:104 | FL starting
+DEBUG flwr 2024-06-06 13:03:52,621 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:06:06,067 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:07:05,569 | server.py:125 | fit progress: (1, 0.0002824354887008667, {'accuracy': 0.2523, 'data_size': 10000}, 192.9479521610774)
+INFO flwr 2024-06-06 13:07:05,569 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:07:05,570 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:09:07,088 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:09:17,864 | server.py:125 | fit progress: (2, 0.0005105559349060059, {'accuracy': 0.1296, 'data_size': 10000}, 325.24360632291064)
+INFO flwr 2024-06-06 13:09:17,865 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:09:17,865 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:11:19,553 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:11:29,285 | server.py:125 | fit progress: (3, 0.0004323657989501953, {'accuracy': 0.1773, 'data_size': 10000}, 456.66472792671993)
+INFO flwr 2024-06-06 13:11:29,286 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:11:29,286 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:13:29,566 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:13:40,942 | server.py:125 | fit progress: (4, 0.00042822489738464354, {'accuracy': 0.1686, 'data_size': 10000}, 588.3215325027704)
+INFO flwr 2024-06-06 13:13:40,943 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:13:40,943 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:15:40,305 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:15:57,857 | server.py:125 | fit progress: (5, 0.00038174667358398435, {'accuracy': 0.2214, 'data_size': 10000}, 725.236542603001)
+INFO flwr 2024-06-06 13:15:57,858 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:15:57,858 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:17:59,600 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:18:10,216 | server.py:125 | fit progress: (6, 0.0002858376979827881, {'accuracy': 0.2282, 'data_size': 10000}, 857.5953844999894)
+INFO flwr 2024-06-06 13:18:10,216 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:18:10,217 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:20:11,473 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:20:23,879 | server.py:125 | fit progress: (7, 0.00022171707153320313, {'accuracy': 0.2758, 'data_size': 10000}, 991.2580421990715)
+INFO flwr 2024-06-06 13:20:23,879 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:20:23,879 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:22:25,329 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:22:44,915 | server.py:125 | fit progress: (8, 0.00019392465353012086, {'accuracy': 0.3182, 'data_size': 10000}, 1132.294756787829)
+INFO flwr 2024-06-06 13:22:44,916 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:22:44,916 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:24:45,573 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:24:56,419 | server.py:125 | fit progress: (9, 0.00017590912580490114, {'accuracy': 0.3465, 'data_size': 10000}, 1263.7981140171178)
+INFO flwr 2024-06-06 13:24:56,419 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:24:56,420 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:26:55,480 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:27:09,791 | server.py:125 | fit progress: (10, 0.00016665279865264891, {'accuracy': 0.388, 'data_size': 10000}, 1397.1698876977898)
+INFO flwr 2024-06-06 13:27:09,791 | server.py:171 | evaluate_round 10: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:27:09,791 | server.py:222 | fit_round 11: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:29:13,148 | server.py:236 | fit_round 11 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:29:33,412 | server.py:125 | fit progress: (11, 0.000163860547542572, {'accuracy': 0.4082, 'data_size': 10000}, 1540.79170955671)
+INFO flwr 2024-06-06 13:29:33,413 | server.py:171 | evaluate_round 11: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:29:33,413 | server.py:222 | fit_round 12: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:31:36,035 | server.py:236 | fit_round 12 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:32:00,855 | server.py:125 | fit progress: (12, 0.00015979394912719725, {'accuracy': 0.4268, 'data_size': 10000}, 1688.2345703430474)
+INFO flwr 2024-06-06 13:32:00,856 | server.py:171 | evaluate_round 12: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:32:00,856 | server.py:222 | fit_round 13: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:34:00,386 | server.py:236 | fit_round 13 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:34:19,940 | server.py:125 | fit progress: (13, 0.0001521576404571533, {'accuracy': 0.4417, 'data_size': 10000}, 1827.3193140160292)
+INFO flwr 2024-06-06 13:34:19,940 | server.py:171 | evaluate_round 13: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:34:19,941 | server.py:222 | fit_round 14: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:36:20,352 | server.py:236 | fit_round 14 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:36:32,586 | server.py:125 | fit progress: (14, 0.00015340837240219118, {'accuracy': 0.4387, 'data_size': 10000}, 1959.9655305468477)
+INFO flwr 2024-06-06 13:36:32,587 | server.py:171 | evaluate_round 14: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:36:32,587 | server.py:222 | fit_round 15: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:38:30,645 | server.py:236 | fit_round 15 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:38:43,229 | server.py:125 | fit progress: (15, 0.00015202646255493165, {'accuracy': 0.432, 'data_size': 10000}, 2090.6080568819307)
+INFO flwr 2024-06-06 13:38:43,229 | server.py:171 | evaluate_round 15: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:38:43,229 | server.py:222 | fit_round 16: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:40:46,272 | server.py:236 | fit_round 16 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:40:55,549 | server.py:125 | fit progress: (16, 0.00014832874536514282, {'accuracy': 0.4505, 'data_size': 10000}, 2222.928455928806)
+INFO flwr 2024-06-06 13:40:55,549 | server.py:171 | evaluate_round 16: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:40:55,550 | server.py:222 | fit_round 17: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:42:59,525 | server.py:236 | fit_round 17 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:43:12,609 | server.py:125 | fit progress: (17, 0.00015072952508926393, {'accuracy': 0.4529, 'data_size': 10000}, 2359.988713269122)
+INFO flwr 2024-06-06 13:43:12,610 | server.py:171 | evaluate_round 17: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:43:12,610 | server.py:222 | fit_round 18: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:45:14,111 | server.py:236 | fit_round 18 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:45:27,923 | server.py:125 | fit progress: (18, 0.00015010511875152588, {'accuracy': 0.4639, 'data_size': 10000}, 2495.3020053370856)
+INFO flwr 2024-06-06 13:45:27,923 | server.py:171 | evaluate_round 18: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:45:27,923 | server.py:222 | fit_round 19: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:47:29,285 | server.py:236 | fit_round 19 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:47:39,135 | server.py:125 | fit progress: (19, 0.00014249517917633056, {'accuracy': 0.4807, 'data_size': 10000}, 2626.5140591328964)
+INFO flwr 2024-06-06 13:47:39,135 | server.py:171 | evaluate_round 19: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:47:39,135 | server.py:222 | fit_round 20: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:49:40,328 | server.py:236 | fit_round 20 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:49:55,708 | server.py:125 | fit progress: (20, 0.00014360259771347046, {'accuracy': 0.4756, 'data_size': 10000}, 2763.087316081859)
+INFO flwr 2024-06-06 13:49:55,708 | server.py:171 | evaluate_round 20: no clients selected, cancel
+INFO flwr 2024-06-06 13:49:55,709 | server.py:153 | FL finished in 2763.087956611067
+INFO flwr 2024-06-06 13:49:55,722 | app.py:226 | app_fit: losses_distributed []
+INFO flwr 2024-06-06 13:49:55,723 | app.py:228 | app_fit: metrics_distributed {}
+INFO flwr 2024-06-06 13:49:55,723 | app.py:229 | app_fit: losses_centralized [(0, 0.0002533486604690552), (1, 0.0002824354887008667), (2, 0.0005105559349060059), (3, 0.0004323657989501953), (4, 0.00042822489738464354), (5, 0.00038174667358398435), (6, 0.0002858376979827881), (7, 0.00022171707153320313), (8, 0.00019392465353012086), (9, 0.00017590912580490114), (10, 0.00016665279865264891), (11, 0.000163860547542572), (12, 0.00015979394912719725), (13, 0.0001521576404571533), (14, 0.00015340837240219118), (15, 0.00015202646255493165), (16, 0.00014832874536514282), (17, 0.00015072952508926393), (18, 0.00015010511875152588), (19, 0.00014249517917633056), (20, 0.00014360259771347046)]
+INFO flwr 2024-06-06 13:49:55,723 | app.py:230 | app_fit: metrics_centralized {'accuracy': [(0, 0.1022), (1, 0.2523), (2, 0.1296), (3, 0.1773), (4, 0.1686), (5, 0.2214), (6, 0.2282), (7, 0.2758), (8, 0.3182), (9, 0.3465), (10, 0.388), (11, 0.4082), (12, 0.4268), (13, 0.4417), (14, 0.4387), (15, 0.432), (16, 0.4505), (17, 0.4529), (18, 0.4639), (19, 0.4807), (20, 0.4756)], 'data_size': [(0, 10000), (1, 10000), (2, 10000), (3, 10000), (4, 10000), (5, 10000), (6, 10000), (7, 10000), (8, 10000), (9, 10000), (10, 10000), (11, 10000), (12, 10000), (13, 10000), (14, 10000), (15, 10000), (16, 10000), (17, 10000), (18, 10000), (19, 10000), (20, 10000)]}
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.4756
+wandb:     loss 0.00014
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_130340-jg5kci1x
+wandb: Find logs at: ./wandb/offline-run-20240606_130340-jg5kci1x/logs
+INFO flwr 2024-06-06 13:49:59,714 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 8
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 13:49:59,715 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 13:49:59,747 | Config.py:72 | No previous federated learning simulation found with hash 5d562df98aa19ce8b91b120c7e29085a251532059d611b410e90383959cf95c1, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 13:50:02,531 | Simulation.py:404 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 13:50:02,532 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 13:50:02,571	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.20:6379...
+2024-06-06 13:50:02,575	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-06-06 13:50:02,586 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=20, round_timeout=None)
+2024-06-06 13:50:02,617	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-06-06 13:50:02,618 | app.py:213 | Flower VCE: Ray initialized with resources: {'object_store_memory': 66912669696.0, 'CPU': 2.0, 'node:10.20.240.20': 1.0, 'GPU': 1.0, 'accelerator_type:A40': 1.0, 'memory': 17179869184.0, 'node:__internal_head__': 1.0}
+INFO flwr 2024-06-06 13:50:02,618 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-06-06 13:50:02,618 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 2, 'num_gpus': 1.0, 'memory': 17179869184}
+INFO flwr 2024-06-06 13:50:02,626 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 1 actors
+INFO flwr 2024-06-06 13:50:02,627 | server.py:89 | Initializing global parameters
+INFO flwr 2024-06-06 13:50:02,627 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-06-06 13:50:02,627 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-06-06 13:50:02,897 | server.py:94 | initial parameters (loss, other metrics): 0.0002573714256286621, {'accuracy': 0.0948, 'data_size': 10000}
+INFO flwr 2024-06-06 13:50:02,897 | server.py:104 | FL starting
+DEBUG flwr 2024-06-06 13:50:02,898 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=2912672)[0m 2024-06-06 13:50:30.376404: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=2912672)[0m 2024-06-06 13:50:30.510509: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=2912672)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=2912672)[0m 2024-06-06 13:50:54.339919: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+DEBUG flwr 2024-06-06 13:54:27,412 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:55:16,606 | server.py:125 | fit progress: (1, 0.00028200883865356444, {'accuracy': 0.2858, 'data_size': 10000}, 313.7079961602576)
+INFO flwr 2024-06-06 13:55:16,606 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:55:16,606 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:57:19,820 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:57:28,096 | server.py:125 | fit progress: (2, 0.0005395997524261474, {'accuracy': 0.1649, 'data_size': 10000}, 445.1981188133359)
+INFO flwr 2024-06-06 13:57:28,096 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:57:28,097 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 13:59:33,270 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-06-06 13:59:43,626 | server.py:125 | fit progress: (3, 0.00040020709037780764, {'accuracy': 0.2609, 'data_size': 10000}, 580.7286595534533)
+INFO flwr 2024-06-06 13:59:43,627 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-06-06 13:59:43,627 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:01:50,563 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:02:18,333 | server.py:125 | fit progress: (4, 0.0005197845935821533, {'accuracy': 0.1672, 'data_size': 10000}, 735.4356011161581)
+INFO flwr 2024-06-06 14:02:18,334 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:02:18,334 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:04:23,400 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:04:57,305 | server.py:125 | fit progress: (5, 0.000441050386428833, {'accuracy': 0.2461, 'data_size': 10000}, 894.4075257652439)
+INFO flwr 2024-06-06 14:04:57,306 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:04:57,306 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:07:00,202 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:07:18,857 | server.py:125 | fit progress: (6, 0.0004517476558685303, {'accuracy': 0.2242, 'data_size': 10000}, 1035.9593352391385)
+INFO flwr 2024-06-06 14:07:18,857 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:07:18,858 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:09:20,747 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:09:31,545 | server.py:125 | fit progress: (7, 0.0003838251113891602, {'accuracy': 0.2559, 'data_size': 10000}, 1168.646968757268)
+INFO flwr 2024-06-06 14:09:31,545 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:09:31,545 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:11:33,989 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:11:50,153 | server.py:125 | fit progress: (8, 0.0003543838262557983, {'accuracy': 0.2687, 'data_size': 10000}, 1307.254968216177)
+INFO flwr 2024-06-06 14:11:50,153 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:11:50,153 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:13:52,619 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:14:00,827 | server.py:125 | fit progress: (9, 0.0003479014873504639, {'accuracy': 0.2416, 'data_size': 10000}, 1437.929356814362)
+INFO flwr 2024-06-06 14:14:00,827 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:14:00,828 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:16:05,876 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:16:16,103 | server.py:125 | fit progress: (10, 0.00029220900535583495, {'accuracy': 0.3333, 'data_size': 10000}, 1573.2058684621006)
+INFO flwr 2024-06-06 14:16:16,104 | server.py:171 | evaluate_round 10: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:16:16,104 | server.py:222 | fit_round 11: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:18:18,946 | server.py:236 | fit_round 11 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:18:30,843 | server.py:125 | fit progress: (11, 0.0002654422760009766, {'accuracy': 0.3061, 'data_size': 10000}, 1707.9449292053469)
+INFO flwr 2024-06-06 14:18:30,843 | server.py:171 | evaluate_round 11: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:18:30,843 | server.py:222 | fit_round 12: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:20:38,145 | server.py:236 | fit_round 12 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:20:47,610 | server.py:125 | fit progress: (12, 0.00025977284908294677, {'accuracy': 0.371, 'data_size': 10000}, 1844.712625825312)
+INFO flwr 2024-06-06 14:20:47,611 | server.py:171 | evaluate_round 12: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:20:47,611 | server.py:222 | fit_round 13: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:22:54,059 | server.py:236 | fit_round 13 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:23:08,929 | server.py:125 | fit progress: (13, 0.00026237895488739015, {'accuracy': 0.3717, 'data_size': 10000}, 1986.0311547880992)
+INFO flwr 2024-06-06 14:23:08,929 | server.py:171 | evaluate_round 13: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:23:08,930 | server.py:222 | fit_round 14: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:25:13,888 | server.py:236 | fit_round 14 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:25:22,652 | server.py:125 | fit progress: (14, 0.00024746806621551515, {'accuracy': 0.376, 'data_size': 10000}, 2119.754445356317)
+INFO flwr 2024-06-06 14:25:22,653 | server.py:171 | evaluate_round 14: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:25:22,653 | server.py:222 | fit_round 15: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:27:25,862 | server.py:236 | fit_round 15 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:27:44,077 | server.py:125 | fit progress: (15, 0.00026267812252044677, {'accuracy': 0.3798, 'data_size': 10000}, 2261.1797780450433)
+INFO flwr 2024-06-06 14:27:44,078 | server.py:171 | evaluate_round 15: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:27:44,078 | server.py:222 | fit_round 16: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:29:47,627 | server.py:236 | fit_round 16 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:29:57,063 | server.py:125 | fit progress: (16, 0.0002010016679763794, {'accuracy': 0.4263, 'data_size': 10000}, 2394.1658702562563)
+INFO flwr 2024-06-06 14:29:57,064 | server.py:171 | evaluate_round 16: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:29:57,064 | server.py:222 | fit_round 17: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:32:02,924 | server.py:236 | fit_round 17 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:32:13,325 | server.py:125 | fit progress: (17, 0.00018513107299804687, {'accuracy': 0.4674, 'data_size': 10000}, 2530.4269944680855)
+INFO flwr 2024-06-06 14:32:13,325 | server.py:171 | evaluate_round 17: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:32:13,325 | server.py:222 | fit_round 18: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:34:16,567 | server.py:236 | fit_round 18 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:34:44,208 | server.py:125 | fit progress: (18, 0.00022533178329467774, {'accuracy': 0.4268, 'data_size': 10000}, 2681.3106162934564)
+INFO flwr 2024-06-06 14:34:44,209 | server.py:171 | evaluate_round 18: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:34:44,209 | server.py:222 | fit_round 19: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:36:46,464 | server.py:236 | fit_round 19 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:36:55,998 | server.py:125 | fit progress: (19, 0.00021401543617248535, {'accuracy': 0.4532, 'data_size': 10000}, 2813.100168653298)
+INFO flwr 2024-06-06 14:36:55,998 | server.py:171 | evaluate_round 19: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:36:55,999 | server.py:222 | fit_round 20: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:39:00,964 | server.py:236 | fit_round 20 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:39:11,654 | server.py:125 | fit progress: (20, 0.00021450772285461426, {'accuracy': 0.4541, 'data_size': 10000}, 2948.756300004199)
+INFO flwr 2024-06-06 14:39:11,654 | server.py:171 | evaluate_round 20: no clients selected, cancel
+INFO flwr 2024-06-06 14:39:11,654 | server.py:153 | FL finished in 2948.756901203189
+INFO flwr 2024-06-06 14:39:11,659 | app.py:226 | app_fit: losses_distributed []
+INFO flwr 2024-06-06 14:39:11,660 | app.py:228 | app_fit: metrics_distributed {}
+INFO flwr 2024-06-06 14:39:11,660 | app.py:229 | app_fit: losses_centralized [(0, 0.0002573714256286621), (1, 0.00028200883865356444), (2, 0.0005395997524261474), (3, 0.00040020709037780764), (4, 0.0005197845935821533), (5, 0.000441050386428833), (6, 0.0004517476558685303), (7, 0.0003838251113891602), (8, 0.0003543838262557983), (9, 0.0003479014873504639), (10, 0.00029220900535583495), (11, 0.0002654422760009766), (12, 0.00025977284908294677), (13, 0.00026237895488739015), (14, 0.00024746806621551515), (15, 0.00026267812252044677), (16, 0.0002010016679763794), (17, 0.00018513107299804687), (18, 0.00022533178329467774), (19, 0.00021401543617248535), (20, 0.00021450772285461426)]
+INFO flwr 2024-06-06 14:39:11,660 | app.py:230 | app_fit: metrics_centralized {'accuracy': [(0, 0.0948), (1, 0.2858), (2, 0.1649), (3, 0.2609), (4, 0.1672), (5, 0.2461), (6, 0.2242), (7, 0.2559), (8, 0.2687), (9, 0.2416), (10, 0.3333), (11, 0.3061), (12, 0.371), (13, 0.3717), (14, 0.376), (15, 0.3798), (16, 0.4263), (17, 0.4674), (18, 0.4268), (19, 0.4532), (20, 0.4541)], 'data_size': [(0, 10000), (1, 10000), (2, 10000), (3, 10000), (4, 10000), (5, 10000), (6, 10000), (7, 10000), (8, 10000), (9, 10000), (10, 10000), (11, 10000), (12, 10000), (13, 10000), (14, 10000), (15, 10000), (16, 10000), (17, 10000), (18, 10000), (19, 10000), (20, 10000)]}
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.4541
+wandb:     loss 0.00021
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_134959-fpw6y3uc
+wandb: Find logs at: ./wandb/offline-run-20240606_134959-fpw6y3uc/logs
+INFO flwr 2024-06-06 14:39:15,370 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 16
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 14:39:15,371 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 14:39:15,429 | Config.py:72 | No previous federated learning simulation found with hash 718649ae4ec13dc0991545731671003f3a7f7afd8bfd20d34751416ec61bfc10, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 14:39:20,439 | Simulation.py:404 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 14:39:20,440 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 14:39:20,483	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.20:6379...
+2024-06-06 14:39:20,488	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-06-06 14:39:20,500 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=20, round_timeout=None)
+2024-06-06 14:39:20,538	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-06-06 14:39:20,539 | app.py:213 | Flower VCE: Ray initialized with resources: {'memory': 17179869184.0, 'object_store_memory': 66912669696.0, 'CPU': 2.0, 'node:10.20.240.20': 1.0, 'GPU': 1.0, 'accelerator_type:A40': 1.0, 'node:__internal_head__': 1.0}
+INFO flwr 2024-06-06 14:39:20,539 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-06-06 14:39:20,539 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 2, 'num_gpus': 1.0, 'memory': 17179869184}
+INFO flwr 2024-06-06 14:39:20,549 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 1 actors
+INFO flwr 2024-06-06 14:39:20,550 | server.py:89 | Initializing global parameters
+INFO flwr 2024-06-06 14:39:20,550 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-06-06 14:39:20,551 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-06-06 14:39:20,852 | server.py:94 | initial parameters (loss, other metrics): 0.0002691135883331299, {'accuracy': 0.1073, 'data_size': 10000}
+INFO flwr 2024-06-06 14:39:20,852 | server.py:104 | FL starting
+DEBUG flwr 2024-06-06 14:39:20,853 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=3488705)[0m 2024-06-06 14:39:39.393963: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=3488705)[0m 2024-06-06 14:39:39.457492: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=3488705)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=3488705)[0m 2024-06-06 14:40:11.316278: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+DEBUG flwr 2024-06-06 14:43:44,012 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:45:27,263 | server.py:125 | fit progress: (1, 0.00032423949241638185, {'accuracy': 0.3196, 'data_size': 10000}, 366.41023473022506)
+INFO flwr 2024-06-06 14:45:27,264 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:45:27,264 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:47:38,218 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:47:45,146 | server.py:125 | fit progress: (2, 0.0005833481788635254, {'accuracy': 0.1706, 'data_size': 10000}, 504.29320442909375)
+INFO flwr 2024-06-06 14:47:45,146 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:47:45,147 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:49:54,227 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:50:01,719 | server.py:125 | fit progress: (3, 0.00045912442207336426, {'accuracy': 0.2737, 'data_size': 10000}, 640.8660608860664)
+INFO flwr 2024-06-06 14:50:01,719 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:50:01,720 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:52:11,926 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:52:17,864 | server.py:125 | fit progress: (4, 0.0005853987693786621, {'accuracy': 0.1625, 'data_size': 10000}, 777.0111408960074)
+INFO flwr 2024-06-06 14:52:17,864 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:52:17,865 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:54:28,471 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:54:34,398 | server.py:125 | fit progress: (5, 0.0004261323928833008, {'accuracy': 0.2728, 'data_size': 10000}, 913.5451998850331)
+INFO flwr 2024-06-06 14:54:34,398 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:54:34,399 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:56:43,716 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:56:49,534 | server.py:125 | fit progress: (6, 0.0005552314758300781, {'accuracy': 0.2104, 'data_size': 10000}, 1048.6809219368733)
+INFO flwr 2024-06-06 14:56:49,534 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:56:49,534 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 14:59:01,767 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-06-06 14:59:14,859 | server.py:125 | fit progress: (7, 0.0006057449817657471, {'accuracy': 0.1922, 'data_size': 10000}, 1194.0064930459484)
+INFO flwr 2024-06-06 14:59:14,860 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-06-06 14:59:14,860 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:01:27,053 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:01:41,283 | server.py:125 | fit progress: (8, 0.0004282236099243164, {'accuracy': 0.213, 'data_size': 10000}, 1340.4302095011808)
+INFO flwr 2024-06-06 15:01:41,283 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:01:41,284 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:03:51,573 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:04:04,342 | server.py:125 | fit progress: (9, 0.0004330973148345947, {'accuracy': 0.2884, 'data_size': 10000}, 1483.4895809162408)
+INFO flwr 2024-06-06 15:04:04,343 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:04:04,343 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:06:11,756 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:06:21,812 | server.py:125 | fit progress: (10, 0.00044997167587280273, {'accuracy': 0.2786, 'data_size': 10000}, 1620.95962099405)
+INFO flwr 2024-06-06 15:06:21,813 | server.py:171 | evaluate_round 10: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:06:21,813 | server.py:222 | fit_round 11: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:08:30,807 | server.py:236 | fit_round 11 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:08:43,163 | server.py:125 | fit progress: (11, 0.00038341801166534426, {'accuracy': 0.3166, 'data_size': 10000}, 1762.3103504320607)
+INFO flwr 2024-06-06 15:08:43,163 | server.py:171 | evaluate_round 11: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:08:43,164 | server.py:222 | fit_round 12: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:10:53,080 | server.py:236 | fit_round 12 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:11:26,087 | server.py:125 | fit progress: (12, 0.00035827288627624513, {'accuracy': 0.3472, 'data_size': 10000}, 1925.234659286216)
+INFO flwr 2024-06-06 15:11:26,088 | server.py:171 | evaluate_round 12: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:11:26,088 | server.py:222 | fit_round 13: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:13:40,836 | server.py:236 | fit_round 13 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:13:55,524 | server.py:125 | fit progress: (13, 0.0003839814424514771, {'accuracy': 0.3182, 'data_size': 10000}, 2074.671352233272)
+INFO flwr 2024-06-06 15:13:55,524 | server.py:171 | evaluate_round 13: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:13:55,525 | server.py:222 | fit_round 14: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:16:03,974 | server.py:236 | fit_round 14 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:16:11,385 | server.py:125 | fit progress: (14, 0.000334698748588562, {'accuracy': 0.3737, 'data_size': 10000}, 2210.53234441299)
+INFO flwr 2024-06-06 15:16:11,386 | server.py:171 | evaluate_round 14: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:16:11,386 | server.py:222 | fit_round 15: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:18:24,433 | server.py:236 | fit_round 15 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:18:34,110 | server.py:125 | fit progress: (15, 0.00034944827556610106, {'accuracy': 0.3737, 'data_size': 10000}, 2353.2572297691368)
+INFO flwr 2024-06-06 15:18:34,110 | server.py:171 | evaluate_round 15: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:18:34,111 | server.py:222 | fit_round 16: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:20:45,746 | server.py:236 | fit_round 16 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:20:56,937 | server.py:125 | fit progress: (16, 0.00031165926456451417, {'accuracy': 0.3934, 'data_size': 10000}, 2496.084037680179)
+INFO flwr 2024-06-06 15:20:56,937 | server.py:171 | evaluate_round 16: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:20:56,938 | server.py:222 | fit_round 17: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:23:07,625 | server.py:236 | fit_round 17 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:23:16,976 | server.py:125 | fit progress: (17, 0.00025829532146453855, {'accuracy': 0.4248, 'data_size': 10000}, 2636.1234990009107)
+INFO flwr 2024-06-06 15:23:16,977 | server.py:171 | evaluate_round 17: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:23:16,977 | server.py:222 | fit_round 18: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:25:26,558 | server.py:236 | fit_round 18 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:25:33,592 | server.py:125 | fit progress: (18, 0.00028389639854431155, {'accuracy': 0.4241, 'data_size': 10000}, 2772.739361626096)
+INFO flwr 2024-06-06 15:25:33,592 | server.py:171 | evaluate_round 18: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:25:33,593 | server.py:222 | fit_round 19: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:27:44,473 | server.py:236 | fit_round 19 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:27:53,173 | server.py:125 | fit progress: (19, 0.0002847507238388062, {'accuracy': 0.4233, 'data_size': 10000}, 2912.320177613292)
+INFO flwr 2024-06-06 15:27:53,173 | server.py:171 | evaluate_round 19: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:27:53,174 | server.py:222 | fit_round 20: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:30:05,520 | server.py:236 | fit_round 20 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:30:13,235 | server.py:125 | fit progress: (20, 0.0002699566125869751, {'accuracy': 0.4283, 'data_size': 10000}, 3052.3822892541066)
+INFO flwr 2024-06-06 15:30:13,235 | server.py:171 | evaluate_round 20: no clients selected, cancel
+INFO flwr 2024-06-06 15:30:13,236 | server.py:153 | FL finished in 3052.383034925908
+INFO flwr 2024-06-06 15:30:13,264 | app.py:226 | app_fit: losses_distributed []
+INFO flwr 2024-06-06 15:30:13,265 | app.py:228 | app_fit: metrics_distributed {}
+INFO flwr 2024-06-06 15:30:13,265 | app.py:229 | app_fit: losses_centralized [(0, 0.0002691135883331299), (1, 0.00032423949241638185), (2, 0.0005833481788635254), (3, 0.00045912442207336426), (4, 0.0005853987693786621), (5, 0.0004261323928833008), (6, 0.0005552314758300781), (7, 0.0006057449817657471), (8, 0.0004282236099243164), (9, 0.0004330973148345947), (10, 0.00044997167587280273), (11, 0.00038341801166534426), (12, 0.00035827288627624513), (13, 0.0003839814424514771), (14, 0.000334698748588562), (15, 0.00034944827556610106), (16, 0.00031165926456451417), (17, 0.00025829532146453855), (18, 0.00028389639854431155), (19, 0.0002847507238388062), (20, 0.0002699566125869751)]
+INFO flwr 2024-06-06 15:30:13,265 | app.py:230 | app_fit: metrics_centralized {'accuracy': [(0, 0.1073), (1, 0.3196), (2, 0.1706), (3, 0.2737), (4, 0.1625), (5, 0.2728), (6, 0.2104), (7, 0.1922), (8, 0.213), (9, 0.2884), (10, 0.2786), (11, 0.3166), (12, 0.3472), (13, 0.3182), (14, 0.3737), (15, 0.3737), (16, 0.3934), (17, 0.4248), (18, 0.4241), (19, 0.4233), (20, 0.4283)], 'data_size': [(0, 10000), (1, 10000), (2, 10000), (3, 10000), (4, 10000), (5, 10000), (6, 10000), (7, 10000), (8, 10000), (9, 10000), (10, 10000), (11, 10000), (12, 10000), (13, 10000), (14, 10000), (15, 10000), (16, 10000), (17, 10000), (18, 10000), (19, 10000), (20, 10000)]}
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.4283
+wandb:     loss 0.00027
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_143915-0wgffcbb
+wandb: Find logs at: ./wandb/offline-run-20240606_143915-0wgffcbb/logs
+INFO flwr 2024-06-06 15:30:17,611 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 32
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 15:30:17,612 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 15:30:17,628 | Config.py:72 | No previous federated learning simulation found with hash 66b016ea987cb123ff4f2904e4062f6500035c6e8289940b1f604efbfc0d8aa7, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 15:30:20,624 | Simulation.py:404 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 15:30:20,625 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 15:30:20,668	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.20:6379...
+2024-06-06 15:30:20,672	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-06-06 15:30:20,683 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=20, round_timeout=None)
+2024-06-06 15:30:20,717	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-06-06 15:30:20,718 | app.py:213 | Flower VCE: Ray initialized with resources: {'accelerator_type:A40': 1.0, 'memory': 17179869184.0, 'object_store_memory': 66912669696.0, 'GPU': 1.0, 'node:__internal_head__': 1.0, 'node:10.20.240.20': 1.0, 'CPU': 2.0}
+INFO flwr 2024-06-06 15:30:20,718 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-06-06 15:30:20,718 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 2, 'num_gpus': 1.0, 'memory': 17179869184}
+INFO flwr 2024-06-06 15:30:20,729 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 1 actors
+INFO flwr 2024-06-06 15:30:20,730 | server.py:89 | Initializing global parameters
+INFO flwr 2024-06-06 15:30:20,730 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-06-06 15:30:20,730 | server.py:91 | Evaluating initial parameters
+INFO flwr 2024-06-06 15:30:21,035 | server.py:94 | initial parameters (loss, other metrics): 0.0002679754257202148, {'accuracy': 0.0986, 'data_size': 10000}
+INFO flwr 2024-06-06 15:30:21,035 | server.py:104 | FL starting
+DEBUG flwr 2024-06-06 15:30:21,036 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+[2m[36m(pid=4036098)[0m 2024-06-06 15:30:27.785254: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2m[36m(pid=4036098)[0m 2024-06-06 15:30:27.888139: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=4036098)[0m To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=4036098)[0m 2024-06-06 15:30:38.184837: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+DEBUG flwr 2024-06-06 15:33:32,870 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:35:56,905 | server.py:125 | fit progress: (1, 0.00034644460678100587, {'accuracy': 0.2958, 'data_size': 10000}, 335.8698653304018)
+INFO flwr 2024-06-06 15:35:56,906 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:35:56,906 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:38:21,089 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:38:32,225 | server.py:125 | fit progress: (2, 0.0005678009986877442, {'accuracy': 0.1777, 'data_size': 10000}, 491.18992115044966)
+INFO flwr 2024-06-06 15:38:32,226 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:38:32,226 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:40:52,550 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:40:58,899 | server.py:125 | fit progress: (3, 0.0004557638168334961, {'accuracy': 0.2282, 'data_size': 10000}, 637.8632492152974)
+INFO flwr 2024-06-06 15:40:58,899 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:40:58,900 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:43:19,119 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:43:24,749 | server.py:125 | fit progress: (4, 0.0006835807800292968, {'accuracy': 0.1555, 'data_size': 10000}, 783.713088913355)
+INFO flwr 2024-06-06 15:43:24,749 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:43:24,749 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:45:46,280 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:45:54,329 | server.py:125 | fit progress: (5, 0.0004832469463348389, {'accuracy': 0.2704, 'data_size': 10000}, 933.2932133073919)
+INFO flwr 2024-06-06 15:45:54,329 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:45:54,330 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:48:17,663 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:48:30,216 | server.py:125 | fit progress: (6, 0.0005945801734924316, {'accuracy': 0.2051, 'data_size': 10000}, 1089.1799522093497)
+INFO flwr 2024-06-06 15:48:30,216 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:48:30,216 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:50:50,542 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:50:58,945 | server.py:125 | fit progress: (7, 0.0005275847434997559, {'accuracy': 0.2914, 'data_size': 10000}, 1237.9091495182365)
+INFO flwr 2024-06-06 15:50:58,945 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:50:58,945 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:53:17,003 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:53:22,641 | server.py:125 | fit progress: (8, 0.0005039002418518066, {'accuracy': 0.235, 'data_size': 10000}, 1381.6053953222)
+INFO flwr 2024-06-06 15:53:22,641 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:53:22,642 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:55:42,885 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:55:48,854 | server.py:125 | fit progress: (9, 0.00048056092262268067, {'accuracy': 0.2777, 'data_size': 10000}, 1527.8187831281684)
+INFO flwr 2024-06-06 15:55:48,855 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:55:48,855 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 15:58:08,283 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-06-06 15:58:17,327 | server.py:125 | fit progress: (10, 0.00044622130393981934, {'accuracy': 0.2822, 'data_size': 10000}, 1676.291483387351)
+INFO flwr 2024-06-06 15:58:17,327 | server.py:171 | evaluate_round 10: no clients selected, cancel
+DEBUG flwr 2024-06-06 15:58:17,328 | server.py:222 | fit_round 11: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 16:00:36,203 | server.py:236 | fit_round 11 received 10 results and 0 failures
+INFO flwr 2024-06-06 16:00:47,178 | server.py:125 | fit progress: (11, 0.0004789897441864014, {'accuracy': 0.2892, 'data_size': 10000}, 1826.1422312082723)
+INFO flwr 2024-06-06 16:00:47,178 | server.py:171 | evaluate_round 11: no clients selected, cancel
+DEBUG flwr 2024-06-06 16:00:47,179 | server.py:222 | fit_round 12: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 16:03:07,132 | server.py:236 | fit_round 12 received 10 results and 0 failures
+INFO flwr 2024-06-06 16:03:35,942 | server.py:125 | fit progress: (12, 0.0004517561912536621, {'accuracy': 0.3, 'data_size': 10000}, 1994.906823612284)
+INFO flwr 2024-06-06 16:03:35,943 | server.py:171 | evaluate_round 12: no clients selected, cancel
+DEBUG flwr 2024-06-06 16:03:35,943 | server.py:222 | fit_round 13: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 16:05:56,054 | server.py:236 | fit_round 13 received 10 results and 0 failures
+INFO flwr 2024-06-06 16:06:23,141 | server.py:125 | fit progress: (13, 0.00047353134155273435, {'accuracy': 0.3114, 'data_size': 10000}, 2162.1055318033323)
+INFO flwr 2024-06-06 16:06:23,142 | server.py:171 | evaluate_round 13: no clients selected, cancel
+DEBUG flwr 2024-06-06 16:06:23,142 | server.py:222 | fit_round 14: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 16:08:41,536 | server.py:236 | fit_round 14 received 10 results and 0 failures
+INFO flwr 2024-06-06 16:08:51,865 | server.py:125 | fit progress: (14, 0.0003582252264022827, {'accuracy': 0.3858, 'data_size': 10000}, 2310.829474307131)
+INFO flwr 2024-06-06 16:08:51,866 | server.py:171 | evaluate_round 14: no clients selected, cancel
+DEBUG flwr 2024-06-06 16:08:51,866 | server.py:222 | fit_round 15: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 16:11:13,107 | server.py:236 | fit_round 15 received 10 results and 0 failures
+INFO flwr 2024-06-06 16:11:21,857 | server.py:125 | fit progress: (15, 0.00037888667583465575, {'accuracy': 0.3515, 'data_size': 10000}, 2460.8216441762634)
+INFO flwr 2024-06-06 16:11:21,858 | server.py:171 | evaluate_round 15: no clients selected, cancel
+DEBUG flwr 2024-06-06 16:11:21,858 | server.py:222 | fit_round 16: strategy sampled 10 clients (out of 100)
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit090: error: *** STEP 291320.0 ON ctit090 CANCELLED AT 2024-06-06T16:11:41 ***
+slurmstepd-ctit090: error: *** JOB 291320 ON ctit090 CANCELLED AT 2024-06-06T16:11:41 ***
+*** SIGTERM received at time=1717683101 on cpu 37 ***
+PC: @     0x7f71af9fc117  (unknown)  (unknown)
+    @     0x7f71af9ad520  (unknown)  (unknown)
+[2024-06-06 16:11:41,444 E 2574459 2574459] logging.cc:361: *** SIGTERM received at time=1717683101 on cpu 37 ***
+[2024-06-06 16:11:41,444 E 2574459 2574459] logging.cc:361: PC: @     0x7f71af9fc117  (unknown)  (unknown)
+[2024-06-06 16:11:41,444 E 2574459 2574459] logging.cc:361:     @     0x7f71af9ad520  (unknown)  (unknown)

@@ -1,0 +1,637 @@
+ctit082
+2024-06-06 11:28:30,135	INFO usage_lib.py:412 -- Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-06-06 11:28:30,135	INFO scripts.py:722 -- Local node IP: 10.20.240.12
+2024-06-06 11:28:36,229	SUCC scripts.py:759 -- --------------------
+2024-06-06 11:28:36,229	SUCC scripts.py:760 -- Ray runtime started.
+2024-06-06 11:28:36,229	SUCC scripts.py:761 -- --------------------
+2024-06-06 11:28:36,229	INFO scripts.py:763 -- Next steps
+2024-06-06 11:28:36,229	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-06-06 11:28:36,229	INFO scripts.py:769 --   ray start --address='10.20.240.12:6379'
+2024-06-06 11:28:36,229	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-06-06 11:28:36,229	INFO scripts.py:780 -- import ray
+2024-06-06 11:28:36,229	INFO scripts.py:781 -- ray.init()
+2024-06-06 11:28:36,230	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-06-06 11:28:36,230	INFO scripts.py:813 --   ray stop
+2024-06-06 11:28:36,230	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-06-06 11:28:36,230	INFO scripts.py:817 --   ray status
+2024-06-06 11:28:40.594162: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-06-06 11:28:42.189105: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-06-06 11:28:49,414 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 11:28:49,415 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 11:28:49,679 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 11:28:49,679 | Simulation.py:265 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 11:28:58,631 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 11:28:58,634 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 11:28:58,752 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 11:28:58,753 | Simulation.py:265 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 11:29:06,866 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 11:29:06,868 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 11:29:06,984 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 11:29:06,984 | Simulation.py:265 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 11:29:15,419 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 11:29:15,420 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 11:29:15,536 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 11:29:15,537 | Simulation.py:265 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 11:29:23,527 | Data.py:35 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-06 11:29:23,530 | Data.py:109 | Found preprocessed data for the given preprocess function with hash eda5b80526d0a893cb27d74de67f453d190ef90188f6c8963c1161cbb5a526ce, returning
+INFO flwr 2024-06-06 11:29:23,644 | Simulation.py:36 | Preparing datasets for federated learning simulation
+INFO flwr 2024-06-06 11:29:23,645 | Simulation.py:265 | Found previously split dataloaders with hash bd65c6a03831e38c587d483e1fe6a818e6bdcb912c586e58c4dda52c558b4a79, loading them
+INFO flwr 2024-06-06 11:29:31,711 | main.py:103 | Loaded 5 configs with name CIFAR10-RESNET18-FEDADAM, running...
+INFO flwr 2024-06-06 11:29:31,715 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 2
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 11:29:31,720 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 11:29:31,747 | Config.py:72 | No previous federated learning simulation found with hash 52f5188f510be21dab2674c6b367eac7498ebc8f83657e1d42d868dde118eedc, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 11:29:33,645 | Simulation.py:405 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 11:29:33,645 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 11:29:33,701	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.12:6379...
+2024-06-06 11:29:33,714	INFO worker.py:1621 -- Connected to Ray cluster.
+INFO flwr 2024-06-06 11:29:35,156 | app.py:178 | Starting Flower simulation, config: ServerConfig(num_rounds=20, round_timeout=None)
+2024-06-06 11:29:35,224	INFO worker.py:1453 -- Calling ray.init() again after it has already been called.
+INFO flwr 2024-06-06 11:29:35,226 | app.py:213 | Flower VCE: Ray initialized with resources: {'object_store_memory': 75843894067.0, 'GPU': 1.0, 'CPU': 2.0, 'accelerator_type:TITAN': 1.0, 'memory': 17179869184.0, 'node:__internal_head__': 1.0, 'node:10.20.240.12': 1.0}
+INFO flwr 2024-06-06 11:29:35,226 | app.py:219 | Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+INFO flwr 2024-06-06 11:29:35,226 | app.py:242 | Flower VCE: Resources for each Virtual Client: {'num_cpus': 2, 'num_gpus': 1.0, 'memory': 17179869184}
+INFO flwr 2024-06-06 11:29:35,240 | app.py:288 | Flower VCE: Creating VirtualClientEngineActorPool with 1 actors
+INFO flwr 2024-06-06 11:29:35,241 | server.py:89 | Initializing global parameters
+INFO flwr 2024-06-06 11:29:35,241 | server.py:272 | Using initial parameters provided by strategy
+INFO flwr 2024-06-06 11:29:35,241 | server.py:91 | Evaluating initial parameters
+[2m[36m(pid=755622)[0m 2024-06-06 11:29:37.356513: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2m[36m(pid=755622)[0m To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2m[36m(pid=755622)[0m 2024-06-06 11:29:38.582954: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-06-06 11:29:42,074 | server.py:94 | initial parameters (loss, other metrics): 0.0002506583452224731, {'accuracy': 0.0978, 'data_size': 10000}
+INFO flwr 2024-06-06 11:29:42,075 | server.py:104 | FL starting
+DEBUG flwr 2024-06-06 11:29:42,076 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:32:45,065 | server.py:236 | fit_round 1 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:33:41,070 | server.py:125 | fit progress: (1, 0.0002997589588165283, {'accuracy': 0.1737, 'data_size': 10000}, 238.99448395101354)
+INFO flwr 2024-06-06 11:33:41,071 | server.py:171 | evaluate_round 1: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:33:41,073 | server.py:222 | fit_round 2: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:36:37,400 | server.py:236 | fit_round 2 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:36:44,269 | server.py:125 | fit progress: (2, 0.00032758471965789796, {'accuracy': 0.1554, 'data_size': 10000}, 422.1927383891307)
+INFO flwr 2024-06-06 11:36:44,269 | server.py:171 | evaluate_round 2: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:36:44,269 | server.py:222 | fit_round 3: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:39:36,350 | server.py:236 | fit_round 3 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:39:47,474 | server.py:125 | fit progress: (3, 0.0002825322151184082, {'accuracy': 0.2154, 'data_size': 10000}, 605.3977427040227)
+INFO flwr 2024-06-06 11:39:47,474 | server.py:171 | evaluate_round 3: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:39:47,474 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:42:39,354 | server.py:236 | fit_round 4 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:42:49,938 | server.py:125 | fit progress: (4, 0.00027093982696533203, {'accuracy': 0.189, 'data_size': 10000}, 787.8624221510254)
+INFO flwr 2024-06-06 11:42:49,939 | server.py:171 | evaluate_round 4: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:42:49,939 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:45:41,972 | server.py:236 | fit_round 5 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:45:52,837 | server.py:125 | fit progress: (5, 0.0002303846597671509, {'accuracy': 0.2676, 'data_size': 10000}, 970.7611115840264)
+INFO flwr 2024-06-06 11:45:52,837 | server.py:171 | evaluate_round 5: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:45:52,838 | server.py:222 | fit_round 6: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:48:45,688 | server.py:236 | fit_round 6 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:48:55,724 | server.py:125 | fit progress: (6, 0.00020285451412200927, {'accuracy': 0.2826, 'data_size': 10000}, 1153.6482529011555)
+INFO flwr 2024-06-06 11:48:55,725 | server.py:171 | evaluate_round 6: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:48:55,725 | server.py:222 | fit_round 7: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:51:46,475 | server.py:236 | fit_round 7 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:51:56,806 | server.py:125 | fit progress: (7, 0.00018038376569747924, {'accuracy': 0.3329, 'data_size': 10000}, 1334.7300988133065)
+INFO flwr 2024-06-06 11:51:56,806 | server.py:171 | evaluate_round 7: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:51:56,807 | server.py:222 | fit_round 8: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:54:48,090 | server.py:236 | fit_round 8 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:54:58,350 | server.py:125 | fit progress: (8, 0.00017219167947769165, {'accuracy': 0.3768, 'data_size': 10000}, 1516.274390959181)
+INFO flwr 2024-06-06 11:54:58,351 | server.py:171 | evaluate_round 8: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:54:58,351 | server.py:222 | fit_round 9: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 11:57:50,343 | server.py:236 | fit_round 9 received 10 results and 0 failures
+INFO flwr 2024-06-06 11:58:03,843 | server.py:125 | fit progress: (9, 0.0001639644503593445, {'accuracy': 0.4026, 'data_size': 10000}, 1701.767264154274)
+INFO flwr 2024-06-06 11:58:03,844 | server.py:171 | evaluate_round 9: no clients selected, cancel
+DEBUG flwr 2024-06-06 11:58:03,844 | server.py:222 | fit_round 10: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:00:55,367 | server.py:236 | fit_round 10 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:01:06,110 | server.py:125 | fit progress: (10, 0.00016230417490005494, {'accuracy': 0.4077, 'data_size': 10000}, 1884.0343198091723)
+INFO flwr 2024-06-06 12:01:06,111 | server.py:171 | evaluate_round 10: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:01:06,111 | server.py:222 | fit_round 11: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:03:55,739 | server.py:236 | fit_round 11 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:04:04,881 | server.py:125 | fit progress: (11, 0.00015948469638824462, {'accuracy': 0.4183, 'data_size': 10000}, 2062.8054484701715)
+INFO flwr 2024-06-06 12:04:04,882 | server.py:171 | evaluate_round 11: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:04:04,882 | server.py:222 | fit_round 12: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:06:54,529 | server.py:236 | fit_round 12 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:07:03,413 | server.py:125 | fit progress: (12, 0.00015389587879180907, {'accuracy': 0.4372, 'data_size': 10000}, 2241.3369053001516)
+INFO flwr 2024-06-06 12:07:03,413 | server.py:171 | evaluate_round 12: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:07:03,414 | server.py:222 | fit_round 13: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:09:56,440 | server.py:236 | fit_round 13 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:10:12,991 | server.py:125 | fit progress: (13, 0.00015570714473724364, {'accuracy': 0.4329, 'data_size': 10000}, 2430.9156588572077)
+INFO flwr 2024-06-06 12:10:12,992 | server.py:171 | evaluate_round 13: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:10:12,992 | server.py:222 | fit_round 14: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:13:03,167 | server.py:236 | fit_round 14 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:13:12,673 | server.py:125 | fit progress: (14, 0.0001494373083114624, {'accuracy': 0.4539, 'data_size': 10000}, 2610.5971601880156)
+INFO flwr 2024-06-06 12:13:12,673 | server.py:171 | evaluate_round 14: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:13:12,674 | server.py:222 | fit_round 15: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:16:03,342 | server.py:236 | fit_round 15 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:16:14,527 | server.py:125 | fit progress: (15, 0.00014879077672958374, {'accuracy': 0.4504, 'data_size': 10000}, 2792.451089985203)
+INFO flwr 2024-06-06 12:16:14,527 | server.py:171 | evaluate_round 15: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:16:14,528 | server.py:222 | fit_round 16: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:19:06,772 | server.py:236 | fit_round 16 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:19:16,158 | server.py:125 | fit progress: (16, 0.00014830522537231445, {'accuracy': 0.4577, 'data_size': 10000}, 2974.0822191992775)
+INFO flwr 2024-06-06 12:19:16,158 | server.py:171 | evaluate_round 16: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:19:16,159 | server.py:222 | fit_round 17: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:22:05,742 | server.py:236 | fit_round 17 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:22:16,677 | server.py:125 | fit progress: (17, 0.00014698046445846556, {'accuracy': 0.4592, 'data_size': 10000}, 3154.601020681206)
+INFO flwr 2024-06-06 12:22:16,677 | server.py:171 | evaluate_round 17: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:22:16,678 | server.py:222 | fit_round 18: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:25:06,885 | server.py:236 | fit_round 18 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:25:16,479 | server.py:125 | fit progress: (18, 0.000144661808013916, {'accuracy': 0.4679, 'data_size': 10000}, 3334.403379250318)
+INFO flwr 2024-06-06 12:25:16,480 | server.py:171 | evaluate_round 18: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:25:16,480 | server.py:222 | fit_round 19: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:28:07,746 | server.py:236 | fit_round 19 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:28:18,796 | server.py:125 | fit progress: (19, 0.00014355114698410036, {'accuracy': 0.4758, 'data_size': 10000}, 3516.7197939753532)
+INFO flwr 2024-06-06 12:28:18,796 | server.py:171 | evaluate_round 19: no clients selected, cancel
+DEBUG flwr 2024-06-06 12:28:18,797 | server.py:222 | fit_round 20: strategy sampled 10 clients (out of 100)
+DEBUG flwr 2024-06-06 12:31:10,341 | server.py:236 | fit_round 20 received 10 results and 0 failures
+INFO flwr 2024-06-06 12:31:21,484 | server.py:125 | fit progress: (20, 0.0001442852258682251, {'accuracy': 0.4691, 'data_size': 10000}, 3699.407660796307)
+INFO flwr 2024-06-06 12:31:21,484 | server.py:171 | evaluate_round 20: no clients selected, cancel
+INFO flwr 2024-06-06 12:31:21,485 | server.py:153 | FL finished in 3699.4088797140867
+INFO flwr 2024-06-06 12:31:21,536 | app.py:226 | app_fit: losses_distributed []
+INFO flwr 2024-06-06 12:31:21,537 | app.py:228 | app_fit: metrics_distributed {}
+INFO flwr 2024-06-06 12:31:21,537 | app.py:229 | app_fit: losses_centralized [(0, 0.0002506583452224731), (1, 0.0002997589588165283), (2, 0.00032758471965789796), (3, 0.0002825322151184082), (4, 0.00027093982696533203), (5, 0.0002303846597671509), (6, 0.00020285451412200927), (7, 0.00018038376569747924), (8, 0.00017219167947769165), (9, 0.0001639644503593445), (10, 0.00016230417490005494), (11, 0.00015948469638824462), (12, 0.00015389587879180907), (13, 0.00015570714473724364), (14, 0.0001494373083114624), (15, 0.00014879077672958374), (16, 0.00014830522537231445), (17, 0.00014698046445846556), (18, 0.000144661808013916), (19, 0.00014355114698410036), (20, 0.0001442852258682251)]
+INFO flwr 2024-06-06 12:31:21,537 | app.py:230 | app_fit: metrics_centralized {'accuracy': [(0, 0.0978), (1, 0.1737), (2, 0.1554), (3, 0.2154), (4, 0.189), (5, 0.2676), (6, 0.2826), (7, 0.3329), (8, 0.3768), (9, 0.4026), (10, 0.4077), (11, 0.4183), (12, 0.4372), (13, 0.4329), (14, 0.4539), (15, 0.4504), (16, 0.4577), (17, 0.4592), (18, 0.4679), (19, 0.4758), (20, 0.4691)], 'data_size': [(0, 10000), (1, 10000), (2, 10000), (3, 10000), (4, 10000), (5, 10000), (6, 10000), (7, 10000), (8, 10000), (9, 10000), (10, 10000), (11, 10000), (12, 10000), (13, 10000), (14, 10000), (15, 10000), (16, 10000), (17, 10000), (18, 10000), (19, 10000), (20, 10000)]}
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb: accuracy 0.4691
+wandb:     loss 0.00014
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_112932-ua8bzac1
+wandb: Find logs at: ./wandb/offline-run-20240606_112932-ua8bzac1/logs
+INFO flwr 2024-06-06 12:31:25,256 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 4
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 12:31:25,257 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 12:31:25,339 | Config.py:72 | No previous federated learning simulation found with hash 84013f3202fd5c5dfe212568b61e4b1a5f5834d930d71cc29f9a209177e96f72, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 12:31:26,084 | Simulation.py:405 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 12:31:26,084 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 12:31:26,139	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.12:6379...
+ERROR flwr 2024-06-06 12:31:26,139 | Simulation.py:183 | Maybe you called ray.init twice by accident? This error can be suppressed by passing in 'ignore_reinit_error=True' or by calling 'ray.shutdown()' prior to 'ray.init()'.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_123125-kbb8t2lz
+wandb: Find logs at: ./wandb/offline-run-20240606_123125-kbb8t2lz/logs
+INFO flwr 2024-06-06 12:31:29,771 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 8
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 12:31:29,771 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 12:31:29,772 | Config.py:72 | No previous federated learning simulation found with hash 5d562df98aa19ce8b91b120c7e29085a251532059d611b410e90383959cf95c1, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 12:31:30,409 | Simulation.py:405 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 12:31:30,409 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 12:31:30,463	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.12:6379...
+ERROR flwr 2024-06-06 12:31:30,464 | Simulation.py:183 | Maybe you called ray.init twice by accident? This error can be suppressed by passing in 'ignore_reinit_error=True' or by calling 'ray.shutdown()' prior to 'ray.init()'.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_123129-9t16r72i
+wandb: Find logs at: ./wandb/offline-run-20240606_123129-9t16r72i/logs
+INFO flwr 2024-06-06 12:31:34,154 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 16
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 12:31:34,155 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 12:31:34,156 | Config.py:72 | No previous federated learning simulation found with hash 718649ae4ec13dc0991545731671003f3a7f7afd8bfd20d34751416ec61bfc10, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 12:31:34,681 | Simulation.py:405 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 12:31:34,681 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 12:31:34,737	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.12:6379...
+ERROR flwr 2024-06-06 12:31:34,737 | Simulation.py:183 | Maybe you called ray.init twice by accident? This error can be suppressed by passing in 'ignore_reinit_error=True' or by calling 'ray.shutdown()' prior to 'ray.init()'.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_123134-fhmeb6e9
+wandb: Find logs at: ./wandb/offline-run-20240606_123134-fhmeb6e9/logs
+INFO flwr 2024-06-06 12:31:38,383 | main.py:105 | Config:
+	Simulation:
+		Data:
+			dataset_name: cifar10
+			batch_size: 64
+			preprocess_fn:
+				def preprocess_fn(element):
+				  return {
+				    "x": element["img"],
+				    "y": element["label"]
+				  }
+		Federation:
+			client_count: 100
+			fraction_fit: 0.1
+			global_rounds: 20
+			local_rounds: 32
+		Model:
+			optimizer_name: FedAdam
+			model_name: ResNet18
+			criterion_name: CrossEntropyLoss
+			optimizer_parameters: 
+				local: {'lr': 0.01}
+				global: {'lr': 0.01, 'betas': [0.9, 0.99], 'eps': 0.0001}
+			model_architecture:
+				repo_or_dir: pytorch/vision:v0.10.0
+					model: resnet18
+					pretrained: False
+					out_features: 10
+	Attack:
+		data_access: 1.0
+		message_access: server
+		repetitions: 0
+		Attack Simulation:
+			batch_size: 64
+			optimizer_name: FedAvg
+			optimizer_parameters:
+				lr: 0.1
+			ModelArchitecture:
+				gradient_component:
+					type: Dropout
+						p: 0.2
+					type: Conv2d
+						out_channels: 1000
+						kernel_size: None
+						stride: 1
+					type: ReLU
+				fcn_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+				encoder_component:
+					type: Dropout
+						p: 0.2
+					type: Linear
+						out_features: 256
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 256
+						out_features: 128
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 128
+						out_features: 64
+					type: ReLU
+					type: Dropout
+						p: 0.2
+					type: Linear
+						in_features: 64
+						out_features: 1
+					type: ReLU
+					type: Sigmoid
+INFO flwr 2024-06-06 12:31:38,383 | Config.py:67 | Starting conFEDential simulation
+INFO flwr 2024-06-06 12:31:38,384 | Config.py:72 | No previous federated learning simulation found with hash 66b016ea987cb123ff4f2904e4062f6500035c6e8289940b1f604efbfc0d8aa7, starting training simulation...
+wandb: Tracking run with wandb version 0.16.5
+wandb: W&B syncing is set to `offline` in this directory.  
+wandb: Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+INFO flwr 2024-06-06 12:31:38,787 | Simulation.py:405 | Created 1 clients with resources 2 CPUs, 1.0 GPUs, and 16.0GB for the total available 2 CPUs, 1 GPUs and 16.0GB.
+INFO flwr 2024-06-06 12:31:38,787 | Simulation.py:159 | Starting federated learning simulation
+2024-06-06 12:31:38,842	INFO worker.py:1431 -- Connecting to existing Ray cluster at address: 10.20.240.12:6379...
+ERROR flwr 2024-06-06 12:31:38,842 | Simulation.py:183 | Maybe you called ray.init twice by accident? This error can be suppressed by passing in 'ignore_reinit_error=True' or by calling 'ray.shutdown()' prior to 'ray.init()'.
+wandb: - 0.000 MB of 0.000 MB uploadedwandb:                                                                                
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/s2240084/conFEDential/wandb/offline-run-20240606_123138-zn5xb8a6
+wandb: Find logs at: ./wandb/offline-run-20240606_123138-zn5xb8a6/logs
+2024-06-06 12:32:43,800	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --store_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.12 --maximum_startup_concurrency=2 --static_resource_list=node:10.20.240.12,1.0,node:__internal_head__,1.0,accelerator_type:TITAN,1,CPU,2,GPU,1,memory,17179869184,object_store_memory,75843894067 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.12 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=57819 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.12:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.12 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs -Dray.session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --log_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --resource_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --metrics-agent-port=57819 --metrics_export_port=59018 --object_store_memory=75843894067 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --labels= --head --num_prestart_python_workers=2 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.12 --metrics-export-port=59018 --dashboard-agent-port=57819 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --runtime-env-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-06-06_11-28-30_244558_755232 --gcs-address=10.20.240.12:6379 --minimal"` (via SIGTERM)
+2024-06-06 12:32:43,804	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/autoscaler/_private/monitor.py --logs-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --monitor-ip=10.20.240.12` (via SIGTERM)
+2024-06-06 12:32:43,804	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/log_monitor.py --logs-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --gcs-address=10.20.240.12:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5` (via SIGTERM)
+2024-06-06 12:32:43,810	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -m ray.util.client.server --address=10.20.240.12:6379 --host=0.0.0.0 --port=10001 --mode=proxy --metrics-agent-port=57819` (via SIGTERM)
+2024-06-06 12:32:43,817	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --store_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.12 --maximum_startup_concurrency=2 --static_resource_list=node:10.20.240.12,1.0,node:__internal_head__,1.0,accelerator_type:TITAN,1,CPU,2,GPU,1,memory,17179869184,object_store_memory,75843894067 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.12 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=57819 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.12:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.12 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs -Dray.session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --log_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --resource_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --metrics-agent-port=57819 --metrics_export_port=59018 --object_store_memory=75843894067 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --labels= --head --num_prestart_python_workers=2 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.12 --metrics-export-port=59018 --dashboard-agent-port=57819 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --runtime-env-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-06-06_11-28-30_244558_755232 --gcs-address=10.20.240.12:6379 --minimal"` (via SIGTERM)
+2024-06-06 12:32:43,824	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --store_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.12 --maximum_startup_concurrency=2 --static_resource_list=node:10.20.240.12,1.0,node:__internal_head__,1.0,accelerator_type:TITAN,1,CPU,2,GPU,1,memory,17179869184,object_store_memory,75843894067 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.12 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=57819 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.12:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.12 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs -Dray.session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --log_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --resource_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --metrics-agent-port=57819 --metrics_export_port=59018 --object_store_memory=75843894067 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --labels= --head --num_prestart_python_workers=2 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.12 --metrics-export-port=59018 --dashboard-agent-port=57819 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --runtime-env-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-06-06_11-28-30_244558_755232 --gcs-address=10.20.240.12:6379 --minimal"` (via SIGTERM)
+2024-06-06 12:32:43,831	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --store_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.12 --maximum_startup_concurrency=2 --static_resource_list=node:10.20.240.12,1.0,node:__internal_head__,1.0,accelerator_type:TITAN,1,CPU,2,GPU,1,memory,17179869184,object_store_memory,75843894067 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.12 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=57819 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.12:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.12 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs -Dray.session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --log_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --resource_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --metrics-agent-port=57819 --metrics_export_port=59018 --object_store_memory=75843894067 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --labels= --head --num_prestart_python_workers=2 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.12 --metrics-export-port=59018 --dashboard-agent-port=57819 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --runtime-env-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-06-06_11-28-30_244558_755232 --gcs-address=10.20.240.12:6379 --minimal"` (via SIGTERM)
+2024-06-06 12:32:43,837	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/log_monitor.py --logs-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --gcs-address=10.20.240.12:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5` (via SIGTERM)
+2024-06-06 12:32:43,848	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/raylet/raylet --raylet_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --store_socket_name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --object_manager_port=0 --min_worker_port=10002 --max_worker_port=19999 --node_manager_port=0 --node_ip_address=10.20.240.12 --maximum_startup_concurrency=2 --static_resource_list=node:10.20.240.12,1.0,node:__internal_head__,1.0,accelerator_type:TITAN,1,CPU,2,GPU,1,memory,17179869184,object_store_memory,75843894067 "--python_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/default_worker.py --node-ip-address=10.20.240.12 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --redis-address=None --temp-dir=/local/ray --metrics-agent-port=57819 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --temp-dir=/local/ray --webui= RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER" "--java_worker_command=/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/workers/setup_worker.py -Dray.address=10.20.240.12:6379 -Dray.raylet.node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER -Dray.object-store.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store -Dray.raylet.socket-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet -Dray.redis.password= -Dray.node-ip=10.20.240.12 -Dray.home=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/../.. -Dray.logging.dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs -Dray.session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 RAY_WORKER_DYNAMIC_OPTION_PLACEHOLDER io.ray.runtime.runner.worker.DefaultWorker" --cpp_worker_command= --native_library_path=/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/cpp/lib --temp_dir=/local/ray --session_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --log_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --resource_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --metrics-agent-port=57819 --metrics_export_port=59018 --object_store_memory=75843894067 --plasma_directory=/dev/shm --ray-debugger-external=0 --gcs-address=10.20.240.12:6379 --session-name=session_2024-06-06_11-28-30_244558_755232 --labels= --head --num_prestart_python_workers=2 "--agent_command=/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.12 --metrics-export-port=59018 --dashboard-agent-port=57819 --listen-port=52365 --node-manager-port=RAY_NODE_MANAGER_PORT_PLACEHOLDER --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --runtime-env-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-06-06_11-28-30_244558_755232 --gcs-address=10.20.240.12:6379 --minimal"` (via SIGTERM)
+2024-06-06 12:32:43,852	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/agent.py --node-ip-address=10.20.240.12 --metrics-export-port=59018 --dashboard-agent-port=57819 --listen-port=52365 --node-manager-port=42651 --object-store-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/plasma_store --raylet-name=/local/ray/session_2024-06-06_11-28-30_244558_755232/sockets/raylet --temp-dir=/local/ray --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --runtime-env-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/runtime_resources --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --session-name=session_2024-06-06_11-28-30_244558_755232 --gcs-address=10.20.240.12:6379 --minimal --agent-id 424238335` (via SIGTERM)
+2024-06-06 12:32:43,858	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/dashboard.py --host=127.0.0.1 --port=8265 --port-retries=0 --temp-dir=/local/ray --log-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --session-dir=/local/ray/session_2024-06-06_11-28-30_244558_755232 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.12:6379 --node-ip-address=10.20.240.12 --minimal` (via SIGTERM)
+2024-06-06 12:32:44,046	INFO scripts.py:1098 -- 1/6 stopped.2024-06-06 12:32:44,219	INFO scripts.py:1098 -- 2/6 stopped.2024-06-06 12:32:44,220	INFO scripts.py:1098 -- 3/6 stopped.2024-06-06 12:32:44,220	INFO scripts.py:1098 -- 4/6 stopped.2024-06-06 12:32:44,432	INFO scripts.py:1098 -- 5/6 stopped.2024-06-06 12:32:44,432	INFO scripts.py:1098 -- 6/6 stopped.2024-06-06 12:32:44,584	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_dir=/local/ray/session_2024-06-06_11-28-30_244558_755232/logs --config_list=eyJvYmplY3Rfc3BpbGxpbmdfY29uZmlnIjogIntcInR5cGVcIjogXCJmaWxlc3lzdGVtXCIsIFwicGFyYW1zXCI6IHtcImRpcmVjdG9yeV9wYXRoXCI6IFwiL2xvY2FsL3JheS9zZXNzaW9uXzIwMjQtMDYtMDZfMTEtMjgtMzBfMjQ0NTU4Xzc1NTIzMlwifX0iLCAiaXNfZXh0ZXJuYWxfc3RvcmFnZV90eXBlX2ZzIjogdHJ1ZX0= --gcs_server_port=6379 --metrics-agent-port=57819 --node-ip-address=10.20.240.12 --session-name=session_2024-06-06_11-28-30_244558_755232` (via SIGTERM)
+2024-06-06 12:32:44,892	INFO scripts.py:1098 -- 1/1 stopped.2024-06-06 12:32:44,892	SUCC scripts.py:1142 -- Stopped all 7 Ray processes.
