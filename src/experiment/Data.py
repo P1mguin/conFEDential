@@ -102,15 +102,16 @@ class Data:
 		"""
 		# Get the path to the preprocessed cache
 		preprocessed_cache_path = self._get_unsplit_preprocessed_cache_file()
+		preprocessed_hash = preprocessed_cache_path.split("/")[-2]
 
 		# If the preprocessed dataset is available, load it
 		if os.path.exists(preprocessed_cache_path):
-			log(INFO, "Found preprocessed data for the given preprocess function, returning")
+			log(INFO, f"Found preprocessed data for the given preprocess function with hash {preprocessed_hash}, returning")
 			with open(preprocessed_cache_path, "rb") as file:
 				self.dataset = pickle.load(file)
 				return
 		else:
-			log(INFO, "No preprocessed data found for the given preprocess function, preprocessing now")
+			log(INFO, f"No preprocessed data found for the given preprocess function with hash {preprocessed_hash}, preprocessing now")
 
 		# Load the raw dataset
 		train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
@@ -147,5 +148,5 @@ class Data:
 		preprocessed_cache_directory = self.get_preprocessed_cache_directory()
 
 		# Return the path
-		preprocessed_cache_path = f"{preprocessed_cache_directory}/unsplit.pkl"
+		preprocessed_cache_path = f"{preprocessed_cache_directory}unsplit.pkl"
 		return preprocessed_cache_path

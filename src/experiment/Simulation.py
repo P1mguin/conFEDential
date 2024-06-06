@@ -258,15 +258,16 @@ class Simulation:
 		:return:
 		"""
 		split_cache_path = self._get_split_cache_path()
+		split_hash = split_cache_path.split("/")[-1].split(".")[0]
 
 		# If the split dataloaders are available, load it
 		if os.path.exists(split_cache_path):
-			log(INFO, "Found previously split dataloaders, loading them")
+			log(INFO, f"Found previously split dataloaders with hash {split_hash}, loading them")
 			with open(split_cache_path, "rb") as file:
 				self.train_loaders, self.test_loader = pickle.load(file)
 				return
 		else:
-			log(INFO, "Found no previously split dataloaders, splitting the data now")
+			log(INFO, f"Found no previously split dataloaders with hash {split_hash}, splitting the data now")
 
 		train_dataset, test_dataset = self._data.dataset
 

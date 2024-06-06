@@ -67,13 +67,13 @@ class Config:
 		log(INFO, "Starting conFEDential simulation")
 		# If nothing has been captured for this simulation, capture the simulation
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
+		capture_hash = federation_simulation_capture_directory.split("/")[-2]
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
-			log(INFO, "No previous federated learning simulation found, starting training simulation...")
+			log(INFO, f"No previous federated learning simulation found with hash {capture_hash}, starting training simulation...")
 			self.simulation.simulate_federation(
 				concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_capturing, is_online, run_name
 			)
 		else:
-			capture_hash = self.simulation.get_capture_directory().split("/")[-2]
 			log(INFO,
 				f"Found previous federated learning simulation with hash {capture_hash}, continuing to attack simulation...")
 
