@@ -73,7 +73,9 @@ class Config:
 				concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_capturing, is_online, run_name
 			)
 		else:
-			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
+			capture_hash = self.simulation.get_capture_directory().split("/")[-2]
+			log(INFO,
+				f"Found previous federated learning simulation with hash {capture_hash}, continuing to attack simulation...")
 
 		for _ in range(self.attack.repetitions):
 			# Clean the variables of the attack
