@@ -1,0 +1,28 @@
+ctit083
+2024-06-05 11:04:10,765	ERROR services.py:1207 -- Failed to start the dashboard 
+2024-06-05 11:04:10,773	ERROR services.py:1232 -- Error should be written to 'dashboard.log' or 'dashboard.err'. We are printing the last 20 lines for you. See 'https://docs.ray.io/en/master/ray-observability/ray-logging.html#logging-directory-structure' to find where the log file is.
+2024-06-05 11:04:10,774	ERROR services.py:1276 -- 
+The last 20 lines of /local/ray/session_2024-06-05_11-03-44_392764_555345/logs/dashboard.log (it contains the error message from the dashboard): 
+2024-06-05 11:03:44,217	INFO usage_lib.py:412 -- Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-06-05 11:03:44,217	INFO scripts.py:722 -- Local node IP: 10.20.240.13
+2024-06-05 11:04:15,960	SUCC scripts.py:759 -- --------------------
+2024-06-05 11:04:15,960	SUCC scripts.py:760 -- Ray runtime started.
+2024-06-05 11:04:15,961	SUCC scripts.py:761 -- --------------------
+2024-06-05 11:04:15,961	INFO scripts.py:763 -- Next steps
+2024-06-05 11:04:15,961	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-06-05 11:04:15,961	INFO scripts.py:769 --   ray start --address='10.20.240.13:6379'
+2024-06-05 11:04:15,961	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-06-05 11:04:15,961	INFO scripts.py:780 -- import ray
+2024-06-05 11:04:15,961	INFO scripts.py:781 -- ray.init()
+2024-06-05 11:04:15,962	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-06-05 11:04:15,962	INFO scripts.py:813 --   ray stop
+2024-06-05 11:04:15,962	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-06-05 11:04:15,962	INFO scripts.py:817 --   ray status
+2024-06-05 11:07:42.637535: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-06-05 11:08:24.946624: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-06-05 11:10:35,515 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-06-05 11:10:35,516 | Data.py:109 | No preprocessed data found for the given preprocess function, preprocessing now
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-ctit083: error: *** JOB 290851 ON ctit083 CANCELLED AT 2024-06-05T11:14:26 ***
+slurmstepd-ctit083: error: *** STEP 290851.0 ON ctit083 CANCELLED AT 2024-06-05T11:14:26 ***
