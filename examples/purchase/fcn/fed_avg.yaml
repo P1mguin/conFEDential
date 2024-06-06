@@ -22,14 +22,18 @@ simulation:
     model_architecture:
       - type: Linear
         in_features: 600
-        out_features: 200
+        out_features: 1024
       - type: Tanh
       - type: Linear
-        in_features: 200
-        out_features: 128
+        in_features: 1024
+        out_features: 512
       - type: Tanh
       - type: Linear
-        in_features: 128
+        in_features: 512
+        out_features: 256
+      - type: Tanh
+      - type: Linear
+        in_features: 256
         out_features: 100
       - type: Softmax
         dim: -1
