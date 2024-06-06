@@ -11,8 +11,8 @@ simulation:
   federation:
     client_count: 100
     fraction_fit: 0.1
-    global_rounds: 20
-    local_rounds: 1
+    global_rounds: 200
+    local_rounds: 4
   model:
     optimizer_name: FedAvg
     model_name: ResNet34
@@ -30,9 +30,9 @@ attack:
   repetitions: 0
   attack_simulation:
     batch_size: 64
-    optimizer_name: FedAvg
+    optimizer_name: Adam
     optimizer_parameters:
-      lr: 0.1
+      lr: 0.0001
     model_architecture:
       gradient_component:
         - type: Dropout
