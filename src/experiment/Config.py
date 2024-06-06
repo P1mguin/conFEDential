@@ -77,7 +77,8 @@ class Config:
 			log(INFO,
 				f"Found previous federated learning simulation with hash {capture_hash}, continuing to attack simulation...")
 
-		for _ in range(self.attack.repetitions):
+		for i in range(self.attack.repetitions):
+			log(INFO, f"Starting {i + 1}th repetition of the attack simulation")
 			# Clean the variables of the attack
 			self.attack.reset_variables()
 
