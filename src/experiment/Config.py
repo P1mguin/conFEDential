@@ -75,30 +75,29 @@ class Config:
 		else:
 			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 
-		# for _ in range(self.attack.repetitions):
-		# 	# Clean the variables of the attack
-		# 	self.attack.reset_variables()
-		#
-		# 	# For each intercepted datapoint, get their gradients, activation functions, loss
-		# 	# Add fraction eval for debugging purposes
-		# 	fraction_test = 1.0
-		# 	fraction_train = 0.85
-		# 	(
-		# 		train_dataset,
-		# 		validation_dataset,
-		# 		test_dataset
-		# 	) = self._get_attack_datasets(fraction_train, fraction_test)
-		#
-		# 	# Get the template model and train it
-		# 	attack_model = self._get_attack_model(train_dataset)
-		#
-		# 	wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
-		# 	mode = "online" if is_online else "offline"
-		# 	wandb_kwargs = {**wandb_kwargs, "mode": mode}
-		# 	self.attack.membership_inference_attack_model(
-		# 		attack_model, train_dataset, validation_dataset, test_dataset, wandb_kwargs
-		# 	)
-		pass
+		for _ in range(self.attack.repetitions):
+			# Clean the variables of the attack
+			self.attack.reset_variables()
+
+			# For each intercepted datapoint, get their gradients, activation functions, loss
+			# Add fraction eval for debugging purposes
+			fraction_test = 1.0
+			fraction_train = 0.85
+			(
+				train_dataset,
+				validation_dataset,
+				test_dataset
+			) = self._get_attack_datasets(fraction_train, fraction_test)
+
+			# Get the template model and train it
+			attack_model = self._get_attack_model(train_dataset)
+
+			wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
+			mode = "online" if is_online else "offline"
+			wandb_kwargs = {**wandb_kwargs, "mode": mode}
+			self.attack.membership_inference_attack_model(
+				attack_model, train_dataset, validation_dataset, test_dataset, wandb_kwargs
+			)
 
 	def _get_attack_model(self, attack_dataset):
 		(

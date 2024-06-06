@@ -209,8 +209,9 @@ class Simulation:
 	def _get_captured_aggregates(self, path):
 		aggregate_rounds = []
 		with h5py.File(path, 'r') as hf:
-			for values in hf.values():
-				aggregate_rounds.append(values[:])
+			for key in range(len(hf.keys())):
+				value = hf[str(key)][:]
+				aggregate_rounds.append(value)
 		return aggregate_rounds
 
 	def get_messages(self, intercepted_client_ids):
@@ -238,11 +239,11 @@ class Simulation:
 				client_group = hf[str(client_id)]
 				client_layers = []
 				server_rounds = None
-				for client_layer_group in client_group.values():
+				for client_layer_group_key in range(len(client_group.keys())):
 					if server_rounds is None:
-						server_rounds = client_layer_group["server_rounds"][:]
+						server_rounds = client_group[str(client_layer_group_key)]["server_rounds"][:]
 
-					values = client_layer_group["values"][:]
+					values = client_group[str(client_layer_group_key)]["values"][:]
 					client_layers.append(values)
 				yield server_rounds, client_layers
 		captured_messages = [list(get_client_messages(id)) for id in intercepted_client_ids]

@@ -402,14 +402,18 @@ class Attack:
 
 		# Convert model iterations to state dicts
 		keys = template_model.state_dict().keys()
-		state_dicts = [{key: torch.tensor(model_iterations[j][i], requires_grad=True) for j, key in enumerate(keys)} for
-					   i in range(global_rounds)]
+		parameter_keys = set(name for name, _ in template_model.named_parameters())
+		state_dicts = [{key: torch.tensor(
+			model_iterations[j][i],
+			dtype=torch.float32,
+			requires_grad=(key in parameter_keys)
+		) for j, key in enumerate(keys)} for i in range(global_rounds)]
 
 		# Get the activation values
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
-		gradients = self._get_gradients(losses, state_dicts)
+		gradients = self._get_gradients(losses, state_dicts, simulation)
 		losses = losses.T
 		return activation_values, gradients, losses
 
@@ -435,6 +439,13 @@ class Attack:
 
 		# Predict the features for each model iteration and capture the activation values from the dict
 		activation_values = []
+
+		# Some layers may require batch to be bigger than 1, for instance BatchNorm. Duplicating it has no effect since the
+		# tracked variables are not used in further computations
+		is_singular_batch = features.size(0) == 1
+		if is_singular_batch:
+			features = torch.cat([features, features])
+
 		for i in range(global_rounds):
 			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
 
@@ -445,7 +456,8 @@ class Attack:
 		# Remove the hooks
 		[h.remove() for h in hooks]
 
-		# Transpose the activations so that they are bundled per layer per batch sample instead of per model iteration
+		if is_singular_batch:
+			activation_values = [[x[0].unsqueeze(0) for x in  global_round_values] for global_round_values in activation_values]
 
 		# Transpose the activations so that they are bundled per layer instead of per model iteration
 		activation_values = [torch.stack(layers, dim=1) for layers in zip(*activation_values)]
@@ -461,13 +473,14 @@ class Attack:
 		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
 		return losses
 
-	def _get_gradients(self, losses, model_state_dicts):
+	def _get_gradients(self, losses, model_state_dicts, simulation):
 		gradients = []
+		parameter_keys = [name for name, _ in simulation.model.named_parameters()]
 		for i, state_dict in enumerate(model_state_dicts):
 			model_gradients = []
 			for loss in losses[i]:
 				loss.backward(retain_graph=True)
-				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in state_dict.keys()))
+				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in parameter_keys))
 			gradients.append((torch.stack(layers) for layers in zip(*model_gradients)))
 
 		# Transpose the gradients so that they are bundled per layer instead of per model iteration
