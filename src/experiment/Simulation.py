@@ -184,7 +184,8 @@ class Simulation:
 			wandb.finish(exit_code=1)
 
 		# Shut ray down
-		ray.shutdown()
+		if not is_ray_initialised:
+			ray.shutdown()
 
 	def get_server_aggregates(self):
 		"""
