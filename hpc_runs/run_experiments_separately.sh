@@ -22,3 +22,4 @@ sbatch hpc_runs/cifar100/resnet34.sbatch
 sbatch hpc_runs/purchase/logistic_regression.sbatch
 sbatch hpc_runs/purchase/fcn.sbatch
 sbatch hpc_runs/texas/logistic_regression.sbatch
+sbatch hpc_runs/texas/fcn.sbatch

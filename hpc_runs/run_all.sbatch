@@ -39,6 +39,11 @@ srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_av
 srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_nag.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name PURCHASE-LOG_RES-FEDNAG
 srun python src/main.py --yaml-file examples/purchase/logistic_regression/fed_nl.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name PURCHASE-LOG_RES-FEDNL
 
+#Texas FCN
+srun python src/main.py --yaml-file examples/texas/fcn/fed_adam.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name TEXAS-FCN-FEDADAM
+srun python src/main.py --yaml-file examples/texas/fcn/fed_avg.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name TEXAS-FCN-FEDAVG
+srun python src/main.py --yaml-file examples/texas/fcn/fed_nag.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name TEXAS-FCN-FEDNAG
+
 #Texas Logistic Regression
 srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_adam.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name TEXAS-LOG_RES-FEDADAM
 srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_avg.yaml --ray --memory 16 --num-cpus 2 --num-gpus 1 --clients 1 --run-name TEXAS-LOG_RES-FEDAVG
