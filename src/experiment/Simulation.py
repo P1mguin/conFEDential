@@ -178,6 +178,7 @@ class Simulation:
 					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
 					strategy=strategy
 				)
+			wandb.finish()
 		except Exception as e:
 			log(ERROR, e)
 			wandb.finish(exit_code=1)
