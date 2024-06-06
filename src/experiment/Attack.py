@@ -132,7 +132,7 @@ class Attack:
 
 		# Training loop with early stopping
 		previous_val_roc_auc = 0.
-		total_buffer_iterations = 5
+		total_buffer_iterations = 1
 		buffer_iterations = total_buffer_iterations
 		while buffer_iterations > 0 or (
 				val_roc_auc > previous_val_roc_auc and buffer_iterations == total_buffer_iterations
