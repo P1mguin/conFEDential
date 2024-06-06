@@ -11,8 +11,8 @@ simulation:
   federation:
     client_count: 10
     fraction_fit: 1.0
-    global_rounds: 20
-    local_rounds: 1
+    global_rounds: 50
+    local_rounds: 4
   model:
     optimizer_name: SingleLayerFedNL
     model_name: Logistic Regression
@@ -30,9 +30,9 @@ attack:
   repetitions: 0
   attack_simulation:
     batch_size: 64
-    optimizer_name: FedAvg
+    optimizer_name: Adam
     optimizer_parameters:
-      lr: 0.1
+      eps: 0.0001
     model_architecture:
       gradient_component:
         - type: Dropout
