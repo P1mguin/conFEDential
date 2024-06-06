@@ -3,7 +3,6 @@ from typing import Any, List, Tuple, Type
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
 
 
 def compute_weighted_average(values, counts) -> Any:

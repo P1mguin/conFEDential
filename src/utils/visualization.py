@@ -1,5 +1,7 @@
-import matplotlib.pyplot as plt
 import uuid
+
+import matplotlib.pyplot as plt
+
 
 def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
 	# Give the plot some id

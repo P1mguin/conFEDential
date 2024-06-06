@@ -83,7 +83,14 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def membership_inference_attack_model(self, attack_model, train_loader, validation_loader, test_loader, wandb_kwargs):
+	def membership_inference_attack_model(
+			self,
+			attack_model,
+			train_loader,
+			validation_loader,
+			test_loader,
+			wandb_kwargs
+	):
 		wandb_kwargs = self._get_wandb_kwargs("membership-inference", wandb_kwargs)
 		wandb.init(**wandb_kwargs)
 
@@ -457,7 +464,9 @@ class Attack:
 		[h.remove() for h in hooks]
 
 		if is_singular_batch:
-			activation_values = [[x[0].unsqueeze(0) for x in  global_round_values] for global_round_values in activation_values]
+			activation_values = [
+				[x[0].unsqueeze(0) for x in global_round_values] for global_round_values in activation_values
+			]
 
 		# Transpose the activations so that they are bundled per layer instead of per model iteration
 		activation_values = [torch.stack(layers, dim=1) for layers in zip(*activation_values)]
@@ -509,7 +518,7 @@ def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Te
 		target_dim = 4
 
 	if input_tensor.ndim > target_dim:
-		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim-1)], -1)
+		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim - 1)], -1)
 	elif input_tensor.ndim < target_dim:
 		tensor_shape = input_tensor.shape
 		target_shape = (

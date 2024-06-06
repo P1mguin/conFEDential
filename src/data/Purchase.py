@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numpy as np
-import torch
 from datasets import Dataset as HuggingFaceDataset, load_dataset
 
 from src.data.Dataset import Dataset

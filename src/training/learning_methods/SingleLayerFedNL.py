@@ -24,7 +24,6 @@ class SingleLayerFedNL(Strategy):
 		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
 		return initial_parameters
 
-
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# The newton method makes use of our custom newton optimizer
 		pass

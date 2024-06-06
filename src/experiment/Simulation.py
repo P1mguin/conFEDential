@@ -1,4 +1,3 @@
-import collections
 import hashlib
 import json
 import math
@@ -10,7 +9,6 @@ from typing import Generator, List
 
 import flwr as fl
 import h5py
-import numpy as np
 import psutil
 import ray
 import torch
@@ -246,6 +244,7 @@ class Simulation:
 					values = client_group[str(client_layer_group_key)]["values"][:]
 					client_layers.append(values)
 				yield server_rounds, client_layers
+
 		captured_messages = [list(get_client_messages(id)) for id in intercepted_client_ids]
 		return captured_messages
 
