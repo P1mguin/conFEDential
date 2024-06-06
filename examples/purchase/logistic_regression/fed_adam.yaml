@@ -1,7 +1,7 @@
 simulation:
   data:
     dataset_name: Purchase
-    batch_size: 1
+    batch_size: 64
     preprocess_fn: |
       def preprocess_fn(element):
         return {
@@ -9,23 +9,23 @@ simulation:
           "y": element["label"]
         }
   federation:
-    client_count: 100
-    fraction_fit: 0.1
+    client_count: 10
+    fraction_fit: 1.0
     global_rounds: 20
-    local_rounds: 8
+    local_rounds: 1
   model:
     optimizer_name: FedAdam
     model_name: Logistic Regression
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
       local:
-        lr: 0.1
+        lr: 0.01
       global:
-        lr: 0.1
+        lr: 0.01
         betas:
           - 0.9
-          - 0.999
-        eps: 0.00000001
+          - 0.99
+        eps: 0.0001
     model_architecture:
       - type: Linear
         in_features: 600
@@ -35,7 +35,7 @@ simulation:
 attack:
   data_access: 1.0
   message_access: server
-  repetitions: 1
+  repetitions: 0
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg
