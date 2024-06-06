@@ -9,7 +9,7 @@ from src import data
 
 
 class Data:
-	def __init__(self, dataset_name: str, batch_size: int, raw_preprocess_fn: str,
+	def __init__(self, dataset_name: str, batch_size: int, raw_preprocess_fn: str | None = None,
 				 splitter: dict | None = None) -> None:
 		# Set the attributes
 		self._dataset_name = dataset_name.lower()
@@ -21,9 +21,13 @@ class Data:
 			self._percent_non_iid = float(splitter['percent_non_iid'])
 
 		# Load the preprocess function
-		namespace = {}
-		exec(self._raw_preprocess_fn, namespace)
-		self._preprocess_fn = namespace['preprocess_fn']
+		if raw_preprocess_fn is not None:
+			namespace = {}
+			exec(self._raw_preprocess_fn, namespace)
+			self._preprocess_fn = namespace['preprocess_fn']
+		else:
+			self._raw_preprocess_fn = ""
+			self._preprocess_fn = lambda x: x
 
 		# Prepare the train and test data
 		self._dataset = None
@@ -57,7 +61,7 @@ class Data:
 		return Data(
 			dataset_name=config['dataset_name'],
 			batch_size=config['batch_size'],
-			raw_preprocess_fn=config['preprocess_fn'],
+			raw_preprocess_fn=config.get('preprocess_fn'),
 			splitter=config.get('splitter', None)
 		)
 
