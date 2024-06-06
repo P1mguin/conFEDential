@@ -402,14 +402,18 @@ class Attack:
 
 		# Convert model iterations to state dicts
 		keys = template_model.state_dict().keys()
-		state_dicts = [{key: torch.tensor(model_iterations[j][i], dtype=torch.float32, requires_grad=True) for j, key in enumerate(keys)} for
-					   i in range(global_rounds)]
+		parameter_keys = set(name for name, _ in template_model.named_parameters())
+		state_dicts = [{key: torch.tensor(
+			model_iterations[j][i],
+			dtype=torch.float32,
+			requires_grad=(key in parameter_keys)
+		) for j, key in enumerate(keys)} for i in range(global_rounds)]
 
 		# Get the activation values
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
-		gradients = self._get_gradients(losses, state_dicts)
+		gradients = self._get_gradients(losses, state_dicts, simulation)
 		losses = losses.T
 		return activation_values, gradients, losses
 
@@ -461,13 +465,14 @@ class Attack:
 		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
 		return losses
 
-	def _get_gradients(self, losses, model_state_dicts):
+	def _get_gradients(self, losses, model_state_dicts, simulation):
 		gradients = []
+		parameter_keys = [name for name, _ in simulation.model.named_parameters()]
 		for i, state_dict in enumerate(model_state_dicts):
 			model_gradients = []
 			for loss in losses[i]:
 				loss.backward(retain_graph=True)
-				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in state_dict.keys()))
+				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in parameter_keys))
 			gradients.append((torch.stack(layers) for layers in zip(*model_gradients)))
 
 		# Transpose the gradients so that they are bundled per layer instead of per model iteration
