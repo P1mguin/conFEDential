@@ -5,193 +5,152 @@ from functools import reduce
 import torch
 import torch.nn as nn
 
-from src import training, utils
+from src import utils
 
 
 class AttackNet(nn.Module):
-	def __init__(self, config):
+	def __init__(self, config, gradient_shapes, activation_shapes, metrics_shapes, label_shape):
 		super(AttackNet, self).__init__()
 		self.config = config
-		self.activation_components = None
+
 		self.label_component = None
 		self.loss_component = None
-		self.gradient_component = None
 		self.metric_components = None
+		self.activation_components = None
+		self.gradient_components = None
 		self.encoder_component = None
 
-		self._initialize_components()
+		self._initialize_components(gradient_shapes, activation_shapes, metrics_shapes, label_shape)
 
-	def forward(self, activation_values, gradients, losses, labels, metrics):
-		batch_size = self.config.attack.attack_simulation.batch_size
+	def forward(self, gradients, activation_values, metrics, loss, label):
+		batch_size = loss.size(0)
 
-		activation = torch.stack(
-			[component(activation_value).view(batch_size, -1)
-			 for component, activation_value in zip(self.activation_components, activation_values)]
-		)
+		label = self.label_component(label)
+		loss = self.loss_component(loss)
+		activation = torch.cat([
+			activation_component(activation_value).view(batch_size, -1)
+			for activation_component, activation_value in zip(self.activation_components, activation_values)
+		], dim=1)
 
-		label = self.label_component(labels.unsqueeze(-1)).view(batch_size, -1)
-		loss = self.loss_component(losses.unsqueeze(-1)).view(batch_size, -1)
-
-		# The input of the gradient components is
-		# (attack batch size, iterations captured, out_channels, in_channels, kernel/out_features, kernel/in_features)
-		# The convolution is
-		gradient = torch.stack(
-			[
-				torch.stack([component(value).view(-1) for value in gradient_value])
-				for component, gradient_value in zip(self.gradient_components, gradients)
-			]
-		)
-
-		metric = torch.stack([
-			torch.stack([
-				torch.stack([metric_component(layer_metric_value).view(-1) for layer_metric_value in metric_value])
-				for metric_component, metric_value in zip(metric_components, metric_values)
-			])
-			for metric_components, metric_values in zip(self.metric_components, metrics.values())
-		])
+		# The input shape of the gradients and metrics is:
+		# (in_channels/in_features, out_channels/1, kernel_width/1, kernel_height/out_features)
+		gradients = [gradient.view(-1, *gradient.shape[-3:]) for gradient in gradients]
+		gradients = torch.cat([
+			gradient_component(gradient).view(batch_size, -1)
+			for gradient_component, gradient in zip(self.gradient_components, gradients)
+		], dim=1)
+		metrics = {
+			key: [value.view(-1, *value.shape[-3:]) for value in metrics[key]]
+			for key in metrics.keys()
+		}
+		metrics = [
+			torch.cat([
+				metric_component(metric_value).view(batch_size, -1)
+				for metric_component, metric_value in zip(self.metric_components[key], metrics[key])
+			], dim=1) for key in metrics.keys()
+		]
 
 		# Concatenate the activation, label, loss, gradient and metric components
-		encoder_input = torch.cat([*activation, label, loss, *gradient, *metric.squeeze(0)], dim=1)
-		prediction = self.encoder_component(encoder_input)
+		encoder_input = torch.cat((label, loss, activation, gradients, *metrics), dim=1)
+		prediction = self.encoder_component(encoder_input).squeeze(1)
 		return prediction
 
-	def _initialize_components(self):
-		self._initialize_activation_component()
-		self._initialize_label_component()
+	def _initialize_components(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape):
+		self._initialize_label_component(label_shape)
 		self._initialize_loss_component()
-		self._initialize_gradient_component()
-		self._initialize_encoder_component()
-		self._initialize_metric_component()
+		self._initialize_activation_component(activation_shapes)
+		self._initialize_gradient_component(gradient_shapes)
+		self._initialize_metric_component(metrics_shapes)
+		self._initialize_encoder_component(activation_shapes, gradient_shapes, metrics_shapes)
 
-	def _initialize_activation_component(self):
-		model = self.config.simulation.model
-		input_shape = self.config.simulation.data.get_input_size()
-		layer_shapes = self.config.simulation.model_config.get_layer_shapes(input_shape)
-
-		trainable_layer_indices = self.config.simulation.model_config.get_trainable_layer_indices()
-		activation_components = []
-		for i in range(len(model.layers)):
-			# Trainable layers are accounted for in the gradients components
-			if i in trainable_layer_indices:
-				continue
-
-			layer_output_shape = layer_shapes[i + 1]
-			is_flattened = len(layer_output_shape) > 1
-			if is_flattened:
-				layer_output_shape = (reduce(operator.mul, layer_output_shape, 1),)
-
-			activation_component = self._get_fcn_layers(layer_output_shape[0])
-
-			if is_flattened:
-				# Prepend a flattening layer to the activation component
-				activation_component.insert(0, nn.Flatten(start_dim=-len(layer_shapes[i])))
-
-			activation_component = utils.get_net_class_from_layers(activation_component)
-			activation_components.append(activation_component)
-
-		self.activation_components = [component().to(training.DEVICE) for component in activation_components]
-
-	def _initialize_label_component(self):
-		layers = self._get_fcn_layers(1)
-		label_component = utils.get_net_class_from_layers(layers)
-		self.label_component = label_component().to(training.DEVICE)
+	def _initialize_label_component(self, label_shape):
+		layers = self._get_fcn_layers(label_shape[0])
+		label_component = nn.Sequential(*layers)
+		self.label_component = label_component
 
 	def _initialize_loss_component(self):
 		layers = self._get_fcn_layers(1)
-		loss_component = utils.get_net_class_from_layers(layers)
-		self.loss_component = loss_component().to(training.DEVICE)
+		layers.append(nn.Flatten(start_dim=1))
+		loss_component = nn.Sequential(*layers)
+		self.loss_component = loss_component
 
-	def _initialize_gradient_component(self):
-		model = self.config.simulation.model
-		gradient_shapes = self.config.simulation.model_config.get_gradient_shapes()
+	def _initialize_activation_component(self, activation_shapes):
+		# Flatten the activation components along the second axis, the first is the global rounds. They go into an
+		# FCN so need flattening
+		activation_components = [[nn.Flatten(start_dim=2)] for _ in activation_shapes]
+		activation_shapes = [shape[1:] for shape in activation_shapes]
+		activation_shapes = [reduce(operator.mul, shape, 1) for shape in activation_shapes]
 
-		trainable_layer_indices = self.config.simulation.model_config.get_trainable_layer_indices()
-		gradient_components = []
-		for i in range(len(model.layers)):
-			# Non-trainable layers are accounted for in the activation components
-			if i not in trainable_layer_indices:
-				continue
+		for activation_shape, activation_component in zip(activation_shapes, activation_components):
+			activation_component.extend(self._get_fcn_layers(activation_shape))
 
-			weights_shape, bias_shape = gradient_shapes.pop(0)
+		self.activation_components = nn.ModuleList([nn.Sequential(*component) for component in activation_components])
 
-			# Based on the assumption that the input will always be 3dimensional:
-			bias_shape = bias_shape + (1,)
-			while len(weights_shape) < 4:
-				weights_shape = (1,) + weights_shape
-			while len(bias_shape) < 4:
-				bias_shape = (1,) + bias_shape
+	def _initialize_gradient_component(self, gradient_shapes):
+		gradient_components = [self._get_convolution_layers(gradient_shape) for gradient_shape in gradient_shapes]
 
-			# Assume the input to be batched
-			weights_shape = (1,) + weights_shape
-			bias_shape = (1,) + bias_shape
+		out_channels = next(
+			layer.out_channels for layer in reversed(gradient_components[0]) if hasattr(layer, "out_channels")
+		)
 
-			weights_convolution_component = self._get_convolution_layers(weights_shape)
-			bias_convolution_component = self._get_convolution_layers(bias_shape)
+		# Add the fcn components to the convolutional components
+		for gradient_component in gradient_components:
+			gradient_component.append(nn.Flatten(start_dim=-3))
+			gradient_component.extend(self._get_fcn_layers(out_channels))
 
-			# Flatten both outputs to be a (batched) vector
-			weights_convolution_component.append(nn.Flatten(1))
-			bias_convolution_component.append(nn.Flatten(1))
+		self.gradient_components = nn.ModuleList([nn.Sequential(*component) for component in gradient_components])
 
-			# Get the output channels of the last convolutional component of the attacker model
-			out_channels = next(
-				layer.out_channels for layer in reversed(bias_convolution_component) if hasattr(layer, "out_channels"))
-
-			# The convolutional components will have reduced the last dimension of the gradient to 1, the rest will be
-			# flattened
-			weight_size = reduce(operator.mul, [out_channels, *weights_shape[2:-1], 1])
-			bias_size = reduce(operator.mul, [out_channels, *bias_shape[2:-1], 1])
-
-			# The weights are equal to (in_channels, out_channels, vertical kernel size/input features)
-			# Where it is the vertical kernel size for a convolutional layer and input features for a fcl
-			# Create the linear components and append
-			weights_convolution_component.extend(self._get_fcn_layers(weight_size))
-			bias_convolution_component.extend(self._get_fcn_layers(bias_size))
-
-			# Flatten the output of the fcn components
-			weight_net = utils.get_net_class_from_layers(weights_convolution_component)
-			bias_net = utils.get_net_class_from_layers(bias_convolution_component)
-			gradient_components.append((weight_net, bias_net))
-		self.gradient_components = [
-			component().to(training.DEVICE) for components in gradient_components for component in components
-		]
-
-	def _initialize_metric_component(self):
+	def _initialize_metric_component(self, metrics_shapes):
 		# Get the metrics from the config and then copy with equal shape as the
-		_, metrics = self.config.simulation.get_server_aggregates()
-		self.metric_components = [
-									 [copy.deepcopy(gradient_component) for gradient_component in
-									  self.gradient_components]
-								 ] * len(metrics)
+		self.metric_components = {}
+		for key, metric_shapes in metrics_shapes.items():
+			metric_components = [self._get_convolution_layers(metric_shape) for metric_shape in metric_shapes]
 
-	def _initialize_encoder_component(self):
-		model = self.config.simulation.model
-		# First go over the activation and gradient components
-		# The gradient components will add the bias and weights in one sweep
-		trainable_layer_indices = self.config.simulation.model_config.get_trainable_layer_indices()
-
-		activation_components = copy.deepcopy(self.activation_components)
-		gradient_components = copy.deepcopy(self.gradient_components)
-
-		layer_components = activation_components + gradient_components
-
-		global_rounds = self.config.simulation.global_rounds
-		metric_count = len(self.config.simulation.get_server_aggregates()[1])
-
-		# Get the output size of each component
-		input_size = 0
-		for i, layer_component in enumerate(layer_components):
-			out_features = next(
-				layer.out_features for layer in reversed(gradient_components[0].layers) if
-				hasattr(layer, "out_features")
+			out_channels = next(
+				layer.out_channels for layer in reversed(metric_components[0]) if hasattr(layer, "out_channels")
 			)
-			if i < len(activation_components):
-				input_size += out_features * global_rounds
-			else:
-				input_size += out_features * (1 + metric_count) * global_rounds
 
-		# Add the out features two times for the loss and label component
-		input_size += out_features * 2 * global_rounds
+			# Add the fcn components to the convolutional components
+			for metric_component in metric_components:
+				metric_component.append(nn.Flatten(start_dim=-3))
+				metric_component.extend(self._get_fcn_layers(out_channels))
 
+			self.metric_components[key] = nn.ModuleList([nn.Sequential(*component) for component in metric_components])
+		self.metric_components = nn.ModuleDict(self.metric_components)
+
+	def _initialize_encoder_component(self, activation_shapes, gradient_shapes, metrics_shapes):
+		# Keep track of the size that the encoder needs to take
+		encoder_size = 0
+
+		# Helper variable and helper function
+		round_multiplier = self.config.simulation.global_rounds + 1
+		get_output_size = lambda component: next(
+			layer.out_features for layer in reversed(component) if hasattr(layer, "out_features")
+		)
+
+		# Size of the label component
+		encoder_size += get_output_size(self.label_component)
+
+		# Size of the loss component
+		encoder_size += get_output_size(self.loss_component) * round_multiplier
+
+		# Size of the activation components
+		activation_output_size = get_output_size(self.activation_components[0])
+		encoder_size += len(activation_shapes) * activation_output_size * round_multiplier
+
+		# Size of the gradient components
+		gradient_output_size = get_output_size(self.gradient_components[0])
+		encoder_size += (sum(gradient_shape[-4] for gradient_shape in gradient_shapes)
+						 * gradient_output_size * round_multiplier)
+
+		# Size of the metric components
+		if metrics_shapes != {}:
+			metric_output_size = get_output_size(next(iter(self.metric_components.values()))[0])
+			encoder_size += sum(
+				sum(metric_shapes[-4] for metric_shapes in metrics_shapes[key]) for key in metrics_shapes.keys()
+			) * metric_output_size * round_multiplier
+
+		# Construct the encoder component knowing the size of the input
 		layers = []
 		in_features_set = False
 		raw_encoder_copy = copy.deepcopy(self.config.attack.attack_simulation.model_architecture.encoder)
@@ -202,12 +161,12 @@ class AttackNet(nn.Module):
 			# The first linear layer of the attack has the size of the concatenated output of all components
 			if not in_features_set and layer_type is nn.Linear:
 				in_features_set = True
-				parameters = {**parameters, "in_features": input_size}
+				parameters = {**parameters, "in_features": encoder_size}
 
 			layer = layer_type(**parameters)
 			layers.append(layer)
-		encoder_component = utils.get_net_class_from_layers(layers)
-		self.encoder_component = encoder_component()
+		encoder_component = nn.Sequential(*layers)
+		self.encoder_component = encoder_component
 
 	def _get_fcn_layers(self, input_size: int):
 		layers = []
@@ -225,7 +184,6 @@ class AttackNet(nn.Module):
 			layer = layer_type(**parameters)
 			layers.append(layer)
 		return layers
-		pass
 
 	def _get_convolution_layers(self, input_shape):
 		layers = []
@@ -242,9 +200,9 @@ class AttackNet(nn.Module):
 			parameters = {key: value for key, value in list(layer.items())[1:]}
 
 			# The kernel of the first convolution layer is as wide as the width/breadth of the input shape
-			if not dynamic_parameters_set and (layer_type is nn.Conv2d or layer_type is nn.Conv3d):
-				parameters["in_channels"] = input_shape[1]
-				parameters["kernel_size"].append(input_shape[-1])
+			if not dynamic_parameters_set and layer_type is nn.Conv2d:
+				parameters["in_channels"] = input_shape[-3]
+				parameters["kernel_size"] = input_shape[-2:]
 				dynamic_parameters_set = True
 
 			layer = layer_type(**parameters)

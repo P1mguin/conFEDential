@@ -1,14 +1,14 @@
 from typing import Tuple
 
-from datasets import load_dataset
-from torch.utils.data import DataLoader
+from datasets import Dataset as HuggingFaceDataset, load_dataset
+from torchvision import transforms
 
 from src.data.Dataset import Dataset
 
 
 class CIFAR100(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[DataLoader, DataLoader]:
+	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
 		# For documentation see Dataset
 		Dataset.is_data_downloaded("cifar100")
 		train_dataset, test_dataset = load_dataset(
@@ -18,6 +18,30 @@ class CIFAR100(Dataset):
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
 		)
+
+		train_transformation = transforms.Compose([
+			transforms.RandomCrop(32, padding=4),
+			transforms.RandomHorizontalFlip(),
+			transforms.RandomRotation(15),
+			transforms.ToTensor(),
+			transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+		])
+
+		test_transformation = transforms.Compose([
+			transforms.ToTensor(),
+			transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+		])
+
+		def train_augmentation(x):
+			x["img"] = train_transformation(x["img"])
+			return x
+
+		def test_augmentation(x):
+			x["img"] = test_transformation(x["img"])
+			return x
+
+		train_dataset = train_dataset.map(train_augmentation)
+		test_dataset = test_dataset.map(test_augmentation)
 
 		# Convert the pytorch tensor to NumPy such FedArtML can convert the data to non-iid
 		train_dataset.set_format(type="np")

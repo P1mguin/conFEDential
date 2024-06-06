@@ -91,9 +91,6 @@ class Data:
 	def batch_size(self):
 		return self._batch_size
 
-	def get_input_size(self):
-		return next(iter(self.dataset[0]))["x"].shape
-
 	def _prepare_dataset(self):
 		"""
 		If the preprocessed dataset is available, loads that and sets the dataset variable. Otherwise,

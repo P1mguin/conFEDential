@@ -2,11 +2,10 @@ import os
 import random
 from logging import INFO
 
-import numpy as np
-import torch
 import yaml
 from flwr.common import log
 
+from src.attacks import AttackNet
 from src.experiment import Attack, Simulation
 
 
@@ -54,81 +53,137 @@ class Config:
 	def attack(self):
 		return self._attack
 
-	def run_simulation(self, concurrent_clients: int, is_online: bool, is_capturing: bool, run_name: str):
+	def run_simulation(
+			self,
+			concurrent_clients: int,
+			memory: int | None,
+			num_cpus: int,
+			num_gpus: int,
+			is_ray_initialised: bool,
+			is_online: bool,
+			is_capturing: bool,
+			run_name: str
+	):
 		log(INFO, "Starting conFEDential simulation")
 		# If nothing has been captured for this simulation, capture the simulation
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
 			log(INFO, "No previous federated learning simulation found, starting training simulation...")
-			self.simulation.simulate_federation(concurrent_clients, is_capturing, is_online, run_name)
+			self.simulation.simulate_federation(
+				concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_capturing, is_online, run_name
+			)
 		else:
 			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
 
-	# For each intercepted datapoint, get their gradients, activation functions, loss
-	# attack_dataset = self._get_attack_dataset()
+		# for _ in range(self.attack.repetitions):
+		# 	# Clean the variables of the attack
+		# 	self.attack.reset_variables()
+		#
+		# 	# For each intercepted datapoint, get their gradients, activation functions, loss
+		# 	# Add fraction eval for debugging purposes
+		# 	fraction_test = 1.0
+		# 	fraction_train = 0.85
+		# 	(
+		# 		train_dataset,
+		# 		validation_dataset,
+		# 		test_dataset
+		# 	) = self._get_attack_datasets(fraction_train, fraction_test)
+		#
+		# 	# Get the template model and train it
+		# 	attack_model = self._get_attack_model(train_dataset)
+		#
+		# 	wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
+		# 	mode = "online" if is_online else "offline"
+		# 	wandb_kwargs = {**wandb_kwargs, "mode": mode}
+		# 	self.attack.membership_inference_attack_model(
+		# 		attack_model, train_dataset, validation_dataset, test_dataset, wandb_kwargs
+		# 	)
+		pass
 
-	# Get the attack model
-	# 		attack_model = AttackNet(self)
+	def _get_attack_model(self, attack_dataset):
+		(
+			gradient,
+			activation_value,
+			metrics,
+			loss_value,
+			label
+		), is_value_member, value_origin = next(iter(attack_dataset))
+		attack_dataset.dataset.reset_generator()
 
-	def _get_attack_dataset(self):
-		# Get the model
-		server_aggregates = self.simulation.get_server_aggregates()
+		# Construct the attack model from all the shapes
+		gradient_shapes = [gradient.shape[1:] for gradient in gradient]
+		activation_shapes = [activation.shape[1:] for activation in activation_value]
+		metrics_shapes = {key: [layer.shape[1:] for layer in metric] for key, metric in metrics.items()}
+		label_shape = label.shape[1:]
 
-		# Get the data to which the attacker has access
-		attack_data = self._get_intercepted_samples()
-		attack_dataset = self.attack.get_attack_dataset(server_aggregates, attack_data, self.simulation)
-		return attack_dataset
+		# Get the attack model
+		attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
+		return attack_model
 
-	def _get_intercepted_samples(self):
-		# Get which client participated in which round
-		client_participation = self.simulation.get_client_participation()
+	def _get_attack_datasets(self, fraction_train: float = 0.85, fraction_test: float = 1.0):
+		# Get the captured server aggregates
+		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
 
-		# Get the data loaders to which the attacker has access
-		client_count = self.simulation.client_count
-		data_access_indices = self.attack.get_data_access_indices(client_count)
+		# Get the captured messages
+		# intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)
+		# model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
 
-		# Get the train_loaders with the corresponding indices
-		all_train_loaders = self.simulation.train_loaders
+		# Get the intercepted samples
+		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_test)
+
+		# Split the intercepted data in training and validation
+		training_length = int(len(intercepted_data) * fraction_train)
+		intercepted_indices = set(range(len(intercepted_data)))
+		training_indices = set(random.sample(list(intercepted_indices), training_length))
+		validation_indices = intercepted_indices - training_indices
+		training_data = [intercepted_data[i] for i in training_indices]
+		validation_data = [intercepted_data[i] for i in validation_indices]
+
+		# Get the datasets
+		training_dataset = self.attack.get_membership_inference_attack_dataset(
+			aggregated_models,
+			aggregated_metrics,
+			training_data,
+			self.simulation
+		)
+
+		validation_dataset = self.attack.get_membership_inference_attack_dataset(
+			aggregated_models,
+			aggregated_metrics,
+			validation_data,
+			self.simulation
+		)
+
+		test_dataset = self.attack.get_membership_inference_attack_dataset(
+			aggregated_models,
+			aggregated_metrics,
+			remaining_data,
+			self.simulation
+		)
+
+		return training_dataset, validation_dataset, test_dataset
+
+	def _get_intercepted_samples(self, fraction_eval: float = 1.0):
+		# Get a target from all possible data
+		target, is_target_member, target_origin = self.attack.get_target_sample(self.simulation)
+
+		# Combine the data in one big dataset, annotated with the client origin and if it is trained on
+		train_loaders = self.simulation.train_loaders
 		test_loader = self.simulation.test_loader
-		data_loaders = np.array(all_train_loaders)[data_access_indices]
-
-		# Get the target sample
-		_, target = self.attack.get_target_sample(self.simulation)
-
-		# If the attacker has all-access add the test data as well
-		global_rounds = self.simulation.global_rounds
-		if self.attack.data_access == "all":
-			# The attack would be trivial if the attacker also had access to the sample. So remove that
-			test_samples = [
-				[(*item, False)] * global_rounds for item in test_loader.dataset if item is not target
-			]
-		# Otherwise, assume the client has a similar ratio of test data as they have train data
-		else:
-			test_data_size = int(len(test_loader.dataset) / client_count)
-			start = test_data_size * self.attack.client_id
-			end = test_data_size * (self.attack.client_id + 1)
-			test_samples = [[(*item, False)] * global_rounds for item in test_loader.dataset[start:end]]
-
-		training_samples = []
-		for i, dataloader in enumerate(data_loaders):
-			for item in dataloader.dataset:
-				# The attack would be trivial if the attacker also had access to the sample. So remove that
-				if item is target:
-					continue
-
-				if self.attack.data_access == "all":
-					training_round_items = [(*item, i in client_participation[j]) for j in range(global_rounds)]
-				else:
-					training_round_items = [(*item, self.attack.client_id in client_participation[j]) for j in
-											range(global_rounds)]
-				training_samples.append(training_round_items)
-
-		intercepted_samples = training_samples + test_samples
-
-		# Convert to torch tensors
-		intercepted_samples = [
-			tuple(torch.tensor(value) for value in zip(*intercepted_sample)) for intercepted_sample in
-			intercepted_samples
+		training_data = [
+			(sample, True, client_id) for client_id, train_loader in enumerate(train_loaders)
+			for sample in train_loader.dataset if sample is not target
 		]
+		testing_data = [(sample, False, None) for sample in test_loader.dataset if sample is not target]
+		data = [*training_data, *testing_data]
+		num_elements = round(self.attack.data_access * len(data))
 
-		return intercepted_samples
+		intercepted_indices = set(random.sample(range(len(data)), num_elements))
+		remaining_indices = set(range(len(data))) - intercepted_indices
+		remaining_indices = random.sample(list(remaining_indices), round(fraction_eval * len(remaining_indices)))
+
+		intercepted_samples = [data[i] for i in intercepted_indices]
+		remaining_samples = [data[i] for i in remaining_indices]
+		remaining_samples += [(target, is_target_member, target_origin)]
+
+		return intercepted_samples, remaining_samples

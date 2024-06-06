@@ -1,6 +1,7 @@
 import collections
 import hashlib
 import json
+import math
 import multiprocessing
 import os
 import pickle
@@ -8,7 +9,9 @@ from logging import ERROR, INFO, WARN
 from typing import Generator, List
 
 import flwr as fl
+import h5py
 import numpy as np
+import psutil
 import ray
 import torch
 import wandb
@@ -136,6 +139,10 @@ class Simulation:
 	def simulate_federation(
 			self,
 			concurrent_clients: int,
+			memory: int | None,
+			num_cpus: int,
+			num_gpus: int,
+			is_ray_initialised: bool = False,
 			is_capturing: bool = False,
 			is_online: bool = False,
 			run_name: str = None
@@ -146,24 +153,33 @@ class Simulation:
 		client_fn = Client.get_client_fn(self)
 		strategy = Server(self, is_capturing)
 
-		wandb_kwargs = self._get_wandb_kwargs(run_name)
+		wandb_kwargs = self.get_wandb_kwargs(run_name)
 		mode = "online" if is_online else "offline"
 		wandb.init(mode=mode, **wandb_kwargs)
 
-		# Initialize ray
-		ray_init_args = get_ray_init_args()
-
-		client_resources = get_client_resources(concurrent_clients)
+		client_resources = get_client_resources(concurrent_clients, memory, num_cpus, num_gpus)
 		log(INFO, "Starting federated learning simulation")
 		try:
-			fl.simulation.start_simulation(
-				client_fn=client_fn,
-				num_clients=self.client_count,
-				client_resources=client_resources,
-				ray_init_args=ray_init_args,
-				config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
-				strategy=strategy
-			)
+			if is_ray_initialised:
+				ray.init(address='auto')
+				fl.simulation.start_simulation(
+					client_fn=client_fn,
+					num_clients=self.client_count,
+					client_resources=client_resources,
+					keep_initialised=is_ray_initialised,
+					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					strategy=strategy
+				)
+			else:
+				ray_init_args = get_ray_init_args(memory, num_cpus, num_gpus)
+				fl.simulation.start_simulation(
+					client_fn=client_fn,
+					num_clients=self.client_count,
+					client_resources=client_resources,
+					ray_init_args=ray_init_args,
+					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					strategy=strategy
+				)
 		except Exception as e:
 			log(ERROR, e)
 			wandb.finish(exit_code=1)
@@ -173,58 +189,64 @@ class Simulation:
 
 	def get_server_aggregates(self):
 		"""
-		Returns the server traffic of the simulation.
+		Returns the aggregates of the model parameters and metrics of the simulation over all global rounds.
 		"""
-		aggregates, metrics = self._get_captured_variable("aggregates")
-		return aggregates, dict(metrics)
+		# Get the file names of the aggregates and metrics
+		base_path = self.get_capture_directory()
+		base_path = f"{base_path}aggregates/"
+		aggregate_file = f"{base_path}aggregates.hdf5"
+		metric_directory = f"{base_path}metrics/"
+		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
 
-	def get_messages(self):
+		# Get and return the variables
+		aggregates = self._get_captured_aggregates(aggregate_file)
+		metrics = {}
+		for metric_file in metric_files:
+			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
+			metrics[metric_name] = self._get_captured_aggregates(metric_file)
+		return aggregates, metrics
+
+	def _get_captured_aggregates(self, path):
+		aggregate_rounds = []
+		with h5py.File(path, 'r') as hf:
+			for values in hf.values():
+				aggregate_rounds.append(values[:])
+		return aggregate_rounds
+
+	def get_messages(self, intercepted_client_ids):
 		"""
 		Returns the messages of the simulation.
 		"""
-		messages, metrics = self._get_captured_variable("messages")
+		# Get the file names of the aggregates and metrics
+		base_path = self.get_capture_directory()
+		base_path = f"{base_path}messages/"
+		messages_file = f"{base_path}messages.hdf5"
+		metric_directory = f"{base_path}metrics/"
+		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
+
+		# Get the clients to which messages the attacker has access
+		messages = self._get_captured_messages(messages_file, intercepted_client_ids)
+		metrics = {}
+		for metric_file in metric_files:
+			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
+			metrics[metric_name] = self._get_captured_messages(metric_file, intercepted_client_ids)
 		return messages, metrics
 
-	def _get_captured_variable(self, variable_name: str):
-		"""
-		Helper method to retrieve information that has been saved
-		"""
-		capture_directory = self.get_capture_directory()
-		variable_directory = f"{capture_directory}{variable_name}/"
-		variable_path = f"{variable_directory}{variable_name}.npz"
+	def _get_captured_messages(self, path, intercepted_client_ids):
+		def get_client_messages(client_id):
+			with h5py.File(path, 'r') as hf:
+				client_group = hf[str(client_id)]
+				client_layers = []
+				server_rounds = None
+				for client_layer_group in client_group.values():
+					if server_rounds is None:
+						server_rounds = client_layer_group["server_rounds"][:]
 
-		variables = []
-		with open(variable_path, "rb") as f:
-			saved_variables = np.load(f)
-
-			for file in saved_variables.files:
-				variables.append(saved_variables[file])
-
-		metric_directory = f"{variable_directory}metrics/"
-		metrics = collections.defaultdict(list)
-		for metric_file in os.listdir(metric_directory):
-			metric_name = ".".join(metric_file.split(".")[:-1])
-			with open(metric_directory + metric_file, "rb") as f:
-				metric = np.load(f)
-
-				metric_values = []
-				for file in metric.files:
-					metric_values.append(metric[file])
-				metrics[metric_name] = metric_values
-		return variables, dict(metrics)
-
-	def get_client_participation(self):
-		"""
-		Returns the client participation of the simulation, i.e. if client i participated in round j. We expect the
-		resulting set of the result list to include client i at index j.
-		"""
-		messages, _ = self.get_messages()
-		tool_round = messages[0]
-		total_rounds = len(tool_round[0])
-		federation_participation = [
-			set(i for i, message in enumerate(tool_round[:, i]) if (message != 0).all()) for i in range(total_rounds)
-		]
-		return federation_participation
+					values = client_layer_group["values"][:]
+					client_layers.append(values)
+				yield server_rounds, client_layers
+		captured_messages = [list(get_client_messages(id)) for id in intercepted_client_ids]
+		return captured_messages
 
 	def _prepare_loaders(self):
 		"""
@@ -250,13 +272,13 @@ class Simulation:
 		train_datasets = self._split_data(train_dataset)
 
 		# Convert the test dataset to a tuple
-		test_dataset = [(value["x"], value["y"]) for value in test_dataset]
+		test_dataset = [(torch.tensor(value["x"]), value["y"]) for value in test_dataset]
 
 		# Bundle the information in a dataloader
 		train_loaders = []
 		for train_dataset in train_datasets:
-			if self._data.batch_size == -1:
-				batch_size = len(train_dataset)
+			if self._data.batch_size < 0:
+				batch_size = len(train_dataset) // abs(self._data.batch_size)
 			else:
 				batch_size = self._data.batch_size
 			data_loader = DataLoader(train_dataset, batch_size=batch_size)
@@ -320,15 +342,15 @@ class Simulation:
 				lengths[i] += 1
 
 			subsets = random_split(dataset, lengths)
-			split_data = ([(value["x"], value["y"]) for value in subset] for subset in subsets)
+			split_data = ([(torch.tensor(value["x"]), value["y"]) for value in subset] for subset in subsets)
 
 		return split_data
 
-	def _get_wandb_kwargs(self, run_name: str = None):
+	def get_wandb_kwargs(self, run_name: str = None):
 		if run_name is None:
-			tags = []
+			tags = ["Training"]
 		else:
-			tags = [run_name]
+			tags = ["Training", run_name]
 
 		return {
 			"project": "conFEDential",
@@ -346,53 +368,72 @@ class Simulation:
 		}
 
 
-def get_client_resources(concurrent_clients: int) -> dict:
+def get_client_resources(
+		concurrent_clients: int, memory: int | None, num_cpus: int | None, num_gpus: int | None
+) -> dict:
 	"""
 	Finds the amount of resources available to each client based on the amount of desired concurrent clients and the
 	resources available to the system.
 	"""
-	total_cpus = multiprocessing.cpu_count()
-	total_gpus = torch.cuda.device_count()
+	if num_cpus is None:
+		total_cpus = multiprocessing.cpu_count()
+	else:
+		total_cpus = num_cpus
+
+	if num_gpus is None:
+		total_gpus = torch.cuda.device_count()
+	else:
+		total_gpus = num_gpus
+
+	if memory is None:
+		memory = psutil.virtual_memory().total
+	else:
+		memory = math.floor(memory * (1024 ** 3))
 
 	client_cpus = total_cpus // concurrent_clients
 	client_gpus = total_gpus / concurrent_clients
+	client_memory = memory // concurrent_clients
 
 	if client_cpus * concurrent_clients < total_cpus:
 		log(WARN, "The amount of clients is not a divisor of the total amount of CPUs,\n"
 				  "consider changing the amount of clients so that all available resources are used."
 				  f"The total resources are {total_cpus} CPUs and {total_gpus} GPUs.")
 	else:
-		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs and {client_gpus} GPUs for"
-				  f" the total available {total_cpus} CPUs and {total_gpus} GPUs")
+		log(INFO, f"Created {concurrent_clients} clients with resources {client_cpus} CPUs, {client_gpus} GPUs, "
+				  f"and {round(client_memory / (1024 ** 3), 1)}GB for the total available {total_cpus} CPUs, {total_gpus} GPUs "
+				  f"and {round(memory / (1024 ** 3), 1)}GB.")
 
 	client_resources = {
 		"num_cpus": client_cpus,
 		"num_gpus": client_gpus,
+		"memory": client_memory,
 	}
 	return client_resources
 
 
-def get_ray_init_args() -> dict:
+def get_ray_init_args(memory: int | None, num_cpus: int | None, num_gpus: int | None) -> dict:
 	"""
 	Returns the ray init arguments for the type of system the simulation is run on.
 	"""
-	total_cpus = multiprocessing.cpu_count()
-	total_gpus = torch.cuda.device_count()
+	if num_cpus is None:
+		num_cpus = multiprocessing.cpu_count()
+
+	if num_gpus is None:
+		num_gpus = torch.cuda.device_count()
+
+	if memory is None:
+		memory = psutil.virtual_memory().total
+	else:
+		memory = math.floor(memory * (1024 ** 3))
 
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
 			"excludes": [".git", "hpc_runs"]
 		},
-		"num_cpus": total_cpus,
-		"num_gpus": total_gpus,
+		"num_cpus": num_cpus,
+		"num_gpus": num_gpus,
+		"_memory": memory,
 	}
-
-	# Cluster admin wants to use local instead of tmp
-	if os.path.exists("/local"):
-		ray_init_args = {
-			**ray_init_args,
-			"_temp_dir": "/local/ray",
-		}
 
 	return ray_init_args

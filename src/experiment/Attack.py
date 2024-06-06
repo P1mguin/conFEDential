@@ -1,23 +1,27 @@
-import copy
-import itertools
 import math
 import random
-from typing import List, Tuple
+from logging import INFO
+from typing import List
 
-import numpy.typing as npt
+import more_itertools
+import numpy as np
 import torch
 import torch.nn as nn
+import torch.utils.data as data
+import wandb
+from flwr.common import log
+from sklearn.metrics import auc, roc_curve
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 import src.training as training
-import src.utils as utils
 from src.experiment import AttackSimulation
 
 
 class Attack:
 	def __init__(
 			self,
-			data_access: str,
+			data_access: float,
 			message_access: str,
 			repetitions: int,
 			attack_simulation=None
@@ -68,7 +72,7 @@ class Attack:
 		self._client_id = client_id
 
 	@property
-	def data_access(self) -> str:
+	def data_access(self) -> float:
 		return self._data_access
 
 	@property
@@ -79,46 +83,228 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def get_data_access_indices(self, client_count) -> List[int]:
-		if self._data_access == "client":
+	def membership_inference_attack_model(self, attack_model, train_loader, validation_loader, test_loader, wandb_kwargs):
+		wandb_kwargs = self._get_wandb_kwargs("membership-inference", wandb_kwargs)
+		wandb.init(**wandb_kwargs)
+
+		# Set initial parameters and get initial performance
+		i = 0
+		test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
+		val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
+
+		# Log the initial performance
+		log(
+			INFO,
+			f"Initial performance: validation auc {val_roc_auc}, test auc {test_roc_auc},"
+			f" validation loss {val_loss}, test loss {test_loss}"
+		)
+		if len(test_loader.dataset) == 1:
+			self._log_aucs(
+				[val_roc_auc],
+				[val_fpr],
+				[val_tpr],
+				[val_loss, test_loss],
+				["Validation", "Test"],
+				step=-1
+			)
+		else:
+			self._log_aucs(
+				[val_roc_auc, test_roc_auc],
+				[val_fpr, test_fpr],
+				[val_tpr, test_tpr],
+				[val_loss, test_loss],
+				["Validation", "Test"],
+				step=-1
+			)
+
+		# Get training algorithm variables and set model in training mode
+		attack_model = attack_model.to(training.DEVICE)
+		attack_model.train()
+		criterion = nn.MSELoss()
+		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
+
+		# Training loop with early stopping
+		previous_val_roc_auc = 0.
+		total_buffer_iterations = 5
+		buffer_iterations = total_buffer_iterations
+		while buffer_iterations > 0 or (
+				val_roc_auc > previous_val_roc_auc and buffer_iterations == total_buffer_iterations
+		):
+			if val_roc_auc <= previous_val_roc_auc or buffer_iterations < total_buffer_iterations:
+				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
+				buffer_iterations -= 1
+
+			previous_val_roc_auc = val_roc_auc
+			predictions = torch.Tensor()
+			is_members = torch.Tensor()
+			for (
+					gradient,
+					activation_value,
+					metrics,
+					loss_value,
+					label
+			), is_value_member, _ in tqdm(train_loader, leave=True):
+				optimizer.zero_grad()
+				gradient = [layer.to(training.DEVICE) for layer in gradient]
+				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
+				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
+				loss_value = loss_value.to(training.DEVICE)
+				label = label.to(training.DEVICE)
+
+				prediction = attack_model(gradient, activation_value, metrics, loss_value, label)
+
+				# Delete memory heavy objects
+				del gradient, activation_value, metrics, loss_value, label
+
+				predictions = torch.cat((predictions, prediction.detach()))
+				is_members = torch.cat((is_members, is_value_member.detach()))
+				loss = criterion(prediction, is_value_member)
+
+				del prediction
+
+				loss.backward()
+				optimizer.step()
+
+			# Get the performance after the epoch
+			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
+			train_roc_auc = auc(train_fpr, train_tpr)
+			train_loss = criterion(predictions, is_members)
+			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
+			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
+
+			# Log the performance
+			log(
+				INFO,
+				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
+				f"train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
+			)
+			if len(test_loader.dataset) == 1:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc],
+					[train_fpr, val_fpr],
+					[train_tpr, val_fpr],
+					[train_loss, val_loss, test_loss],
+					["Train", "Validation", "Test"],
+					step=i
+				)
+			else:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc, test_roc_auc],
+					[train_fpr, val_fpr, test_fpr],
+					[train_tpr, val_tpr, test_tpr],
+					[train_loss, val_loss, test_loss],
+					["Train", "Validation", "Test"],
+					step=i
+				)
+
+			i += 1
+		wandb.finish()
+
+	def _test_model(self, model, dataloader):
+		# Set the model on the right device and put it in testing mode
+		model = model.to(training.DEVICE)
+		model.eval()
+
+		criterion = nn.MSELoss()
+
+		predictions = torch.Tensor()
+		is_members = torch.Tensor()
+		for (
+				gradient,
+				activation_value,
+				metrics,
+				loss_value,
+				label
+		), is_value_member, _ in tqdm(dataloader, leave=True):
+			with torch.no_grad():
+				gradient = [layer.to(training.DEVICE) for layer in gradient]
+				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
+				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
+				loss_value = loss_value.to(training.DEVICE)
+				label = label.to(training.DEVICE)
+
+				prediction = model(gradient, activation_value, metrics, loss_value, label)
+
+				predictions = torch.cat((predictions, prediction))
+				is_members = torch.cat((is_members, is_value_member))
+
+		fpr, tpr, _ = roc_curve(is_members, predictions)
+		roc_auc = auc(fpr, tpr)
+		loss = criterion(predictions, is_members)
+		return roc_auc, fpr, tpr, loss
+
+	def _log_aucs(self, roc_aucs, fprs, tprs, losses, titles, step: int):
+		wandb_log = {}
+
+		# Add the losses to the wandb log
+		for i in range(len(losses)):
+			loss = losses[i]
+			title = titles[i]
+			wandb_log[f"{title} loss"] = loss
+
+		# Add the auc to the wandb log
+		for i in range(len(roc_aucs)):
+			roc_auc = roc_aucs[i]
+			title = titles[i]
+			wandb_log[f"{title} ROC AUC"] = roc_auc
+			titles[i] = f"{title} (area = {round(roc_auc, 2)})"
+
+		# Remove the titles that do not have a roc auc
+		titles = titles[:len(roc_aucs)]
+
+		# Add guessing as a line to the plot
+		fprs += [np.array([0., 1.])]
+		tprs += [np.array([0., 1.])]
+		titles += ["Guessing (area = 0.50)"]
+
+		# Add the roc curve to the wandb log
+		plot_title = f"ROC AUCs at epoch {step}"
+		wandb_log[plot_title] = wandb.plot.line_series(
+			xs=fprs, ys=tprs, keys=titles, title=plot_title, xname="False Positive Rate"
+		)
+		wandb.log(wandb_log)
+
+	def reset_variables(self):
+		self._client_id = None
+		self._is_target_member = bool(random.getrandbits(1))
+		self._target = None
+		self._target_client = None
+
+	def get_message_access_indices(self, client_count) -> List[int]:
+		if self._message_access == "client":
 			return [self._client_id]
-		elif self._data_access == "all":
+		elif self._message_access == "server":
 			return list(range(client_count))
+		else:
+			return []
 
 	def get_target_sample(self, simulation):
 		"""
-		Function that selects the target to attack based on the configuration. In case the attacker has access to all
-		data, it will be any sample from the dataset. If they only have access to one client, the sample will come from
-		anything but the client. Returns the federation client id from which the attack target was taken, and the
-		attack target
+		Function that selects the target to attack based on the configuration. Samples one random target from all the
+		data, returns the target, whether it was taken from the training data (if it is a member), and which client
+		index the sample was taken from. In case the target is not a member, the client index will be None.
 		"""
 		if self._target is not None:
-			return self._target
+			return self._target, self._is_target_member, self._target_client
 
-		# If the attacker has access to all data, pick any random sample
-		# Otherwise pick any random sample from anything other than the client
-		train_loaders = simulation.train_loaders
-		test_loader = simulation.test_loader
-
+		# Generate whether the victim is a member, and if so what client they originate from
 		if self._is_target_member:
-			# Select a client to target and then a sample
-			possible_targets = list(range(len(train_loaders)))
-			if self.data_access == "client":
-				possible_targets.remove(self._client_id)
-			self._target_client = random.choice(possible_targets)
-
+			train_loaders = simulation.train_loaders
+			self._target_client = random.randint(0, len(train_loaders) - 1)
 			self._target = random.choice(train_loaders[self._target_client].dataset)
 		else:
 			# Pick any value from the test dataset
+			test_loader = simulation.test_loader
 			self._target_client = None
 			self._target = random.choice(test_loader.dataset)
 
-		return self._target_client, self._target
+		return self._target, self._is_target_member, self._target_client
 
-	def get_attack_dataset(
+	def get_membership_inference_attack_dataset(
 			self,
-			server_aggregates: Tuple[List[npt.NDArray], dict],
-			attack_data: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]],
+			models,
+			metrics,
+			intercepted_data,
 			simulation
 	) -> DataLoader:
 		"""
@@ -129,149 +315,216 @@ class Attack:
 		whether the model was trained on the client
 		:return:
 		"""
-		model_iterations = server_aggregates[0]
-		metric_iterations = server_aggregates[1]
+		# Choose either 8 or 16
+		process_batch_size = 16
 
-		# Reshape each value in the metrics to be 5D
-		for key, value in metric_iterations.items():
-			for i, layer in enumerate(value):
-				layer_value = torch.tensor(layer)
-				while layer_value.ndim < 5:
-					layer_value = layer_value.unsqueeze(1)
+		# Extract the value that will be used in the attack dataset into separate variables
+		features = torch.stack([torch.tensor(value[0][0]) for value in intercepted_data])
+		labels = torch.stack([torch.tensor(value[0][1]) for value in intercepted_data])
+		is_member = torch.stack([torch.tensor(value[1]) for value in intercepted_data])
+		member_origins = torch.tensor([value[2] if value[2] else -1 for value in intercepted_data])
+		num_classes = simulation.model_config.get_num_classes()
 
-				metric_iterations[key][i] = layer_value.float()
+		# Translate the boolean to an integer
+		is_member = is_member.int()
 
-		features = torch.stack([value[0] for value in attack_data])
-		labels = torch.stack([value[1] for value in attack_data])
-		is_member = torch.stack([value[2] for value in attack_data])
+		# Reshape the metrics so they are 5D and can fit in a gradient component
+		metrics = {
+			key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
+			metrics.items()
+		}
 
-		batch_size = self._attack_simulation.batch_size
-		batch_amount = math.ceil(len(features) / batch_size)
+		process_amount = math.ceil(len(features) / process_batch_size)
 
-		def attack_dataset_generator():
-			for i in range(batch_amount):
-				start = i * batch_size
-				end = (i + 1) * batch_size
+		def attack_dataset_generator(random_seed=None):
+			if random_seed is not None:
+				random.seed(random_seed)
+
+			indices = set(range(len(features)))
+			for i in range(process_amount):
+				try:
+					batch_indices = random.sample(list(indices), process_batch_size)
+				except ValueError:
+					batch_indices = list(indices)
+
+				indices = indices - set(batch_indices)
 
 				# Stack the information of the shadow_model_simulation in tensors
-				batch_features = features[start:end]
-				batch_labels = labels[start:end]
-				batch_is_member = is_member[start:end]
+				batch_features = features[batch_indices]
+				batch_labels = labels[batch_indices]
+				batch_is_member = is_member[batch_indices]
+				batch_member_origins = member_origins[batch_indices]
 
-				activation_values, gradients, loss = self._get_model_information_from_iterations(
-					batch_features, batch_labels, model_iterations, simulation
+				iteration_batch_size = len(batch_indices)
+
+				activation_values, gradients, loss = self._precompute_attack_features(
+					batch_features, batch_labels, models, simulation
 				)
 
-				for j in range(batch_size):
-					activation_value = [layer[j] for layer in activation_values]
-					gradient = [layer[j] for layer in gradients]
-					loss_value = loss[j]
-					is_value_member = batch_is_member[j]
-					label = batch_labels[j].float()
-					yield (activation_value, gradient, loss_value, label, metric_iterations), is_value_member
+				# One-hot encode the labels
+				batch_labels = torch.nn.functional.one_hot(batch_labels, num_classes=num_classes)
 
-		attack_dataset = attack_dataset_generator()
-		dataset = GeneratorDataset(attack_dataset, len(attack_data))
-		attack_dataloader = DataLoader(dataset, batch_size=self._attack_simulation.batch_size)
+				for j in range(iteration_batch_size):
+					# Make label float as it is the input for another component
+					label = batch_labels[j].float()
+
+					# Gradient, activation values and loss values have a grad_fn detach the tensor from it
+					gradient = [layer[j] for layer in gradients]
+					activation_value = [layer[j].detach() for layer in activation_values]
+					loss_value = loss[j].detach().unsqueeze(-1)
+
+					is_value_member = batch_is_member[j].detach()
+					value_origin = batch_member_origins[j].detach()
+
+					yield (
+						(gradient, activation_value, metrics, loss_value, label), is_value_member.float(), value_origin
+					)
+
+		# Helper variables for clarity
+		dataset_size = len(intercepted_data)
+
+		dataset = IterableDataset(attack_dataset_generator, dataset_size)
+
+		batch_size = self._attack_simulation.batch_size
+		if batch_size < 0:
+			batch_size = dataset_size // abs(batch_size)
+
+		attack_dataloader = DataLoader(dataset, batch_size=batch_size)
 		return attack_dataloader
 
-	def _get_model_information_from_iterations(self, features, labels, model_iterations, simulation):
+	def _precompute_attack_features(self, features, labels, model_iterations, simulation):
 		"""
 		Gets the loss, activation functions and gradients for a list of parameters
 		"""
-		features, labels = torch.tensor(features).to(training.DEVICE), torch.tensor(labels).to(training.DEVICE)
-
 		# Get the models from the parameter iterations
-		batch_size = len(features)
-		models = self._get_models(model_iterations, batch_size, simulation)
-		activation_values = self._get_activation_values(models, features)
+		template_model = simulation.model
+		global_rounds = simulation.global_rounds + 1
+
+		# Convert model iterations to state dicts
+		keys = template_model.state_dict().keys()
+		state_dicts = [{key: torch.tensor(model_iterations[j][i], requires_grad=True) for j, key in enumerate(keys)} for
+					   i in range(global_rounds)]
+
+		# Get the activation values
+		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
 		losses = self._get_losses(predictions, labels, simulation)
-		gradient_values = self._get_gradient_values(losses, models)
-		return activation_values, gradient_values, losses
+		gradients = self._get_gradients(losses, state_dicts)
+		losses = losses.T
+		return activation_values, gradients, losses
 
-	def _get_models(self, model_iterations: List[npt.NDArray], batch_size: int, simulation) -> List[List[nn.Module]]:
-		"""
-		Creates a list of models from a list of parameters from the model iterations
-		"""
-		iteration_count = model_iterations[0].shape[0]
+	def _get_activation_values(self, model_state_dicts, features, simulation):
+		# Helper variables
+		template_model = simulation.model
+		global_rounds = simulation.global_rounds + 1
 
-		models = []
-		for i in range(iteration_count):
-			model = copy.deepcopy(simulation.model)
-			new_state_dict = {
-				key: torch.tensor(parameter[i]) for key, parameter in zip(model.state_dict().keys(), model_iterations)
-			}
-			model.load_state_dict(new_state_dict)
-			models.append(model.to(training.DEVICE))
-		models = [[copy.deepcopy(model) for model in models] for _ in range(batch_size)]
-		return models
+		# Attach the hooks that will get the intermediate value of each layer
+		activation = {}
 
-	def _get_activation_values(self, models, features):
-		"""
-		Gets the activation values from a list of model iterations and features
-		"""
-		trainable_indices = utils.get_trainable_layers_indices(models[0][0])
-		layer_count = len(models[0][0].layers)
+		def get_activation(name):
+			def hook(model, input, output):
+				activation[name] = output.detach()
 
-		def get_activation_values():
-			value = features
-			for i in range(layer_count):
-				value = torch.stack(
-					[
-						torch.stack([iteration.layers[i](value[j][k]) for k, iteration in enumerate(iterations)])
-						for j, iterations in enumerate(models)
-					]
-				)
-				if i not in trainable_indices:
-					yield value
+			return hook
 
-		activation_values = list(get_activation_values())
+		# Attack activation hook to all leaf modules
+		hooks = [
+			module.register_forward_hook(get_activation(name)) for name, module in template_model.named_modules()
+			if len(list(module.children())) == 0
+		]
+
+		# Predict the features for each model iteration and capture the activation values from the dict
+		activation_values = []
+		for i in range(global_rounds):
+			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
+
+			# Append prediction separately so grad_fn stays intact
+			activation_values.append(list(activation.values())[:-1])
+			activation_values[-1].append(prediction)
+
+		# Remove the hooks
+		[h.remove() for h in hooks]
+
+		# Transpose the activations so that they are bundled per layer per batch sample instead of per model iteration
+
+		# Transpose the activations so that they are bundled per layer instead of per model iteration
+		activation_values = [torch.stack(layers, dim=1) for layers in zip(*activation_values)]
 		return activation_values
 
 	def _get_losses(self, predictions, label, simulation):
 		"""
 		Gets the losses of a list of predictions and a list of labels
 		"""
-		iteration_count = predictions.shape[1]
+		global_rounds = simulation.global_rounds + 1
 		criterion = simulation.criterion
 		criterion.reduction = "none"
-		loss = torch.stack([criterion(predictions[i], label[i]) for i in range(predictions.shape[0])])
-		return loss
+		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
+		return losses
 
-	def _get_gradient_values(self, losses, models):
-		"""
-		Gets the gradients from a list of model iterations and features
-		"""
-		losses.sum().backward()
-		trainable_layer_count = len(list(models[0][0].parameters()))
+	def _get_gradients(self, losses, model_state_dicts):
+		gradients = []
+		for i, state_dict in enumerate(model_state_dicts):
+			model_gradients = []
+			for loss in losses[i]:
+				loss.backward(retain_graph=True)
+				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in state_dict.keys()))
+			gradients.append((torch.stack(layers) for layers in zip(*model_gradients)))
 
-		def get_gradients():
-			for i in range(trainable_layer_count):
-				def reshape_to_4d(input_tensor: torch.Tensor) -> torch.Tensor:
-					while input_tensor.ndim < 4:
-						input_tensor = input_tensor.unsqueeze(0)
-					return input_tensor
-
-				layer_gradients = torch.stack([
-					torch.stack(
-						[reshape_to_4d(next(itertools.islice(iteration.parameters(), i, None)).grad)
-						 for iteration in iterations]
-					) for iterations in models
-				])
-				yield layer_gradients
-
-		gradients = list(get_gradients())
+		# Transpose the gradients so that they are bundled per layer instead of per model iteration
+		gradients = [torch.stack(layers, dim=1) for layers in zip(*gradients)]
 		return gradients
 
+	def _get_wandb_kwargs(self, attack_type, simulation_wandb_kwargs):
+		simulation_wandb_kwargs["tags"][0] = f"Attack-{attack_type}"
+		simulation_wandb_kwargs["config"] = {"simulation": simulation_wandb_kwargs["config"]}
+		simulation_wandb_kwargs["config"]["attack"] = {
+			"data_access": self._data_access,
+			"message_access": self._message_access,
+			"batch_size": self._attack_simulation.batch_size,
+			"optimizer": self._attack_simulation.optimizer_name,
+			**self._attack_simulation.optimizer_parameters
+		}
+		return simulation_wandb_kwargs
 
-class GeneratorDataset:
-	def __init__(self, generator, length):
-		self._generator = generator
+
+def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Tensor:
+	if batched:
+		unsqueeze_dim = 2
+		target_dim = 5
+	else:
+		unsqueeze_dim = 1
+		target_dim = 4
+
+	if input_tensor.ndim > target_dim:
+		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim-1)], -1)
+	elif input_tensor.ndim < target_dim:
+		tensor_shape = input_tensor.shape
+		target_shape = (
+			*tensor_shape[:unsqueeze_dim], *(1,) * (target_dim - input_tensor.ndim), *tensor_shape[unsqueeze_dim:]
+		)
+		input_tensor = input_tensor.view(target_shape)
+	return input_tensor
+
+
+class IterableDataset(data.IterableDataset):
+	def __init__(self, generator_fn, length):
+		self._generator_fn = generator_fn
+		self._generator = None
+		self.reset_generator()
+
 		self._length = length
+
+	def __iter__(self):
+		# See if an item is available from the generator, if not reset generator
+		try:
+			self._generator.peek()
+		except StopIteration:
+			self.reset_generator()
+
+		return iter(self._generator)
 
 	def __len__(self):
 		return self._length
 
-	def __getitem__(self, index):
-		return next(self._generator)
+	def reset_generator(self):
+		self._generator = more_itertools.peekable(self._generator_fn())

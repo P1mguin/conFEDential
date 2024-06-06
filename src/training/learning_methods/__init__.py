@@ -1,10 +1,14 @@
+from .Adam import Adam
 from .FedAdam import FedAdam
 from .FedAvg import FedAvg
 from .FedNAG import FedNAG
-from .FedNL import FedNL
 from .RMSprop import RMSprop
+from .SingleLayerFedNL import SingleLayerFedNL
 from .Strategy import Strategy
 
+# Aliases
+adam = Adam
+ADAM = Adam
 FedNag = FedNAG
 fednag = FedNAG
 FEDNAG = FedNag
@@ -14,9 +18,9 @@ FedADAM = FedAdam
 FEDAVG = FedAvg
 fedavg = FedAvg
 FedAVG = FedAvg
-FEDNL = FedNL
-fednl = FedNL
-FedNl = FedNL
+SINGLELAYERFEDNL = SingleLayerFedNL
+singlelayerfednl = SingleLayerFedNL
+SingleLayerFedNl = SingleLayerFedNL
 RMSProp = RMSprop
 rmsprop = RMSprop
 RMSPROP = RMSProp

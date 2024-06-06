@@ -1,0 +1,308 @@
+ctit080
+2024-05-23 14:08:17,589	ERROR node.py:605 -- Failed to connect to GCS. Please check `gcs_server.out` for more details.
+2024-05-23 14:08:41,224	ERROR services.py:1207 -- Failed to start the dashboard 
+2024-05-23 14:08:41,224	ERROR services.py:1232 -- Error should be written to 'dashboard.log' or 'dashboard.err'. We are printing the last 20 lines for you. See 'https://docs.ray.io/en/master/ray-observability/ray-logging.html#logging-directory-structure' to find where the log file is.
+2024-05-23 14:08:41,225	ERROR services.py:1242 -- Couldn't read dashboard.log file. Error: [Errno 2] No such file or directory: '/local/ray/session_2024-05-23_14-08-10_397453_3255257/logs/dashboard.log'. It means the dashboard is broken even before it initializes the logger (mostly dependency issues). Reading the dashboard.err file which contains stdout/stderr.
+2024-05-23 14:08:41,225	ERROR services.py:1276 -- Failed to read dashboard.err file: cannot mmap an empty file. It is unexpected. Please report an issue to Ray github. https://github.com/ray-project/ray/issues
+2024-05-23 14:08:10,304	INFO usage_lib.py:412 -- Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2024-05-23 14:08:10,304	INFO scripts.py:722 -- Local node IP: 10.20.240.10
+2024-05-23 14:08:44,531	SUCC scripts.py:759 -- --------------------
+2024-05-23 14:08:44,531	SUCC scripts.py:760 -- Ray runtime started.
+2024-05-23 14:08:44,531	SUCC scripts.py:761 -- --------------------
+2024-05-23 14:08:44,531	INFO scripts.py:763 -- Next steps
+2024-05-23 14:08:44,531	INFO scripts.py:766 -- To add another node to this Ray cluster, run
+2024-05-23 14:08:44,532	INFO scripts.py:769 --   ray start --address='10.20.240.10:6379'
+2024-05-23 14:08:44,532	INFO scripts.py:778 -- To connect to this Ray cluster:
+2024-05-23 14:08:44,532	INFO scripts.py:780 -- import ray
+2024-05-23 14:08:44,532	INFO scripts.py:781 -- ray.init()
+2024-05-23 14:08:44,532	INFO scripts.py:812 -- To terminate the Ray runtime, run
+2024-05-23 14:08:44,532	INFO scripts.py:813 --   ray stop
+2024-05-23 14:08:44,532	INFO scripts.py:816 -- To view the status of the cluster, use
+2024-05-23 14:08:44,532	INFO scripts.py:817 --   ray status
+2024-05-23 14:11:07.618062: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-23 14:11:16.500886: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-23 14:11:53,572 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-23 14:11:53,626 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit080: task 0: Exited with exit code 1
+2024-05-23 14:15:09.587255: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-23 14:15:15.322531: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-23 14:15:45,467 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-23 14:15:45,468 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit080: task 0: Exited with exit code 1
+2024-05-23 14:19:07.237470: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-23 14:19:20.184939: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-23 14:20:05,382 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-23 14:20:05,426 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit080: task 0: Exited with exit code 1
+2024-05-23 14:22:12.057074: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-05-23 14:22:19.776686: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO flwr 2024-05-23 14:22:47,543 | Data.py:31 | Preprocessing the federated learning dataset
+INFO flwr 2024-05-23 14:22:47,544 | Data.py:112 | No preprocessed data found for the given preprocess function, preprocessing now
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 0 examples [00:00, ? examples/s]
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1973, in _prepare_split_single
+    for _, table in generator:
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/packaged_modules/csv/csv.py", line 192, in _generate_tables
+    csv_file_reader = pd.read_csv(file, iterator=True, dtype=dtype, **self.config.pd_read_csv_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/streaming.py", line 75, in wrapper
+    return function(*args, download_config=download_config, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/download/streaming_download_manager.py", line 784, in xpandas_read_csv
+    return pd.read_csv(xopen(filepath_or_buffer, "rb", download_config=download_config), **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 211, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/util/_decorators.py", line 331, in wrapper
+    return func(*args, **kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 950, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 605, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1442, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1753, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 79, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 547, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 636, in pandas._libs.parsers.TextReader._get_header
+  File "pandas/_libs/parsers.pyx", line 852, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 1965, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x93 in position 0: invalid start byte
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s2240084/conFEDential/src/main.py", line 112, in <module>
+    main()
+  File "/home/s2240084/conFEDential/src/main.py", line 92, in main
+    configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in generate_configs_from_yaml_file
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/utils/batch_config.py", line 77, in <listcomp>
+    configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+  File "/home/s2240084/conFEDential/src/experiment/Config.py", line 45, in from_dict
+    simulation=Simulation.from_dict(config['simulation']),
+  File "/home/s2240084/conFEDential/src/experiment/Simulation.py", line 58, in from_dict
+    data=Data.from_dict(config['data']),
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 57, in from_dict
+    return Data(
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 32, in __init__
+    self._prepare_dataset()
+  File "/home/s2240084/conFEDential/src/experiment/Data.py", line 115, in _prepare_dataset
+    train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+  File "/home/s2240084/conFEDential/src/data/Texas.py", line 16, in load_dataset
+    train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.npz", split="train[:85%]")
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/load.py", line 2582, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1005, in download_and_prepare
+    self._download_and_prepare(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1100, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 1860, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+  File "/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/datasets/builder.py", line 2016, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
+srun: error: ctit080: task 0: Exited with exit code 1
+2024-05-23 14:24:52,929	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/autoscaler/_private/monitor.py --logs-dir=/local/ray/session_2024-05-23_14-08-10_397453_3255257/logs --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.10:6379 --monitor-ip=10.20.240.10` (via SIGTERM)
+2024-05-23 14:24:52,929	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/log_monitor.py --logs-dir=/local/ray/session_2024-05-23_14-08-10_397453_3255257/logs --gcs-address=10.20.240.10:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5` (via SIGTERM)
+2024-05-23 14:24:52,951	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -m ray.util.client.server --address=10.20.240.10:6379 --host=0.0.0.0 --port=10001 --mode=proxy --metrics-agent-port=63085` (via SIGTERM)
+2024-05-23 14:24:52,991	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python -u /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/_private/log_monitor.py --logs-dir=/local/ray/session_2024-05-23_14-08-10_397453_3255257/logs --gcs-address=10.20.240.10:6379 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5` (via SIGTERM)
+2024-05-23 14:24:53,004	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/bin/python /home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/dashboard/dashboard.py --host=127.0.0.1 --port=8265 --port-retries=0 --temp-dir=/local/ray --log-dir=/local/ray/session_2024-05-23_14-08-10_397453_3255257/logs --session-dir=/local/ray/session_2024-05-23_14-08-10_397453_3255257 --logging-rotate-bytes=536870912 --logging-rotate-backup-count=5 --gcs-address=10.20.240.10:6379 --node-ip-address=10.20.240.10 --minimal` (via SIGTERM)
+2024-05-23 14:24:53,009	INFO scripts.py:1098 -- 1/4 stopped.2024-05-23 14:24:53,035	INFO scripts.py:1098 -- 2/4 stopped.2024-05-23 14:24:53,288	INFO scripts.py:1098 -- 3/4 stopped.2024-05-23 14:24:53,621	INFO scripts.py:1098 -- 4/4 stopped.2024-05-23 14:24:53,812	VINFO scripts.py:1068 -- Send termination request to `/home/s2240084/conFEDential/venv/lib/python3.10/site-packages/ray/core/src/ray/gcs/gcs_server --log_dir=/local/ray/session_2024-05-23_14-08-10_397453_3255257/logs --config_list=eyJvYmplY3Rfc3BpbGxpbmdfY29uZmlnIjogIntcInR5cGVcIjogXCJmaWxlc3lzdGVtXCIsIFwicGFyYW1zXCI6IHtcImRpcmVjdG9yeV9wYXRoXCI6IFwiL2xvY2FsL3JheS9zZXNzaW9uXzIwMjQtMDUtMjNfMTQtMDgtMTBfMzk3NDUzXzMyNTUyNTdcIn19IiwgImlzX2V4dGVybmFsX3N0b3JhZ2VfdHlwZV9mcyI6IHRydWV9 --gcs_server_port=6379 --metrics-agent-port=63085 --node-ip-address=10.20.240.10 --session-name=session_2024-05-23_14-08-10_397453_3255257` (via SIGTERM)
+2024-05-23 14:24:54,173	INFO scripts.py:1098 -- 1/1 stopped.2024-05-23 14:24:54,173	SUCC scripts.py:1142 -- Stopped all 5 Ray processes.

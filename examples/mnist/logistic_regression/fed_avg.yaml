@@ -10,8 +10,8 @@ simulation:
         }
   federation:
     client_count: 100
-    fraction_fit: 0.1
-    global_rounds: 1
+    fraction_fit: 0.01
+    global_rounds: 2
     local_rounds: 1
   model:
     optimizer_name: FedAvg
@@ -26,9 +26,9 @@ simulation:
       - type: Softmax
         dim: -1
 attack:
-  data_access: all
+  data_access: 1.0
   message_access: server
-  repetitions: 10
+  repetitions: 1
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg
@@ -38,11 +38,9 @@ attack:
       gradient_component:
         - type: Dropout
           p: 0.2
-        - type: Conv3d
+        - type: Conv2d
           out_channels: 1000
           kernel_size:
-            - 1
-            - 1
           stride: 1
         - type: ReLU
       fcn_component:

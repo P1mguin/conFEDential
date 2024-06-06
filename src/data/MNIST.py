@@ -1,14 +1,13 @@
 from typing import Tuple
 
-from datasets import load_dataset
-from torch.utils.data import DataLoader
+from datasets import Dataset as HuggingFaceDataset, load_dataset
 
 from src.data.Dataset import Dataset
 
 
 class MNIST(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[DataLoader, DataLoader]:
+	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
 		# For documentation see Dataset
 		Dataset.is_data_downloaded("mnist")
 		train_dataset, test_dataset = load_dataset(

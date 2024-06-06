@@ -5,13 +5,13 @@ simulation:
     preprocess_fn: |
       def preprocess_fn(element):
         return {
-          "x": (element["img"] / 255.).transpose(2, 0, 1),
+          "x": element["img"],
           "y": element["fine_label"]
         }
   federation:
     client_count: 100
     fraction_fit: 0.1
-    global_rounds: 1
+    global_rounds: 20
     local_rounds: 1
   model:
     optimizer_name: FedAvg
@@ -25,9 +25,9 @@ simulation:
       pretrained: False
       out_features: 100
 attack:
-  data_access: all
+  data_access: 1.0
   message_access: server
-  repetitions: 10
+  repetitions: 1
   attack_simulation:
     batch_size: 64
     optimizer_name: FedAvg
@@ -37,11 +37,9 @@ attack:
       gradient_component:
         - type: Dropout
           p: 0.2
-        - type: Conv3d
+        - type: Conv2d
           out_channels: 1000
           kernel_size:
-            - 1
-            - 1
           stride: 1
         - type: ReLU
       fcn_component:

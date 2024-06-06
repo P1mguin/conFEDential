@@ -26,7 +26,6 @@ class FedAdam(Strategy):
 		self.global_lr = kwargs["global"]["lr"]
 		self.betas = kwargs["global"]["betas"]
 		self.eps = kwargs["global"]["eps"]
-		self.weight_decay = kwargs["global"]["weight_decay"]
 
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> SGD:
 		# FedAdam works with SGD at the client
@@ -78,17 +77,15 @@ class FedAdam(Strategy):
 		current_weights = parameters_to_ndarrays(self.current_weights)
 
 		# Aggregate and negate the parameters
-		delta_results = [
-			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-			for _, fit_res in results
-		]
-		deltas_aggregated = utils.common.compute_weighted_average(delta_results)
+		counts = [fit_res.num_examples for _, fit_res in results]
+		delta_results = (parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results)
+		deltas_aggregated = list(utils.common.compute_weighted_average(delta_results, counts))
 
 		# In the first round the momenta are unitialized
 		if self.first_momentum is None:
-			self.first_momentum = [np.zeros_like(layer) for layer in deltas_aggregated]
+			self.first_momentum = (np.zeros_like(layer) for layer in deltas_aggregated)
 		if self.second_momentum is None:
-			self.second_momentum = [np.zeros_like(layer) for layer in deltas_aggregated]
+			self.second_momentum = (np.zeros_like(layer) for layer in deltas_aggregated)
 
 		# Calculate the new momenta
 		self.first_momentum = [

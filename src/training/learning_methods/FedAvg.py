@@ -61,10 +61,8 @@ class FedAvg(Strategy):
 			return None, {}
 
 		# Aggregate and return the results
-		parameter_results = [
-			(parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-			for _, fit_res in results
-		]
-		parameters_aggregated = utils.common.compute_weighted_average(parameter_results)
+		counts = [fitres.num_examples for _, fitres in results]
+		parameter_results = (parameters_to_ndarrays(fit_res.parameters)	for _, fit_res in results)
+		parameters_aggregated = utils.common.compute_weighted_average(parameter_results, counts)
 		parameters_aggregated = ndarrays_to_parameters(parameters_aggregated)
 		return parameters_aggregated, {}
