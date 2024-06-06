@@ -439,6 +439,13 @@ class Attack:
 
 		# Predict the features for each model iteration and capture the activation values from the dict
 		activation_values = []
+
+		# Some layers may require batch to be bigger than 1, for instance BatchNorm. Duplicating it has no effect since the
+		# tracked variables are not used in further computations
+		is_singular_batch = features.size(0) == 1
+		if is_singular_batch:
+			features = torch.cat([features, features])
+
 		for i in range(global_rounds):
 			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
 
@@ -449,7 +456,8 @@ class Attack:
 		# Remove the hooks
 		[h.remove() for h in hooks]
 
-		# Transpose the activations so that they are bundled per layer per batch sample instead of per model iteration
+		if is_singular_batch:
+			activation_values = [[x[0].unsqueeze(0) for x in  global_round_values] for global_round_values in activation_values]
 
 		# Transpose the activations so that they are bundled per layer instead of per model iteration
 		activation_values = [torch.stack(layers, dim=1) for layers in zip(*activation_values)]
