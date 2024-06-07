@@ -85,7 +85,8 @@ def process_purchase():
 
 	# Load the file into a pandas dataframe
 	print(f"Loading purchase CSV to dataframe")
-	df = pd.read_csv(cache_path)
+	column_names = ["C_" + str(i) for i in range(601)]
+	df = pd.read_csv(cache_path, names=column_names, header=None)
 
 	# Convert the first column to an int32 and decrement by 1, and convert other values to float64
 	print(f"Converting to int and floats")
@@ -105,8 +106,9 @@ def process_texas():
 
 	# Load the features and labels into pandas dataframes
 	print("Loading texas features and labels CSV to dataframe")
-	df_features = pd.read_csv(features_path, names=list(range(1, 6170)), header=None, dtype="int32") - 1
-	df_labels = pd.read_csv(labels_path, names=[0], header=None, dtype="float64")
+	column_names = ["C_" + str(i) for i in range(6170)]
+	df_features = pd.read_csv(features_path, names=column_names[1:], header=None, dtype="int32") - 1
+	df_labels = pd.read_csv(labels_path, names=[column_names[0]], header=None, dtype="float64")
 
 	# Create one dataframe with labels as first column and features as the rest
 	print("Creating single dataframe")
