@@ -11,12 +11,12 @@ datasets = {
 	"purchase": {
 		"link": "https://www.comp.nus.edu.sg/~reza/files/dataset_purchase.tgz",
 		"cache_path": "purchase/purchase/",
-		"target_path": "purchase/purchase/purchase.arrow"
+		"target_path": "purchase/purchase/purchase.parquet"
 	},
 	"texas": {
 		"link": "https://www.comp.nus.edu.sg/~reza/files/dataset_texas.tgz",
 		"cache_path": "texas/texas/",
-		"target_path": "texas/texas/texas.arrow"
+		"target_path": "texas/texas/texas.parquet"
 	}
 }
 
@@ -76,11 +76,11 @@ async def download_file(url: str, file_path: str):
 def process_purchase():
 	data_config = datasets["purchase"]
 	cache_path = f".cache/data/{data_config['cache_path']}dataset_purchase"
-	arrow_path = f".cache/data/{data_config['target_path']}"
+	parquet_path = f".cache/data/{data_config['target_path']}"
 
 	# If arrow file exists continue
-	if os.path.exists(arrow_path):
-		print(f"Arrow file already exists: {arrow_path}")
+	if os.path.exists(parquet_path):
+		print(f"Arrow file already exists: {parquet_path}")
 		return
 
 	# Load the file into a pandas dataframe
@@ -92,21 +92,14 @@ def process_purchase():
 	df.iloc[:, 0] = df.iloc[:, 0].astype("int32") - 1
 	df.iloc[:, 1:] = df.iloc[:, 1:].astype("float64")
 
-	# Convert the pandas dataframe to a pyarrow table
-	print(f"Converting purchase dataframe to arrow table")
-	table = pa.Table.from_pandas(df)
-
-	# Write the table to an arrow file
-	print(f"Writing arrow table to {arrow_path}")
-	with pa.OSFile(arrow_path, "wb") as sink:
-		with pa.RecordBatchFileWriter(sink, table.schema) as writer:
-			writer.write_table(table)
-
+	# Store the dataframe as a parquet file
+	print("Storing dataframe as parquet file")
+	df.to_parquet(parquet_path, compression="snappy")
 
 def process_texas():
 	data_config = datasets["texas"]
 	texas_100_path = f".cache/data/{data_config['cache_path']}texas/100/"
-	arrow_path = f".cache/data/{data_config['target_path']}"
+	parquet_path = f".cache/data/{data_config['target_path']}"
 	features_path = f"{texas_100_path}feats"
 	labels_path = f"{texas_100_path}labels"
 
@@ -119,16 +112,9 @@ def process_texas():
 	print("Creating single dataframe")
 	df = pd.concat([df_labels, df_features], axis=1)
 
-	# Convert the pandas dataframe to a pyarrow table
-	print("Converting texas dataframe to arrow table")
-	table = pa.Table.from_pandas(df)
-
-	# Write the table to an arrow file
-	print(f"Writing arrow table to {arrow_path}")
-	with pa.OSFile(arrow_path, "wb") as sink:
-		with pa.RecordBatchFileWriter(sink, table.schema) as writer:
-			writer.write_table(table)
-
+	# Store the dataframe as a parquet file
+	print("Storing dataframe as parquet file")
+	df.to_parquet(parquet_path, compression="snappy")
 
 def clean_up_directories():
 	for name in datasets.keys():
@@ -139,7 +125,7 @@ def clean_up_directories():
 		# Walk the cache directory leaf to root and remove everything except the arrow file, including directories
 		for root, dirs, files in os.walk(cache_dir, topdown=False):
 			for file in files:
-				if file.endswith(".arrow"):
+				if file.endswith(".parquet"):
 					continue
 				os.remove(os.path.join(root, file))
 			for dir in dirs:
