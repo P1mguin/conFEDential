@@ -19,7 +19,7 @@ wandb sync --clean
 # Submit the sbatch jobs
 sbatch --nodes=1 hpc_runs/cifar10/resnet18.sbatch
 sbatch --nodes=1 hpc_runs/cifar100/resnet34.sbatch
-sbatch --nodes=1 hpc_runs/purchase/logistic_regression.sbatch
 sbatch --nodes=1 hpc_runs/purchase/fcn.sbatch
-sbatch --nodes=1 hpc_runs/texas/logistic_regression.sbatch
+sbatch --nodes=1 hpc_runs/purchase/logistic_regression.sbatch
 sbatch --nodes=1 hpc_runs/texas/fcn.sbatch
+sbatch --nodes=1 hpc_runs/texas/logistic_regression.sbatch
