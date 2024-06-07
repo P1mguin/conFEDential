@@ -14,7 +14,7 @@ class Purchase(Dataset):
 		# Get the file from the locally downloaded files
 		dataset = load_dataset("parquet", data_files=".cache/data/purchase/purchase/purchase.parquet")
 		train_dataset = dataset["train"].select(range(10000))
-		test_dataset = dataset["train"].select(range(10000, dataset["train"].shape[0]))
+		test_dataset = dataset["train"].select(range(10000, 11775))
 
 		def split_label_and_features(entry):
 			entry = np.array(list(entry.values()))
