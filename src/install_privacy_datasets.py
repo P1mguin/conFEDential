@@ -4,7 +4,6 @@ import tarfile
 
 import httpx
 import pandas as pd
-import pyarrow as pa
 from tqdm import tqdm
 
 datasets = {
@@ -88,10 +87,10 @@ def process_purchase():
 	column_names = ["C_" + str(i) for i in range(601)]
 	df = pd.read_csv(cache_path, names=column_names, header=None)
 
-	# Convert the first column to an int32 and decrement by 1, and convert other values to float64
+	# Convert the first column to an int64 and decrement by 1, and convert other values to float32
 	print(f"Converting to int and floats")
-	df.iloc[:, 0] = df.iloc[:, 0].astype("int32") - 1
-	df.iloc[:, 1:] = df.iloc[:, 1:].astype("float64")
+	df.iloc[:, 0] = df.iloc[:, 0].astype("int64") - 1
+	df.iloc[:, 1:] = df.iloc[:, 1:].astype("float32")
 
 	# Store the dataframe as a parquet file
 	print("Storing dataframe as parquet file")
@@ -107,8 +106,8 @@ def process_texas():
 	# Load the features and labels into pandas dataframes
 	print("Loading texas features and labels CSV to dataframe")
 	column_names = ["C_" + str(i) for i in range(6170)]
-	df_features = pd.read_csv(features_path, names=column_names[1:], header=None, dtype="int32") - 1
-	df_labels = pd.read_csv(labels_path, names=[column_names[0]], header=None, dtype="float64")
+	df_features = pd.read_csv(features_path, names=column_names[1:], header=None, dtype="float32")
+	df_labels = pd.read_csv(labels_path, names=[column_names[0]], header=None, dtype="int64") - 1
 
 	# Create one dataframe with labels as first column and features as the rest
 	print("Creating single dataframe")
