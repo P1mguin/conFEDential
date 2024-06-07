@@ -12,18 +12,15 @@ class Purchase(Dataset):
 		Dataset.is_data_downloaded("purchase")
 
 		# Get the file from the locally downloaded files
-		train_dataset = load_dataset(
-			"csv", data_files=".cache/data/purchase/purchase/purchase100.csv", split="train[:85%]"
-		)
-		test_dataset = load_dataset(
-			"csv", data_files=".cache/data/purchase/purchase/purchase100.csv", split="train[-15%:]"
-		)
+		dataset = load_dataset("parquet", data_files=".cache/data/purchase/purchase/purchase.parquet")
+		train_dataset = dataset["train"].select(range(10000))
+		test_dataset = dataset["train"].select(range(10000, dataset["train"].shape[0]))
 
 		def split_label_and_features(entry):
 			entry = np.array(list(entry.values()))
 			return {
-				"label": entry[-1].astype(np.int64),
-				"features": entry[:-1].astype(np.float32)
+				"label": entry[0].astype(np.int64),
+				"features": entry[1:].astype(np.float32)
 			}
 
 		train_dataset = train_dataset.map(split_label_and_features)

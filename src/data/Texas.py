@@ -12,17 +12,15 @@ class Texas(Dataset):
 		Dataset.is_data_downloaded("texas")
 
 		# Get the file from the locally downloaded files
-		train_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.csv", split="train[:85%]")
-		test_dataset = load_dataset("csv", data_files=".cache/data/texas/texas/texas100.csv", split="train[-15%:]")
-
-		train_dataset.set_format(type="np")
-		test_dataset.set_format(type="np")
+		dataset = load_dataset("parquet", data_files=".cache/data/texas/texas/texas.parquet")
+		train_dataset = dataset["train"].select(range(10000))
+		test_dataset = dataset["train"].select(range(10000, dataset["train"].shape[0]))
 
 		def split_label_and_features(entry):
 			entry = np.array(list(entry.values()))
 			return {
-				"label": entry[-1].astype(np.int64),
-				"features": entry[:-1].astype(np.float32)
+				"label": entry[0].astype(np.int64),
+				"features": entry[1:].astype(np.float32)
 			}
 
 		train_dataset = train_dataset.map(split_label_and_features)
