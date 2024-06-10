@@ -74,6 +74,7 @@ class Strategy(ABC):
 		if parameters is not None:
 			training.set_weights(net, parameters)
 		criterion = simulation.criterion
+		criterion.reduction = "sum"
 		correct, total_loss = 0, 0.
 
 		# Disable gradient calculation for testing
