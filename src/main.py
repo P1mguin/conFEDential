@@ -82,14 +82,18 @@ parser.add_argument(
 	type=int,
 	default=None,
 	help="Number of GPUs to allocate to the simulation, by default takes all GPUs available"
+)
 
+parser.add_argument(
+	"--cache-root",
+	type=str,
+	default="./.cache/",
+	help="Absolute path to root of the directory in which the datasets, model architectures, experiment results as well as partial computations will be stored to prevent recomputing heavy experiments"
 )
 
 
 def main():
 	args = parser.parse_args()
-
-	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()))
 
 	concurrent_clients = args.clients
 	memory = args.memory
@@ -99,12 +103,22 @@ def main():
 	is_online = args.logging
 	is_capturing = args.capturing
 	run_name = args.run_name
+	cache_root = f"{os.path.abspath(args.cache_root)}/"
+
+	configs = batch_config.generate_configs_from_yaml_file(str(Path(args.yaml_file).resolve()), cache_root)
 
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		log(INFO, config)
 		config.run_simulation(
-			concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_online, is_capturing, run_name
+			concurrent_clients,
+			memory,
+			num_cpus,
+			num_gpus,
+			is_ray_initialised,
+			is_online,
+			is_capturing,
+			run_name,
 		)
 
 

@@ -7,13 +7,13 @@ from src.data.Dataset import Dataset
 
 class MNIST(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
+	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
 		# For documentation see Dataset
-		Dataset.is_data_downloaded("mnist")
+		Dataset.is_data_downloaded("mnist", cache_root)
 		train_dataset, test_dataset = load_dataset(
 			"mnist",
 			name="mnist",
-			cache_dir=".cache/data",
+			cache_dir=f"{cache_root}data",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
 		)

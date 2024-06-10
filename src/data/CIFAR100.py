@@ -8,13 +8,13 @@ from src.data.Dataset import Dataset
 
 class CIFAR100(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
+	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
 		# For documentation see Dataset
-		Dataset.is_data_downloaded("cifar100")
+		Dataset.is_data_downloaded("cifar100", cache_root)
 		train_dataset, test_dataset = load_dataset(
 			"cifar100",
 			name="cifar100",
-			cache_dir=".cache/data",
+			cache_dir=f"{cache_root}data",
 			split=["train", "test"],
 			download_mode="reuse_dataset_if_exists"
 		)

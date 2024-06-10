@@ -24,7 +24,8 @@ PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 
 
 class Simulation:
-	def __init__(self, data, federation, model):
+	def __init__(self, cache_root, data, federation, model):
+		self._cache_root = cache_root
 		self._data = data
 		self._federation = federation
 		self._model = model
@@ -52,11 +53,12 @@ class Simulation:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> 'Simulation':
+	def from_dict(config: dict, cache_root: str) -> 'Simulation':
 		return Simulation(
-			data=Data.from_dict(config['data']),
+			cache_root=cache_root,
+			data=Data.from_dict(config['data'], cache_root),
 			federation=Federation.from_dict(config['federation']),
-			model=Model.from_dict(config['model'])
+			model=Model.from_dict(config['model'], cache_root)
 		)
 
 	@property
@@ -124,7 +126,7 @@ class Simulation:
 		simulation_string = str(self)
 		simulation_hash = hashlib.sha256(simulation_string.encode()).hexdigest()
 
-		capture_directory = f".cache/data/{dataset}/training/{model_name}/{optimizer}/{simulation_hash}/"
+		capture_directory = f"{self._cache_root}data/{dataset}/training/{model_name}/{optimizer}/{simulation_hash}/"
 
 		# Ensure the directory exists
 		os.makedirs(capture_directory, exist_ok=True)

@@ -9,9 +9,10 @@ from src import data
 
 
 class Data:
-	def __init__(self, dataset_name: str, batch_size: int, raw_preprocess_fn: str | None = None,
+	def __init__(self, cache_root: str, dataset_name: str, batch_size: int, raw_preprocess_fn: str | None = None,
 				 splitter: dict | None = None) -> None:
 		# Set the attributes
+		self._cache_root = cache_root
 		self._dataset_name = dataset_name.lower()
 		self._batch_size = batch_size
 		self._raw_preprocess_fn = raw_preprocess_fn
@@ -57,8 +58,9 @@ class Data:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> 'Data':
+	def from_dict(config: dict, cache_root) -> 'Data':
 		return Data(
+			cache_root=cache_root,
 			dataset_name=config['dataset_name'],
 			batch_size=config['batch_size'],
 			raw_preprocess_fn=config.get('preprocess_fn'),
@@ -114,7 +116,7 @@ class Data:
 			log(INFO, f"No preprocessed data found for the given preprocess function with hash {preprocessed_hash}, preprocessing now")
 
 		# Load the raw dataset
-		train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset()
+		train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset(self._cache_root)
 
 		# Apply the preprocess function to the train and test dataset
 		train_dataset = train_dataset.map(self._preprocess_fn)
@@ -130,7 +132,7 @@ class Data:
 		"""
 		Returns the path to the cache directory for the dataset with the given preprocess function.
 		"""
-		base_path = f".cache/data/{self._dataset_name}/preprocessed/"
+		base_path = f"{self._cache_root}data/{self._dataset_name}/preprocessed/"
 
 		# Get the hash function of the preprocess function
 		function_hash = hashlib.sha256(self._raw_preprocess_fn.encode()).hexdigest()

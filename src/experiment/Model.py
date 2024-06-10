@@ -10,6 +10,7 @@ from src import training, utils
 class Model:
 	def __init__(
 			self,
+			cache_root: str,
 			optimizer_name: str,
 			model_name: str,
 			criterion_name: str,
@@ -23,6 +24,7 @@ class Model:
 		self._criterion_name = criterion_name
 		self._optimizer_parameters = optimizer_parameters
 		self._model_architecture = model_architecture
+		self._cache_root = cache_root
 
 		self._model = None
 		self._prepare_model()
@@ -59,8 +61,9 @@ class Model:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> 'Model':
+	def from_dict(config: dict, cache_root: str) -> 'Model':
 		return Model(
+			cache_root=cache_root,
 			optimizer_name=config['optimizer_name'],
 			model_name=config['model_name'],
 			criterion_name=config['criterion_name'],
@@ -116,7 +119,7 @@ class Model:
 	def _prepare_model(self):
 		is_from_hub = isinstance(self._model_architecture, dict)
 		if is_from_hub:
-			model = self._load_model_from_hub()
+			model = self._load_model_from_hub(self._cache_root)
 		else:
 			model = self._load_model_from_layers()
 
@@ -136,7 +139,7 @@ class Model:
 		return model()
 
 	def _load_model_from_hub(self):
-		model_path = self._get_model_cache_path()
+		model_path = self._get_model_cache_path(self._cache_root)
 
 		def get_model():
 			base_model = torch.load(model_path)
@@ -151,7 +154,7 @@ class Model:
 		repo = self._model_architecture["repo_or_dir"]
 		model_name = self._model_architecture["model"]
 
-		return f".cache/model_architectures/{repo.replace('/', '')}_{model_name}.pth"
+		return f"{self._cache_root}model_architectures/{repo.replace('/', '')}_{model_name}.pth"
 
 	def _prepare_criterion(self):
 		self._criterion = getattr(nn, self._criterion_name)

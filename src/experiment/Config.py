@@ -32,16 +32,16 @@ class Config:
 		return result
 
 	@staticmethod
-	def from_yaml_file(yaml_file: str) -> 'Config':
+	def from_yaml_file(yaml_file: str, cache_root) -> 'Config':
 		with open(yaml_file, "r") as f:
 			config = yaml.safe_load(f)
 
-		return Config.from_dict(config)
+		return Config.from_dict(config, cache_root)
 
 	@staticmethod
-	def from_dict(config: dict) -> 'Config':
+	def from_dict(config: dict, cache_root: str) -> 'Config':
 		return Config(
-			simulation=Simulation.from_dict(config['simulation']),
+			simulation=Simulation.from_dict(config['simulation'], cache_root),
 			attack=Attack.from_dict(config['attack'])
 		)
 
@@ -62,7 +62,7 @@ class Config:
 			is_ray_initialised: bool,
 			is_online: bool,
 			is_capturing: bool,
-			run_name: str
+			run_name: str,
 	):
 		log(INFO, "Starting conFEDential simulation")
 		# If nothing has been captured for this simulation, capture the simulation

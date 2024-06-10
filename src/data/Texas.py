@@ -8,11 +8,11 @@ from src.data.Dataset import Dataset
 
 class Texas(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
-		Dataset.is_data_downloaded("texas")
+	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
+		Dataset.is_data_downloaded("texas", cache_root)
 
 		# Get the file from the locally downloaded files
-		dataset = load_dataset("parquet", data_files=".cache/data/texas/texas/texas.parquet")
+		dataset = load_dataset("parquet", data_files=f"{cache_root}data/texas/texas/texas.parquet")
 		train_dataset = dataset["train"].select(range(10000))
 		test_dataset = dataset["train"].select(range(10000, 11775))
 

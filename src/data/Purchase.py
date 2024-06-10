@@ -8,11 +8,11 @@ from src.data.Dataset import Dataset
 
 class Purchase(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
-		Dataset.is_data_downloaded("purchase")
+	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
+		Dataset.is_data_downloaded("purchase", cache_root)
 
 		# Get the file from the locally downloaded files
-		dataset = load_dataset("parquet", data_files=".cache/data/purchase/purchase/purchase.parquet")
+		dataset = load_dataset("parquet", data_files=f"{cache_root}data/purchase/purchase/purchase.parquet")
 		train_dataset = dataset["train"].select(range(10000))
 		test_dataset = dataset["train"].select(range(10000, 11775))
 

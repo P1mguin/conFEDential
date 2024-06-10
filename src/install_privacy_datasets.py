@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import os
 import tarfile
@@ -20,11 +21,11 @@ datasets = {
 }
 
 
-def uncompress_tgz(name: str):
+def uncompress_tgz(name: str, cache_root):
 	print(f"Uncompressing {name} dataset")
 	dataset = datasets[name]
-	cache_dir = f".cache/data/{dataset['cache_path']}"
-	file_path = f".cache/data/{dataset['cache_path']}{name}.tgz"
+	cache_dir = f"{cache_root}data/{dataset['cache_path']}"
+	file_path = f"{cache_root}data/{dataset['cache_path']}{name}.tgz"
 
 	# If there is more than one file in the cache dir continue
 	if len(os.listdir(cache_dir)) > 1:
@@ -35,11 +36,11 @@ def uncompress_tgz(name: str):
 		tar.extractall(cache_dir)
 
 
-async def download_files():
+async def download_files(cache_root):
 	loop = asyncio.get_running_loop()
 
 	urls = [dataset["link"] for name, dataset in datasets.items()]
-	file_paths = [f".cache/data/{dataset['cache_path']}{name}.tgz" for name, dataset in datasets.items()]
+	file_paths = [f"{cache_root}data/{dataset['cache_path']}{name}.tgz" for name, dataset in datasets.items()]
 	args = zip(urls, file_paths)
 	tasks = [loop.create_task(download_file(*arg)) for arg in args]
 	await asyncio.gather(*tasks, return_exceptions=True)
@@ -72,10 +73,10 @@ async def download_file(url: str, file_path: str):
 						downloaded = r.num_bytes_downloaded
 
 
-def process_purchase():
+def process_purchase(cache_root):
 	data_config = datasets["purchase"]
-	cache_path = f".cache/data/{data_config['cache_path']}dataset_purchase"
-	parquet_path = f".cache/data/{data_config['target_path']}"
+	cache_path = f"{cache_root}data/{data_config['cache_path']}dataset_purchase"
+	parquet_path = f"{cache_root}data/{data_config['target_path']}"
 
 	# If arrow file exists continue
 	if os.path.exists(parquet_path):
@@ -96,10 +97,11 @@ def process_purchase():
 	print("Storing dataframe as parquet file")
 	df.to_parquet(parquet_path, compression="snappy")
 
-def process_texas():
+
+def process_texas(cache_root):
 	data_config = datasets["texas"]
-	texas_100_path = f".cache/data/{data_config['cache_path']}texas/100/"
-	parquet_path = f".cache/data/{data_config['target_path']}"
+	texas_100_path = f"{cache_root}data/{data_config['cache_path']}texas/100/"
+	parquet_path = f"{cache_root}data/{data_config['target_path']}"
 	features_path = f"{texas_100_path}feats"
 	labels_path = f"{texas_100_path}labels"
 
@@ -117,11 +119,12 @@ def process_texas():
 	print("Storing dataframe as parquet file")
 	df.to_parquet(parquet_path, compression="snappy")
 
-def clean_up_directories():
+
+def clean_up_directories(cache_root):
 	for name in datasets.keys():
 		print(f"Cleaning up {name} directory")
 		data_config = datasets[name]
-		cache_dir = f".cache/data/{data_config['cache_path']}"
+		cache_dir = f"{cache_root}data/{data_config['cache_path']}"
 
 		# Walk the cache directory leaf to root and remove everything except the arrow file, including directories
 		for root, dirs, files in os.walk(cache_dir, topdown=False):
@@ -133,16 +136,28 @@ def clean_up_directories():
 				os.rmdir(os.path.join(root, dir))
 
 
+parser = argparse.ArgumentParser(description="Download PURCHASE100 and TEXAS100 from Shokris repositories")
+
+parser.add_argument(
+	"--cache-root",
+	type=str,
+	default="./.cache/",
+	help="Absolute path to root of the directory in which the model architecture will be saved"
+)
+
 def main():
-	asyncio.run(download_files())
+	args = parser.parse_args()
+	cache_root = f"{os.path.abspath(args.cache_root)}/"
 
-	uncompress_tgz("purchase")
-	uncompress_tgz("texas")
+	asyncio.run(download_files(cache_root))
 
-	process_purchase()
-	process_texas()
+	uncompress_tgz("purchase", cache_root)
+	uncompress_tgz("texas", cache_root)
 
-	clean_up_directories()
+	process_purchase(cache_root)
+	process_texas(cache_root)
+
+	clean_up_directories(cache_root)
 
 
 if __name__ == '__main__':
