@@ -119,7 +119,7 @@ class Model:
 	def _prepare_model(self):
 		is_from_hub = isinstance(self._model_architecture, dict)
 		if is_from_hub:
-			model = self._load_model_from_hub(self._cache_root)
+			model = self._load_model_from_hub()
 		else:
 			model = self._load_model_from_layers()
 
@@ -139,7 +139,7 @@ class Model:
 		return model()
 
 	def _load_model_from_hub(self):
-		model_path = self._get_model_cache_path(self._cache_root)
+		model_path = self._get_model_cache_path()
 
 		def get_model():
 			base_model = torch.load(model_path)
