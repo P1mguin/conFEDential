@@ -158,11 +158,11 @@ class Server(FedAvg):
 						client_layer_group = client_group.create_group(str(i))
 
 						client_layer_group.create_dataset(
-							"server_rounds", data=np.array([0]), maxshape=(global_rounds + 1,), chunks=True
+							"server_rounds", data=np.array([0]), maxshape=(global_rounds + 1,), chunks=True, compression="gzip"
 						)
 						max_layer_shape = (global_rounds + 1, *value_shape)
 						client_layer_group.create_dataset(
-							"values", data=initial_value, maxshape=max_layer_shape, chunks=True
+							"values", data=initial_value, maxshape=max_layer_shape, chunks=True, compression="gzip"
 						)
 
 		with h5py.File(path, 'r+') as hf:
@@ -198,7 +198,7 @@ class Server(FedAvg):
 			with h5py.File(path, 'w') as hf:
 				for i, (initial_value, value_shape) in enumerate(zip(initial_values, value_shapes)):
 					max_shape = (global_rounds + 1, *value_shape)
-					hf.create_dataset(str(i), data=initial_value, maxshape=max_shape, chunks=True)
+					hf.create_dataset(str(i), data=initial_value, maxshape=max_shape, chunks=True, compression="gzip")
 
 		with h5py.File(path, 'r+') as hf:
 			for i, value in enumerate(values):
