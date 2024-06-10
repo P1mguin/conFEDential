@@ -1,6 +1,5 @@
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
-import flwr as fl
 import numpy as np
 import torch
 from flwr.common import FitRes, ndarrays_to_parameters, Parameters, parameters_to_ndarrays
@@ -17,12 +16,6 @@ from src.training.learning_methods.Strategy import Strategy
 class SingleLayerFedNL(Strategy):
 	def __init__(self, **kwargs):
 		super(SingleLayerFedNL, self).__init__(**kwargs)
-
-	@staticmethod
-	def get_initial_parameters(model):
-		model_weights = [np.zeros(val.shape) for val in model.state_dict().values()]
-		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
-		return initial_parameters
 
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# The newton method makes use of our custom newton optimizer
@@ -52,19 +45,22 @@ class SingleLayerFedNL(Strategy):
 
 			# Add a bias element to the features
 			features = torch.cat([torch.ones_like(features[:, 0:1]), features], dim=1)
-			diagonal = features.T @ features
 
-			for _ in range(local_rounds):
-				prediction = functional.softmax(features @ model_weights.T)
+			for i in range(local_rounds):
+				prediction = functional.sigmoid(features @ model_weights.T)
+				likelihood = prediction * (1 - prediction)
+				weight_matrices = torch.stack([torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])])
+				hessians = torch.stack([features.T @ weight_matrix @ features for weight_matrix in weight_matrices])
+				gradient = features.T @ (labels - prediction)
 
-				hessian = diagonal * torch.sum(prediction.T @ (1 - prediction))
-				inverse_hessian = torch.linalg.pinv(hessian)
-				gradient = (prediction - labels).T @ features
-
-				model_weights -= gradient @ inverse_hessian
+				if i != local_rounds - 1:
+					update = torch.stack([
+						torch.linalg.lstsq(hessians[i], gradient[:, i], rcond=None)[0] for i in range(gradient.shape[1])
+					])
+					model_weights += update
 
 		data_size = len(train_loader.dataset)
-		return [gradient.cpu().numpy()], data_size, {"hessian": [hessian.cpu().numpy()]}
+		return [gradient.cpu().numpy()], data_size, {"hessian": [hessians.cpu().numpy()]}
 
 	def aggregate_fit(
 			self,
@@ -87,12 +83,15 @@ class SingleLayerFedNL(Strategy):
 		hessian_results = (fit_res.metrics["hessian"] for _, fit_res in results)
 		hessians = utils.common.compute_weighted_average(hessian_results, counts)[0]
 
-		# Compute the inverse hessian and update the weights
-		inverse_hessian = np.linalg.pinv(hessians)
-		update = gradients @ inverse_hessian
+		# Update the weights using the least squares problem as that is equivalent to the newton method for logistic
+		# regression
+		update = np.stack([
+			np.linalg.lstsq(hessians[i], gradients[:, i], rcond=None)[0] for i in range(gradients.shape[1])
+		])
+
 		current_weights = parameters_to_ndarrays(self.current_weights)
-		current_weights[0] -= update[:, 1:]
-		current_weights[1] -= update[:, 0]
+		current_weights[0] += update[:, 1:]
+		current_weights[1] += update[:, 0]
 
 		self.current_weights = ndarrays_to_parameters(current_weights)
 		return self.current_weights, {}
