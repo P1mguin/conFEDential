@@ -1,20 +1,6 @@
 #!/bin/bash
-#SBATCH --partition=main
-#SBATCH --mail-type=BEGIN,END
-#SBATCH --gres=gpu:1
-#SBATCH -c 2
-#SBATCH --mem=16G
-#SBATCH --job-name=TEXAS-LogRes
-#SBATCH --output hpc_runs/texas/outputs/logistic_regression/slurm-%j.out
-
 # Show node in output file
 hostname
-
-module load python/3.10.7
-module load nvidia/nvhpc/23.3
-module load slurm/utils
-module load monitor/node
-source venv/bin/activate
 
 cd /home/s2240084/conFEDential
 ray start --head --num-cpus 2 --num-gpus 1 --temp-dir /local/ray --memory 17179869184
