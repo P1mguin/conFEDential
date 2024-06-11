@@ -24,8 +24,6 @@ simulation:
       - type: Linear
         in_features: 6169
         out_features: 100
-      - type: Softmax
-        dim: -1
 attack:
   data_access: 1.0
   message_access: server

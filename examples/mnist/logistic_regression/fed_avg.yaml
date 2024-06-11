@@ -1,7 +1,7 @@
 simulation:
   data:
     dataset_name: MNIST
-    batch_size: 1
+    batch_size: 64
     preprocess_fn: |
       def preprocess_fn(element):
         return {
