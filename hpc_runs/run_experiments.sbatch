@@ -3,6 +3,7 @@
 # Submit the sbatch jobs on exclusive nodes so that the ray cluster is not shared
 #SBATCH --nodes=6
 #SBATCH --ntasks-per-node=1
+#SBATCH --output hpc_runs/outputs/slurm-%j.out
 
 # Pull the latest changes from the git repository
 git pull
