@@ -83,7 +83,7 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def membership_inference_attack_model(
+	def train_membership_inference_net(
 			self,
 			attack_model,
 			train_loader,

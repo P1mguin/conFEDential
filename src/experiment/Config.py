@@ -5,7 +5,7 @@ from logging import INFO
 import yaml
 from flwr.common import log
 
-from src.attacks import AttackNet
+from src.attacks import MembershipNet
 from src.experiment import Attack, Simulation
 
 
@@ -93,16 +93,16 @@ class Config:
 			) = self._get_attack_datasets(fraction_train, fraction_test)
 
 			# Get the template model and train it
-			attack_model = self._get_attack_model(train_dataset)
+			membership_net = self._construct_membership_net(train_dataset)
 
 			wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
 			mode = "online" if is_online else "offline"
 			wandb_kwargs = {**wandb_kwargs, "mode": mode}
-			self.attack.membership_inference_attack_model(
-				attack_model, train_dataset, validation_dataset, test_dataset, wandb_kwargs
+			self.attack.train_membership_inference_net(
+				membership_net, train_dataset, validation_dataset, test_dataset, wandb_kwargs
 			)
 
-	def _get_attack_model(self, attack_dataset):
+	def _construct_membership_net(self, attack_dataset):
 		(
 			gradient,
 			activation_value,
@@ -119,8 +119,8 @@ class Config:
 		label_shape = label.shape[1:]
 
 		# Get the attack model
-		attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
-		return attack_model
+		membership_net = MembershipNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
+		return membership_net
 
 	def _get_attack_datasets(self, fraction_train: float = 0.85, fraction_test: float = 1.0):
 		# Get the captured server aggregates

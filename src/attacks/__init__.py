@@ -1,1 +1,1 @@
-from .AttackNet import AttackNet
+from .MembershipNet import MembershipNet

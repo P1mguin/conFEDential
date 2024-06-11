@@ -8,9 +8,9 @@ import torch.nn as nn
 from src import utils
 
 
-class AttackNet(nn.Module):
+class MembershipNet(nn.Module):
 	def __init__(self, config, gradient_shapes, activation_shapes, metrics_shapes, label_shape):
-		super(AttackNet, self).__init__()
+		super(MembershipNet, self).__init__()
 		self.config = config
 
 		self.label_component = None
