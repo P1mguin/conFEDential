@@ -4,6 +4,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH -c 2
 #SBATCH --mem=16G
+#SBATCH --job-name=CIFAR10-ResNet18
 #SBATCH --output hpc_runs/cifar10/outputs/resnet18/slurm-%j.out
 
 # Show node in output file
