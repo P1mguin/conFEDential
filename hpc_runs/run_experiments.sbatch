@@ -7,7 +7,6 @@
 #SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
-#SBATCH --output hpc_runs/outputs/slurm-%j.out
 
 srun --nodes=1 --ntasks=1 --output hpc_runs/cifar10/outputs/resnet18/slurm-%j.out hpc_runs/cifar10/resnet18.sh &
 srun --nodes=1 --ntasks=1 --output hpc_runs/cifar100/outputs/resnet34/slurm-%j.out hpc_runs/cifar100/resnet34.sh &
