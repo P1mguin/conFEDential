@@ -1,0 +1,5 @@
+error: cannot pull with rebase: You have unstaged changes.
+error: please commit or stash them.
+	Adding python 3.10.7 (ubuntu 20.04) to your environment
+	Adding slurm utilities
+	Adding compute-node cpu/gpu monitoring utilities
