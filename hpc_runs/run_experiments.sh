@@ -16,5 +16,10 @@ source venv/bin/activate
 wandb sync --sync-all
 wandb sync --clean
 
-# Submit the sbatch jobs
-sbatch hpc_runs/run_all.sbatch
+# Submit the sbatch jobs on exclusive nodes so that the ray cluster is not shared
+sbatch --exclude=s2240084 hpc_runs/cifar10/resnet18.sbatch
+sbatch --exclude=s2240084 hpc_runs/cifar100/resnet34.sbatch
+sbatch --exclude=s2240084 hpc_runs/purchase/fcn.sbatch
+sbatch --exclude=s2240084 hpc_runs/purchase/logistic_regression.sbatch
+sbatch --exclude=s2240084 hpc_runs/texas/fcn.sbatch
+sbatch --exclude=s2240084 hpc_runs/texas/logistic_regression.sbatch
