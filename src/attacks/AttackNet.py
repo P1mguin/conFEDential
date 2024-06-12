@@ -6,9 +6,17 @@ import torch.nn as nn
 import src.attacks.component_constructor as component_constructor
 
 
-class MembershipNet(nn.Module):
-	def __init__(self, config, gradient_shapes, activation_shapes, metrics_shapes, label_shape):
-		super(MembershipNet, self).__init__()
+class AttackNet(nn.Module):
+	def __init__(
+			self,
+			config,
+			gradient_shapes: List[Sequence[int]],
+			activation_shapes: List[Sequence[int]],
+			metrics_shapes: Dict[str, List[Sequence[int]]],
+			label_shape: Sequence[int],
+			output_size: int
+	):
+		super(AttackNet, self).__init__()
 		self.config = config
 
 		self.label_component = None
@@ -18,7 +26,7 @@ class MembershipNet(nn.Module):
 		self.gradient_components = None
 		self.encoder_component = None
 
-		self._initialize_components(gradient_shapes, activation_shapes, metrics_shapes, label_shape)
+		self._initialize_components(gradient_shapes, activation_shapes, metrics_shapes, label_shape, output_size)
 
 	def forward(self, gradients, activation_values, metrics, loss, label):
 		batch_size = loss.size(0)
@@ -58,8 +66,9 @@ class MembershipNet(nn.Module):
 			gradient_shapes: List[Sequence[int]],
 			activation_shapes: List[Sequence[int]],
 			metrics_shapes: Dict[str, List[Sequence[int]]],
-			label_shape: Sequence[int]
-	):
+			label_shape: Sequence[int],
+			output_size: int
+	) -> None:
 		self.label_component = component_constructor.construct_label_component(self.config, label_shape)
 		self.loss_component = component_constructor.construct_loss_component(self.config)
 		self.activation_components = component_constructor.construct_activation_component(
@@ -68,9 +77,29 @@ class MembershipNet(nn.Module):
 		)
 		self.gradient_components = component_constructor.construct_gradient_component(self.config, gradient_shapes)
 		self.metric_components = component_constructor.construct_metric_component(self.config, metrics_shapes)
-		self._initialize_encoder_component(activation_shapes, gradient_shapes, metrics_shapes)
+		self._initialize_encoder_component(activation_shapes, gradient_shapes, metrics_shapes, output_size)
 
-	def _initialize_encoder_component(self, activation_shapes, gradient_shapes, metrics_shapes):
+	def _initialize_encoder_component(
+			self,
+			activation_shapes: List[Sequence[int]],
+			gradient_shapes: List[Sequence[int]],
+			metrics_shapes: Dict[str, List[Sequence[int]]],
+			output_size: int,
+	) -> None:
+		encoder_size = self._get_encoder_input_size(activation_shapes, gradient_shapes, metrics_shapes)
+
+		self.encoder_component = component_constructor.construct_encoder_component(
+			self.config,
+			encoder_size,
+			output_size
+		)
+
+	def _get_encoder_input_size(
+			self,
+			activation_shapes: List[Sequence[int]],
+			gradient_shapes: List[Sequence[int]],
+			metrics_shapes: Dict[str, List[Sequence[int]]],
+	):
 		# Keep track of the size that the encoder needs to take
 		encoder_size = 0
 
@@ -101,5 +130,43 @@ class MembershipNet(nn.Module):
 			encoder_size += sum(
 				sum(metric_shapes[-4] for metric_shapes in metrics_shapes[key]) for key in metrics_shapes.keys()
 			) * metric_output_size * round_multiplier
+		return encoder_size
 
-		self.encoder_component = component_constructor.construct_encoder_component(self.config, encoder_size, 1)
+
+class MembershipNet(AttackNet):
+	def __init__(
+			self,
+			config,
+			gradient_shapes: List[Sequence[int]],
+			activation_shapes: List[Sequence[int]],
+			metrics_shapes: Dict[str, List[Sequence[int]]],
+			label_shape: Sequence[int],
+	):
+		super(MembershipNet, self).__init__(
+			config,
+			gradient_shapes,
+			activation_shapes,
+			metrics_shapes,
+			label_shape,
+			1
+		)
+
+
+class OriginNet(AttackNet):
+	def __init__(
+			self,
+			config,
+			gradient_shapes: List[Sequence[int]],
+			activation_shapes: List[Sequence[int]],
+			metrics_shapes: Dict[str, List[Sequence[int]]],
+			label_shape: Sequence[int],
+			client_amount: int
+	):
+		super(OriginNet, self).__init__(
+			config,
+			gradient_shapes,
+			activation_shapes,
+			metrics_shapes,
+			label_shape,
+			client_amount
+		)

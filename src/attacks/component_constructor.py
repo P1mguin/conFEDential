@@ -6,7 +6,7 @@ from typing import Dict, List, Sequence
 import torch.nn as nn
 
 
-def construct_label_component(config, label_shape: Sequence[int]):
+def construct_label_component(config, label_shape: Sequence[int]) -> nn.Module:
 	"""
 	Constructs the component that is used in the attacks to model the distribution
 	and importance of the one-hot-encoded target label of the input data
@@ -17,7 +17,7 @@ def construct_label_component(config, label_shape: Sequence[int]):
 	return nn.Sequential(*layers)
 
 
-def construct_loss_component(config):
+def construct_loss_component(config) -> nn.Module:
 	"""
 	Constructs the component that is used in the attacks to model the distribution
 	and importance of the loss values of the victim model
@@ -28,7 +28,7 @@ def construct_loss_component(config):
 	return nn.Sequential(*layers)
 
 
-def construct_activation_component(config, activation_shapes: List[Sequence[int]]):
+def construct_activation_component(config, activation_shapes: List[Sequence[int]]) -> nn.Module:
 	"""
 	Constructs the component that is used in the attacks to model the distribution
 	and importance of each element in the activation values of the victim model
@@ -48,7 +48,7 @@ def construct_activation_component(config, activation_shapes: List[Sequence[int]
 	return activation_components
 
 
-def construct_gradient_component(config, gradient_shapes: List[Sequence[int]]):
+def construct_gradient_component(config, gradient_shapes: List[Sequence[int]]) -> nn.Module:
 	"""
 	Constructs the component that is used in the attacks to model the distribution
 	and importance of each element in the gradient values of the victim model
@@ -71,7 +71,7 @@ def construct_gradient_component(config, gradient_shapes: List[Sequence[int]]):
 	return gradient_components
 
 
-def construct_metric_component(config, metrics_shapes: Dict[str, List[Sequence[int]]]):
+def construct_metric_component(config, metrics_shapes: Dict[str, List[Sequence[int]]]) -> nn.Module:
 	"""
 	Constructs the component that is used in the attacks to model the distribution
 	and importance of each additional piece of information and its elements that the federation
@@ -97,7 +97,7 @@ def construct_metric_component(config, metrics_shapes: Dict[str, List[Sequence[i
 	return metric_component
 
 
-def construct_encoder_component(config, input_size: int, output_size: int):
+def construct_encoder_component(config, input_size: int, output_size: int) -> nn.Module:
 	"""
 	Constructs the component that bundles the outputs of each component to determine the
 	distribution and importance of each of these variables.
@@ -129,7 +129,7 @@ def construct_encoder_component(config, input_size: int, output_size: int):
 	return encoder_component
 
 
-def _get_fcn_layers(config, input_size: int):
+def _get_fcn_layers(config, input_size: int) -> List[nn.Module]:
 	"""
 	Returns the fully connected subcomponent of the variable component.
 	:param config: the configuration with which the experiment is run
@@ -152,7 +152,7 @@ def _get_fcn_layers(config, input_size: int):
 	return layers
 
 
-def _get_convolution_layers(config, input_shape: Sequence[int]):
+def _get_convolution_layers(config, input_shape: Sequence[int]) -> List[nn.Module]:
 	"""
 	Returns the convolutional subcomponent of the variable component.
 	:param config: the configuration with which the experiment is run
