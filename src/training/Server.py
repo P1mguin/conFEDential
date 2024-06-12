@@ -148,7 +148,6 @@ class Server(FedAvg):
 			initial_values = [np.zeros((1, *value_shape)) for value_shape in value_shapes]
 
 			client_count = self.simulation.client_count
-			global_rounds = self.simulation.global_rounds
 			with h5py.File(path, 'w') as hf:
 				for client_id in range(client_count):
 					client_group = hf.create_group(str(client_id))
@@ -160,13 +159,13 @@ class Server(FedAvg):
 						client_layer_group.create_dataset(
 							"server_rounds",
 							data=np.array([0]),
-							maxshape=(global_rounds + 1,),
-							chunks=(global_rounds + 1,),
+							maxshape=(None,),
+							chunks=True,
 							compression="gzip",
 							shuffle=True,
 							fletcher32=True
 						)
-						max_layer_shape = (global_rounds + 1, *value_shape)
+						max_layer_shape = (None, *value_shape)
 						client_layer_group.create_dataset(
 							"values",
 							data=initial_value,
@@ -206,10 +205,9 @@ class Server(FedAvg):
 			else:
 				initial_values = [np.zeros((1, *value_shape)) for value_shape in value_shapes]
 
-			global_rounds = self.simulation.global_rounds
 			with h5py.File(path, 'w') as hf:
 				for i, (initial_value, value_shape) in enumerate(zip(initial_values, value_shapes)):
-					max_shape = (global_rounds + 1, *value_shape)
+					max_shape = (None, *value_shape)
 					hf.create_dataset(
 						str(i),
 						data=initial_value,

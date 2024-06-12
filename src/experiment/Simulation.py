@@ -102,10 +102,6 @@ class Simulation:
 		return self._federation.fraction_fit
 
 	@property
-	def global_rounds(self):
-		return self._federation.global_rounds
-
-	@property
 	def batch_size(self):
 		return self._data.batch_size
 
@@ -167,7 +163,7 @@ class Simulation:
 					num_clients=self.client_count,
 					client_resources=client_resources,
 					keep_initialised=is_ray_initialised,
-					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					config=fl.server.ServerConfig(num_rounds=int(1e4)),
 					strategy=strategy
 				)
 			else:
@@ -177,7 +173,7 @@ class Simulation:
 					num_clients=self.client_count,
 					client_resources=client_resources,
 					ray_init_args=ray_init_args,
-					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					config=fl.server.ServerConfig(num_rounds=int(1e4)),
 					strategy=strategy
 				)
 			wandb.finish()
