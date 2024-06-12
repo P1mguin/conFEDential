@@ -11,7 +11,6 @@ simulation:
   federation:
     client_count: 100
     fraction_fit: 0.1
-    global_rounds: 300
     local_rounds: 4
   model:
     optimizer_name: FedAvg

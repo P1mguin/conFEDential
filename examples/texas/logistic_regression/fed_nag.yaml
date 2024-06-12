@@ -11,7 +11,6 @@ simulation:
   federation:
     client_count: 10
     fraction_fit: 1.0
-    global_rounds: 50
     local_rounds: 4
   model:
     optimizer_name: FedNAG
