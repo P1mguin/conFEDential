@@ -51,11 +51,16 @@ class SingleLayerFedNL(Strategy):
 				likelihood = prediction * (1 - prediction)
 				weight_matrices = torch.stack([torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])])
 				hessians = torch.stack([features.T @ weight_matrix @ features for weight_matrix in weight_matrices])
+
+				# Add regularization to the hessian to make it invertible and to prevent overfitting
+				hessians += torch.unsqueeze(1e-6 * torch.eye(hessians.size(1)), dim=0).repeat_interleave(hessians.size(0), dim=0)
+
 				gradient = features.T @ (labels - prediction)
 
+				# Update the weights with the inverse only if necessary for the next local round
 				if i != local_rounds - 1:
 					update = torch.stack([
-						torch.linalg.lstsq(hessians[i], gradient[:, i], rcond=None)[0] for i in range(gradient.shape[1])
+						torch.linalg.inv(hessians[i]) @ gradient[:, i] for i in range(gradient.shape[1])
 					])
 					model_weights += update
 
@@ -85,9 +90,7 @@ class SingleLayerFedNL(Strategy):
 
 		# Update the weights using the least squares problem as that is equivalent to the newton method for logistic
 		# regression
-		update = np.stack([
-			np.linalg.lstsq(hessians[i], gradients[:, i], rcond=None)[0] for i in range(gradients.shape[1])
-		])
+		update = np.stack([np.linalg.inv(hessians[i]) @ gradients[:, i] for i in range(gradients.shape[1])])
 
 		current_weights = parameters_to_ndarrays(self.current_weights)
 		current_weights[0] += update[:, 1:]
