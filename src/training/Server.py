@@ -11,6 +11,7 @@ from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
+import src.utils as utils
 from src import training
 from src.training.learning_methods import Strategy
 
@@ -95,7 +96,7 @@ class Server(FedAvg):
 			aggregated_parameters: Parameters,
 			metrics: dict
 	) -> None:
-		self._capture_aggregates(server_round, aggregated_parameters, metrics)
+		self._capture_aggregates(server_round, results, aggregated_parameters, metrics)
 		self._capture_messages(server_round, results)
 
 	def _capture_messages(self, server_round, messages: List[Tuple[ClientProxy, FitRes]]) -> None:
@@ -116,7 +117,13 @@ class Server(FedAvg):
 		for key, value in metrics.items():
 			self._capture_message_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
-	def _capture_aggregates(self, server_round: int, aggregated_parameters: Parameters, metrics: dict):
+	def _capture_aggregates(
+			self,
+			server_round: int,
+			results: List[Tuple[ClientProxy, FitRes]],
+			aggregated_parameters: Parameters,
+			metrics: dict
+	):
 		base_path = self.simulation.get_capture_directory()
 		base_path = f"{base_path}aggregates/"
 
@@ -129,8 +136,19 @@ class Server(FedAvg):
 			is_parameters=True
 		)
 
+		# Add the message metrics that are not in the aggregated metrics
+		non_included_metric_keys = results[0][1].metrics.keys() - metrics.keys()
+		counts = [fitres.num_examples for _, fitres in results]
+		non_aggregate_metrics = {
+			key: [fitres.metrics[key] for _, fitres in results] for key in non_included_metric_keys
+		}
+		non_aggregate_metrics = {
+			key: utils.common.compute_weighted_average(non_aggregate_metrics["hessian"], counts)
+			for key in non_included_metric_keys
+		}
+
 		# Capture all metrics
-		for key, value in metrics.items():
+		for key, value in {**metrics, **non_aggregate_metrics}.items():
 			value = [layer for layer in value]
 			self._capture_aggregate_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
