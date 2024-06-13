@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --gpus-per-task=1
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
 #SBATCH --job-name=CIFAR100-ResNet34
