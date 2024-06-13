@@ -14,6 +14,6 @@ source venv/bin/activate
 
 # Sync all runs with wandb and clean up
 wandb sync --sync-all
-wandb sync --clean
+wandb sync --clean-force
 
 sbatch hpc_runs/run_experiments.sbatch
