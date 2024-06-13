@@ -15,6 +15,23 @@ scripts=(
     "hpc_runs/texas/logistic_regression.sbatch"
 )
 
+# Function to get the computation nodes on which jobs of a user are already running
+function get_exclusion_list() {
+    local user=$1
+    local exclusion_list=""
+    for job in $(squeue -u $user -h -o "%i"); do
+        node=$(squeue -j $job -h -o "%N")
+        if [ -n "$node" ]; then
+            if [ -n "$exclusion_list" ]; then
+                exclusion_list="$exclusion_list,$node"
+            else
+                exclusion_list="$node"
+            fi
+        fi
+    done
+    echo "$exclusion_list"
+}
+
 # Function to submit a job excluding a set of computation and to get the job id
 function submit_job() {
     local script=$1
@@ -36,7 +53,7 @@ function get_node() {
 }
 
 # Submit jobs and build exclusion list
-exclusion_list=""
+exclusion_list=$(get_exclusion_list $USER)
 for script in "${scripts[@]}"; do
     job_id=$(submit_job $script "$exclusion_list")
 
