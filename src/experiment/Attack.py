@@ -3,6 +3,7 @@ import random
 from logging import INFO
 from typing import List
 
+import h5py
 import more_itertools
 import numpy as np
 import torch
@@ -289,6 +290,25 @@ class Attack:
 			return list(range(client_count))
 		else:
 			return []
+
+	def get_aggregate_access_indices(self, aggregate_path):
+		# Get how many rounds there were (including the initial model)
+		with h5py.File(aggregate_path, 'r') as hf:
+			global_rounds = hf["0"].shape[0]
+
+		if isinstance(self._aggregate_access, int):
+			# Return the last n rounds
+			aggregate_access_indices = list(range(global_rounds - self._aggregate_access, global_rounds))
+		elif isinstance(self._aggregate_access, float):
+			# Return n fraction of the rounds counting from the back
+			aggregate_access_indices = list(range(global_rounds - int(global_rounds * self._aggregate_access), global_rounds))
+		elif isinstance(self._aggregate_access, list):
+			# Return the specified rounds
+			aggregate_access_indices = self._aggregate_access
+		else:
+			raise ValueError("Aggregate access should be an int, float or list of ints")
+
+		return aggregate_access_indices
 
 	def get_target_sample(self, simulation):
 		"""

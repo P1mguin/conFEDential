@@ -124,7 +124,9 @@ class Config:
 
 	def _get_attack_datasets(self, fraction_train: float = 0.85, fraction_test: float = 1.0):
 		# Get the captured server aggregates
-		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
+		aggregate_path = f"{self.simulation.get_capture_directory()}aggregates/aggregates.hdf5"
+		aggregate_access_indices = self.attack.get_aggregate_access_indices(aggregate_path)
+		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates(aggregate_access_indices)
 
 		# Get the captured messages
 		# intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)

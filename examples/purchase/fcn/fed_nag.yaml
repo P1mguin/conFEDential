@@ -38,7 +38,8 @@ simulation:
 attack:
   data_access: 1.0
   message_access: server
-  repetitions: 0
+  aggregate_access: 0.8
+  repetitions: 1
   attack_simulation:
     batch_size: 64
     optimizer_name: Adam

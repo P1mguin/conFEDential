@@ -184,7 +184,7 @@ class Simulation:
 		# Shut ray down
 		ray.shutdown()
 
-	def get_server_aggregates(self):
+	def get_server_aggregates(self, aggregate_access_indices):
 		"""
 		Returns the aggregates of the model parameters and metrics of the simulation over all global rounds.
 		"""
@@ -201,6 +201,10 @@ class Simulation:
 		for metric_file in metric_files:
 			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
 			metrics[metric_name] = self._get_captured_aggregates(metric_file)
+
+		# Return the aggregates and metrics of the specified indices
+		aggregates = [layer[aggregate_access_indices] for layer in aggregates]
+		metrics = {key: [layer[aggregate_access_indices] for layer in value] for key, value in metrics.items()}
 		return aggregates, metrics
 
 	def _get_captured_aggregates(self, path):
