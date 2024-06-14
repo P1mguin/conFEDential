@@ -53,7 +53,7 @@ class SingleLayerFedNL(Strategy):
 				hessians = torch.stack([features.T @ weight_matrix @ features for weight_matrix in weight_matrices])
 
 				# Add regularization to the hessian to make it invertible and to prevent overfitting
-				hessians += torch.unsqueeze(1e-6 * torch.eye(hessians.size(1)), dim=0).repeat_interleave(hessians.size(0), dim=0)
+				hessians += torch.unsqueeze(1e-6 * torch.eye(hessians.size(1), device=training.DEVICE), dim=0).repeat_interleave(hessians.size(0), dim=0)
 
 				gradient = features.T @ (labels - prediction)
 
