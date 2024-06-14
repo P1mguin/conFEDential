@@ -41,6 +41,7 @@ simulation:
 attack:
   data_access: 1.0
   message_access: server
+  aggregate_access: 1.0
   repetitions: 0
   attack_simulation:
     batch_size: 64

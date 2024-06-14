@@ -38,7 +38,7 @@ simulation:
 attack:
   data_access: 1.0
   message_access: server
-  aggregate_access: 0.8
+  aggregate_access: 1.0
   repetitions: 1
   attack_simulation:
     batch_size: 64
