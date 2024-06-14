@@ -23,11 +23,13 @@ class Attack:
 			self,
 			data_access: float,
 			message_access: str,
+			aggregate_access: List[int] | int | float,
 			repetitions: int,
 			attack_simulation=None
 	):
 		self._data_access = data_access
 		self._message_access = message_access
+		self._aggregate_access = aggregate_access
 		self._repetitions = repetitions
 		self._attack_simulation = attack_simulation
 
@@ -40,6 +42,7 @@ class Attack:
 		result = "Attack:"
 		result += f"\n\tdata_access: {self._data_access}"
 		result += f"\n\tmessage_access: {self._message_access}"
+		result += f"\n\taggregate_access: {self._aggregate_access}"
 		result += f"\n\trepetitions: {self._repetitions}"
 		result += "\n\t{}".format("\n\t".join(str(self._attack_simulation).split("\n")))
 		return result
@@ -48,6 +51,7 @@ class Attack:
 		result = "Attack("
 		result += f"data_access={self._data_access}, "
 		result += f"message_access={self._message_access}, "
+		result += f"aggregate_access={self._aggregate_access}, "
 		result += f"repetitions={self._repetitions}, "
 		result += f"{repr(self._attack_simulation)}"
 		result += ")"
@@ -59,6 +63,7 @@ class Attack:
 		return Attack(
 			data_access=config['data_access'],
 			message_access=config['message_access'],
+			aggregate_access=config['aggregate_access'],
 			repetitions=config['repetitions'],
 			attack_simulation=attack_simulation,
 		)
