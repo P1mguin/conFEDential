@@ -79,7 +79,7 @@ def construct_metric_component(config, metrics_shapes: Dict[str, List[Sequence[i
 	:param config: the configuration with which the experiment is run
 	:param metrics_shapes: the output shapes of the additional pieces of information
 	"""
-	metric_component = {}
+	metric_component_dict = {}
 	for key, metric_shapes in metrics_shapes.items():
 		metric_components = [_get_convolution_layers(config, metric_shape) for metric_shape in metric_shapes]
 
@@ -92,9 +92,9 @@ def construct_metric_component(config, metrics_shapes: Dict[str, List[Sequence[i
 			metric_component.append(nn.Flatten(start_dim=-3))
 			metric_component.extend(_get_fcn_layers(config, out_channels))
 
-		metric_component[key] = nn.ModuleList([nn.Sequential(*component) for component in metric_components])
-	metric_component = nn.ModuleDict(metric_component)
-	return metric_component
+		metric_component_dict[key] = nn.ModuleList([nn.Sequential(*component) for component in metric_components])
+	metric_component_dict = nn.ModuleDict(metric_component_dict)
+	return metric_component_dict
 
 
 def construct_encoder_component(config, input_size: int, output_size: int) -> nn.Module:

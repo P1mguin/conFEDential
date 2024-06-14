@@ -430,7 +430,7 @@ class Attack:
 		"""
 		# Get the models from the parameter iterations
 		template_model = simulation.model
-		global_rounds = simulation.global_rounds + 1
+		intercepted_aggregate_round_count = model_iterations[0].shape[0]
 
 		# Convert model iterations to state dicts
 		keys = template_model.state_dict().keys()
@@ -439,7 +439,7 @@ class Attack:
 			model_iterations[j][i],
 			dtype=torch.float32,
 			requires_grad=(key in parameter_keys)
-		) for j, key in enumerate(keys)} for i in range(global_rounds)]
+		) for j, key in enumerate(keys)} for i in range(intercepted_aggregate_round_count)]
 
 		# Get the activation values
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
@@ -452,7 +452,7 @@ class Attack:
 	def _get_activation_values(self, model_state_dicts, features, simulation):
 		# Helper variables
 		template_model = simulation.model
-		global_rounds = simulation.global_rounds + 1
+		intercepted_aggregate_round_count = len(model_state_dicts)
 
 		# Attach the hooks that will get the intermediate value of each layer
 		activation = {}
@@ -478,7 +478,7 @@ class Attack:
 		if is_singular_batch:
 			features = torch.cat([features, features])
 
-		for i in range(global_rounds):
+		for i in range(intercepted_aggregate_round_count):
 			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
 
 			# Append prediction separately so grad_fn stays intact
@@ -501,10 +501,9 @@ class Attack:
 		"""
 		Gets the losses of a list of predictions and a list of labels
 		"""
-		global_rounds = simulation.global_rounds + 1
 		criterion = simulation.criterion
 		criterion.reduction = "none"
-		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
+		losses = torch.stack([criterion(predictions[:, i], label) for i in range(predictions.shape[1])])
 		return losses
 
 	def _get_gradients(self, losses, model_state_dicts, simulation):

@@ -104,7 +104,7 @@ class AttackNet(nn.Module):
 		encoder_size = 0
 
 		# Helper variable and helper function
-		round_multiplier = self.config.simulation.global_rounds + 1
+		round_multiplier = activation_shapes[0][0]
 		get_output_size = lambda component: next(
 			layer.out_features for layer in reversed(component) if hasattr(layer, "out_features")
 		)
