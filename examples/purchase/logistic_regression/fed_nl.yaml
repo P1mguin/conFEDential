@@ -11,13 +11,7 @@ simulation:
   federation:
     client_count: 10
     fraction_fit: 1.0
-    local_rounds:
-      values:
-        - 1
-        - 2
-        - 4
-        - 8
-        - 16
+    local_rounds: 1
   model:
     optimizer_name: SingleLayerFedNL
     model_name: Logistic Regression
