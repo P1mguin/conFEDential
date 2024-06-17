@@ -54,7 +54,7 @@ class SingleLayerFedNL(Strategy):
 
 				# Add regularization to the hessian to make it invertible and to prevent overfitting
 				identity = torch.eye(features.size(1), device=training.DEVICE)
-				hessians = (hessian + 1e-6 * identity for hessian in hessians)
+				hessians = (hessian + 1e-3 * identity for hessian in hessians)
 
 				gradient = features.T @ (labels - prediction)
 
@@ -65,7 +65,7 @@ class SingleLayerFedNL(Strategy):
 						model_weights[j] += update
 
 		data_size = len(train_loader.dataset)
-		hessian_copy = np.zeros((*model_weights.shape, model_weights.shape[-1]))
+		hessian_copy = np.zeros((*model_weights.shape, model_weights.shape[-1]), dtype=np.float32)
 		for i, hessian in enumerate(hessians):
 			hessian_copy[i] = hessian.cpu().numpy()
 
