@@ -12,7 +12,13 @@ def compute_weighted_average(values, counts) -> Any:
 	"""
 	total = sum(counts)
 	multiplied_values = ((layer * weight / total for layer in value) for value, weight in zip(values, counts))
-	mean_values = list(np.sum(layer, axis=0) for layer in zip(*multiplied_values))
+
+	mean_values = []
+	for layer in zip(*multiplied_values):
+		mean_values.append(np.zeros_like(layer[0]))
+		for value in layer:
+			mean_values[-1] += value
+
 	return mean_values
 
 
