@@ -1,6 +1,6 @@
 import math
 import random
-from logging import INFO
+from logging import DEBUG, INFO
 from typing import List
 
 import h5py
@@ -100,8 +100,12 @@ class Attack:
 		wandb_kwargs = self._get_wandb_kwargs("membership-inference", wandb_kwargs)
 		wandb.init(**wandb_kwargs)
 
+		# Get training algorithm variables and set model in training mode
+		attack_model = attack_model.to(training.DEVICE)
+		criterion = nn.MSELoss()
+		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
+
 		# Set initial parameters and get initial performance
-		i = 0
 		test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
 		val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
 
@@ -130,24 +134,15 @@ class Attack:
 				step=-1
 			)
 
-		# Get training algorithm variables and set model in training mode
-		attack_model = attack_model.to(training.DEVICE)
-		attack_model.train()
-		criterion = nn.MSELoss()
-		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
-
 		# Training loop with early stopping
-		previous_val_roc_auc = 0.
-		total_buffer_iterations = 1
-		buffer_iterations = total_buffer_iterations
-		while buffer_iterations > 0 or (
-				val_roc_auc > previous_val_roc_auc and buffer_iterations == total_buffer_iterations
-		):
-			if val_roc_auc <= previous_val_roc_auc or buffer_iterations < total_buffer_iterations:
-				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
-				buffer_iterations -= 1
+		patience = 10
+		patience_counter = 0
+		relative_tolerance = 1e-3
 
-			previous_val_roc_auc = val_roc_auc
+		attack_model.train()
+		i = 0
+		while True:
+			previous_val_loss = val_loss
 			predictions = torch.Tensor()
 			is_members = torch.Tensor()
 			for (
@@ -189,7 +184,7 @@ class Attack:
 			log(
 				INFO,
 				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
-				f"train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
+				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
 			)
 			if len(test_loader.dataset) == 1:
 				self._log_aucs(
@@ -209,6 +204,23 @@ class Attack:
 					["Train", "Validation", "Test"],
 					step=i
 				)
+
+			# Early stopping
+			loss_decrease = -(val_loss - previous_val_loss) / previous_val_loss
+			log(DEBUG, f"Loss decrease: {loss_decrease}")
+
+			if loss_decrease < relative_tolerance:
+				patience_counter += 1
+				if patience_counter >= patience:
+					log(
+						INFO,
+						"Early stopping at round %s, loss %s",
+						i,
+						val_loss
+					)
+					break
+			else:
+				patience_counter = 0
 
 			i += 1
 		wandb.finish()
@@ -540,11 +552,18 @@ class Attack:
 	def _get_wandb_kwargs(self, attack_type, simulation_wandb_kwargs):
 		simulation_wandb_kwargs["tags"][0] = f"Attack-{attack_type}"
 		simulation_wandb_kwargs["config"] = {"simulation": simulation_wandb_kwargs["config"]}
+		model_config = self._attack_simulation.model_architecture
 		simulation_wandb_kwargs["config"]["attack"] = {
 			"data_access": self._data_access,
 			"message_access": self._message_access,
+			"aggregate_access": self._aggregate_access,
 			"batch_size": self._attack_simulation.batch_size,
 			"optimizer": self._attack_simulation.optimizer_name,
+			"label": model_config.use_label,
+			"loss": model_config.use_loss,
+			"activation": model_config.use_activation,
+			"gradient": model_config.use_gradient,
+			"metrics": model_config.use_metrics,
 			**self._attack_simulation.optimizer_parameters
 		}
 		return simulation_wandb_kwargs
