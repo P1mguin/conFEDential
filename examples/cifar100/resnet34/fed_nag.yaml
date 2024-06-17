@@ -28,19 +28,19 @@ attack:
   data_access: 1.0
   message_access: server
   aggregate_access: 1
-  repetitions: 1
+  repetitions: 0
   attack_simulation:
     batch_size: 64
     optimizer_name: Adam
     optimizer_parameters:
-      lr: 0.0001
+      eps: 0.0001
     model_architecture:
       components:
-        label: True
+        label: False
         loss: True
-        activation: True
-        gradient: True
-        metrics: True
+        activation: False
+        gradient: False
+        metrics: False
       gradient_component:
         - type: Dropout
           p: 0.2
