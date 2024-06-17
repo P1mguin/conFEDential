@@ -196,22 +196,19 @@ class Simulation:
 		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
 
 		# Get and return the variables
-		aggregates = self._get_captured_aggregates(aggregate_file)
+		aggregates = self._get_captured_aggregates(aggregate_file, aggregate_access_indices)
 		metrics = {}
 		for metric_file in metric_files:
 			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
-			metrics[metric_name] = self._get_captured_aggregates(metric_file)
+			metrics[metric_name] = self._get_captured_aggregates(metric_file, aggregate_access_indices)
 
-		# Return the aggregates and metrics of the specified indices
-		aggregates = [layer[aggregate_access_indices] for layer in aggregates]
-		metrics = {key: [layer[aggregate_access_indices] for layer in value] for key, value in metrics.items()}
 		return aggregates, metrics
 
-	def _get_captured_aggregates(self, path):
+	def _get_captured_aggregates(self, path, aggregate_access_indices):
 		aggregate_rounds = []
 		with h5py.File(path, 'r') as hf:
-			for key in range(len(hf.keys())):
-				value = hf[str(key)][:]
+			for layer_index in range(len(hf.keys())):
+				value = hf[str(layer_index)][aggregate_access_indices]
 				aggregate_rounds.append(value)
 		return aggregate_rounds
 
@@ -234,7 +231,7 @@ class Simulation:
 			metrics[metric_name] = self._get_captured_messages(metric_file, intercepted_client_ids)
 		return messages, metrics
 
-	def _get_captured_messages(self, path, intercepted_client_ids):
+	def _get_captured_messages(self, path, intercepted_client_ids, aggregate_access_indices):
 		def get_client_messages(client_id):
 			with h5py.File(path, 'r') as hf:
 				client_group = hf[str(client_id)]
@@ -244,7 +241,7 @@ class Simulation:
 					if server_rounds is None:
 						server_rounds = client_group[str(client_layer_group_key)]["server_rounds"][:]
 
-					values = client_group[str(client_layer_group_key)]["values"][:]
+					values = client_group[str(client_layer_group_key)]["values"][aggregate_access_indices]
 					client_layers.append(values)
 				yield server_rounds, client_layers
 

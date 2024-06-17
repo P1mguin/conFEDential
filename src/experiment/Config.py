@@ -2,6 +2,7 @@ import os
 import random
 from logging import INFO
 
+import torch
 import yaml
 from flwr.common import log
 
@@ -116,7 +117,10 @@ class Config:
 		gradient_shapes = [gradient.shape[1:] for gradient in gradient]
 		activation_shapes = [activation.shape[1:] for activation in activation_value]
 		metrics_shapes = {key: [layer.shape[1:] for layer in metric] for key, metric in metrics.items()}
-		label_shape = label.shape[1:]
+		if self.attack.attack_simulation.model_architecture.use_label:
+			label_shape = label.shape[1:]
+		else:
+			label_shape = torch.empty(0, )
 
 		# Get the attack model
 		membership_net = MembershipNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)

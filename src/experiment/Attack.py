@@ -361,10 +361,13 @@ class Attack:
 		is_member = is_member.int()
 
 		# Reshape the metrics so they are 5D and can fit in a gradient component
-		metrics = {
-			key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
-			metrics.items()
-		}
+		if self.attack_simulation.model_architecture.use_metrics:
+			metrics = {
+				key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
+				metrics.items()
+			}
+		else:
+			metrics = {}
 
 		process_amount = math.ceil(len(features) / process_batch_size)
 
@@ -403,7 +406,10 @@ class Attack:
 					# Gradient, activation values and loss values have a grad_fn detach the tensor from it
 					gradient = [layer[j] for layer in gradients]
 					activation_value = [layer[j].detach() for layer in activation_values]
-					loss_value = loss[j].detach().unsqueeze(-1)
+					if self.attack_simulation.model_architecture.use_loss:
+						loss_value = loss[j].detach().unsqueeze(-1)
+					else:
+						loss_value = torch.tensor(-1)
 
 					is_value_member = batch_is_member[j].detach()
 					value_origin = batch_member_origins[j].detach()
@@ -444,9 +450,15 @@ class Attack:
 		# Get the activation values
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
-		losses = self._get_losses(predictions, labels, simulation)
-		gradients = self._get_gradients(losses, state_dicts, simulation)
-		losses = losses.T
+
+		gradients, losses = [], []
+		if self.attack_simulation.model_architecture.use_loss or self.attack_simulation.model_architecture.use_gradient:
+			losses = self._get_losses(predictions, labels, simulation)
+			if self.attack_simulation.model_architecture.use_gradient:
+				gradients = self._get_gradients(losses, state_dicts, simulation)
+			if self.attack_simulation.model_architecture.use_loss:
+				losses = losses.T
+
 		return activation_values, gradients, losses
 
 	def _get_activation_values(self, model_state_dicts, features, simulation):
@@ -455,19 +467,20 @@ class Attack:
 		intercepted_aggregate_round_count = len(model_state_dicts)
 
 		# Attach the hooks that will get the intermediate value of each layer
-		activation = {}
+		if self.attack_simulation.model_architecture.use_activation:
+			activation = {}
 
-		def get_activation(name):
-			def hook(model, input, output):
-				activation[name] = output.detach()
+			def get_activation(name):
+				def hook(model, input, output):
+					activation[name] = output.detach()
 
-			return hook
+				return hook
 
-		# Attack activation hook to all leaf modules
-		hooks = [
-			module.register_forward_hook(get_activation(name)) for name, module in template_model.named_modules()
-			if len(list(module.children())) == 0
-		]
+			# Attack activation hook to all leaf modules
+			hooks = [
+				module.register_forward_hook(get_activation(name)) for name, module in template_model.named_modules()
+				if len(list(module.children())) == 0
+			]
 
 		# Predict the features for each model iteration and capture the activation values from the dict
 		activation_values = []
@@ -482,11 +495,15 @@ class Attack:
 			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
 
 			# Append prediction separately so grad_fn stays intact
-			activation_values.append(list(activation.values())[:-1])
-			activation_values[-1].append(prediction)
+			if self.attack_simulation.model_architecture.use_activation:
+				activation_values.append(list(activation.values())[:-1])
+				activation_values[-1].append(prediction)
+			else:
+				activation_values.append([prediction])
 
 		# Remove the hooks
-		[h.remove() for h in hooks]
+		if self.attack_simulation.model_architecture.use_activation:
+			[h.remove() for h in hooks]
 
 		if is_singular_batch:
 			activation_values = [
