@@ -8,7 +8,7 @@ from datasets import Dataset as HuggingFaceDataset
 class Dataset(ABC):
 	@staticmethod
 	@abstractmethod
-	def load_dataset(cache_root) -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
+	def load_dataset(cache_root) -> Tuple[HuggingFaceDataset, HuggingFaceDataset, HuggingFaceDataset]:
 		"""
 		Load raw dataset from cache directory, if not found, throws an error
 		"""

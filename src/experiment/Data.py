@@ -116,17 +116,18 @@ class Data:
 			log(INFO, f"No preprocessed data found for the given preprocess function with hash {preprocessed_hash}, preprocessing now")
 
 		# Load the raw dataset
-		train_dataset, test_dataset = getattr(data, self._dataset_name).load_dataset(self._cache_root)
+		train_dataset, test_dataset, non_member_dataset = getattr(data, self._dataset_name).load_dataset(self._cache_root)
 
 		# Apply the preprocess function to the train and test dataset
 		train_dataset = train_dataset.map(self._preprocess_fn)
 		test_dataset = test_dataset.map(self._preprocess_fn)
+		non_member_dataset = non_member_dataset.map(self._preprocess_fn)
 
 		# Save the preprocessed dataset
 		with open(preprocessed_cache_path, "wb") as file:
-			pickle.dump((train_dataset, test_dataset), file)
+			pickle.dump((train_dataset, test_dataset, non_member_dataset), file)
 
-		self.dataset = (train_dataset, test_dataset)
+		self.dataset = (train_dataset, test_dataset, non_member_dataset)
 
 	def get_preprocessed_cache_directory(self):
 		"""

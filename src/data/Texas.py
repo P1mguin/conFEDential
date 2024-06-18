@@ -8,13 +8,21 @@ from src.data.Dataset import Dataset
 
 class Texas(Dataset):
 	@staticmethod
-	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
+	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset, HuggingFaceDataset]:
 		Dataset.is_data_downloaded("texas", cache_root)
 
 		# Get the file from the locally downloaded files
 		dataset = load_dataset("parquet", data_files=f"{cache_root}data/texas/texas/texas.parquet")
-		train_dataset = dataset["train"].select(range(10000))
-		test_dataset = dataset["train"].select(range(10000, 11775))
+
+		train_size = 10000
+		test_size = 2000
+		non_member_size = dataset["train"].shape[0] - train_size - test_size
+
+		train_dataset = dataset["train"].select(range(train_size))
+		test_dataset = dataset["train"].select(range(train_size, train_size + test_size))
+		non_member_size = dataset["train"].select(
+			range(train_size + test_size, train_size + test_size + non_member_size)
+		)
 
 		def split_label_and_features(entry):
 			entry = np.array(list(entry.values()))
@@ -25,5 +33,6 @@ class Texas(Dataset):
 
 		train_dataset = train_dataset.map(split_label_and_features)
 		test_dataset = test_dataset.map(split_label_and_features)
+		non_member_size = non_member_size.map(split_label_and_features)
 
-		return train_dataset, test_dataset
+		return train_dataset, test_dataset, non_member_size

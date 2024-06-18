@@ -31,8 +31,9 @@ class Simulation:
 		self._model = model
 
 		# Set the train and test loaders based on the dataset and the federation
-		self.train_loaders = None
-		self.test_loader = None
+		self._train_loaders = None
+		self._test_loader = None
+		self._non_member_loader = None
 
 		log(INFO, "Preparing datasets for federated learning simulation")
 		self._prepare_loaders()
@@ -76,6 +77,14 @@ class Simulation:
 	@test_loader.setter
 	def test_loader(self, test_loader: DataLoader):
 		self._test_loader = test_loader
+
+	@property
+	def non_member_loader(self) -> DataLoader:
+		return self._non_member_loader
+
+	@non_member_loader.setter
+	def non_member_loader(self, non_member_loader: DataLoader):
+		self._non_member_loader = non_member_loader
 
 	@property
 	def model(self):
@@ -262,18 +271,19 @@ class Simulation:
 		if os.path.exists(split_cache_path):
 			log(INFO, f"Found previously split dataloaders with hash {split_hash}, loading them")
 			with open(split_cache_path, "rb") as file:
-				self.train_loaders, self.test_loader = pickle.load(file)
+				self.train_loaders, self.test_loader, self.non_member_loader = pickle.load(file)
 				return
 		else:
 			log(INFO, f"Found no previously split dataloaders with hash {split_hash}, splitting the data now")
 
-		train_dataset, test_dataset = self._data.dataset
+		train_dataset, test_dataset, non_member_dataset = self._data.dataset
 
 		# Split the train dataset
 		train_datasets = self._split_data(train_dataset)
 
 		# Convert the test dataset to a tuple
 		test_dataset = [(torch.tensor(value["x"]), value["y"]) for value in test_dataset]
+		non_member_dataset = [(torch.tensor(value["x"]), value["y"]) for value in non_member_dataset]
 
 		# Bundle the information in a dataloader
 		train_loaders = []
@@ -287,15 +297,17 @@ class Simulation:
 
 		# Create the test loader
 		test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
+		non_member_loader = DataLoader(non_member_dataset, batch_size=len(non_member_dataset))
 
 		# Cache the train and test loaders
 		split_preprocessed_directory = self._data.get_preprocessed_cache_directory() + "split/"
 		os.makedirs(split_preprocessed_directory, exist_ok=True)
 		with open(split_cache_path, "wb") as file:
-			pickle.dump((train_loaders, test_loader), file)
+			pickle.dump((train_loaders, test_loader, non_member_loader), file)
 
 		self.train_loaders = train_loaders
 		self.test_loader = test_loader
+		self.non_member_loader = non_member_loader
 
 	def _get_split_cache_path(self):
 		"""

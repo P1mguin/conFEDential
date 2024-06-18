@@ -15,6 +15,8 @@ from sklearn.metrics import auc, roc_curve
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+import matplotlib.pyplot as plt
+
 import src.training as training
 from src.experiment import AttackSimulation
 
@@ -173,6 +175,23 @@ class Attack:
 				loss.backward()
 				optimizer.step()
 
+			non_members_loss = torch.stack([x[0][3] for x in train_loader.dataset if x[1] == 0]).flatten().numpy()
+			members_loss = torch.stack([x[0][3] for x in train_loader.dataset if x[1] == 1]).flatten().numpy()
+
+			non_member_hist_values, non_member_bins = np.histogram(non_members_loss, bins='auto')
+			member_hist_values, member_bins = np.histogram(members_loss, bins='auto')
+
+			plt.hist(members_loss, bins=member_bins, label="Members")
+			plt.hist(non_members_loss, bins=non_member_bins, label="Non-Members")
+
+			plt.title("(Train): Loss distribution")
+			plt.xlabel("Index")
+			plt.ylabel("Value")
+			plt.ylim(0, max(member_hist_values.max(), non_member_hist_values.max()) * 1.05)
+			plt.legend()
+
+			plt.show()
+
 			# Get the performance after the epoch
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
 			train_roc_auc = auc(train_fpr, train_tpr)
@@ -252,6 +271,24 @@ class Attack:
 
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))
+
+		if len(dataloader.dataset) != 1:
+			non_members_loss = torch.stack([x[0][3] for x in dataloader.dataset if x[1] == 0]).flatten().numpy()
+			members_loss = torch.stack([x[0][3] for x in dataloader.dataset if x[1] == 1]).flatten().numpy()
+
+			non_member_hist_values, non_member_bins = np.histogram(non_members_loss, bins='sqrt')
+			member_hist_values, member_bins = np.histogram(members_loss, bins='sqrt')
+
+			plt.hist(members_loss, bins=member_bins, label="Members")
+			plt.hist(non_members_loss, bins=non_member_bins, label="Non-Members")
+
+			plt.title("(Test): Loss distribution")
+			plt.xlabel("Index")
+			plt.ylabel("Value")
+			plt.ylim(0, max(member_hist_values.max(), non_member_hist_values.max()) * 2)
+			plt.legend()
+
+			plt.show()
 
 		fpr, tpr, _ = roc_curve(is_members, predictions)
 		roc_auc = auc(fpr, tpr)
