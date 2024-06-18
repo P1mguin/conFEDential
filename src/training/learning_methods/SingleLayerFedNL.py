@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
@@ -50,26 +51,29 @@ class SingleLayerFedNL(Strategy):
 				prediction = functional.sigmoid(features @ model_weights.T)
 				likelihood = prediction * (1 - prediction)
 				weight_matrices = torch.stack([torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])])
-				hessians = (features.T @ weight_matrix @ features for weight_matrix in weight_matrices)
 
 				# Add regularization to the hessian to make it invertible and to prevent overfitting
 				identity = torch.eye(features.size(1), device=training.DEVICE)
-				hessians = (hessian + 1e-3 * identity for hessian in hessians)
+
+				@pickleable_generator
+				def hessians():
+					for weight_matrix in weight_matrices:
+						hessian = features.T @ weight_matrix @ features
+						yield hessian + 1e-3 * identity
 
 				gradient = features.T @ (labels - prediction)
 
 				# Update the weights with the inverse only if necessary for the next local round
 				if i != local_rounds - 1:
-					updates = (torch.linalg.inv(next(hessians)) @ gradient[:, i] for i in range(gradient.shape[1]))
+					hessian_generator = hessians()
+					updates = (torch.linalg.inv(next(hessian_generator)) @ gradient[:, i] for i in
+							   range(gradient.shape[1]))
 					for j, update in enumerate(updates):
 						model_weights[j] += update
 
 		data_size = len(train_loader.dataset)
-		hessian_copy = np.zeros((*model_weights.shape, model_weights.shape[-1]), dtype=np.float32)
-		for i, hessian in enumerate(hessians):
-			hessian_copy[i] = hessian.cpu().numpy()
-
-		return [gradient.cpu().numpy()], data_size, {"hessian": [hessian_copy]}
+		hessian_generator = PickleableGenerator(hessians)
+		return [gradient.cpu().numpy()], data_size, {"hessian": hessian_generator}
 
 	def aggregate_fit(
 			self,
@@ -88,17 +92,42 @@ class SingleLayerFedNL(Strategy):
 		gradient_results = (parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results)
 		gradients = utils.common.compute_weighted_average(gradient_results, counts)[0]
 
-		# Aggregate the hessians
+		# Aggregate the hessians, do not do it via the weighted computation as the hessian is transmitted as a matrix
 		hessian_results = (fit_res.metrics["hessian"] for _, fit_res in results)
-		hessians = utils.common.compute_weighted_average(hessian_results, counts)[0]
+		def hessians():
+			total = sum(counts)
+			multiplied_values = ((layer * weight / total for layer in value) for value, weight in zip(hessian_results, counts))
+			for hessian in zip(*multiplied_values):
+				yield sum(hessian)
 
 		# Update the weights using the least squares problem as that is equivalent to the newton method for logistic
 		# regression
-		update = np.stack([np.linalg.inv(hessians[i]) @ gradients[:, i] for i in range(gradients.shape[1])])
+		hessian_generator = hessians()
+		updates = (np.linalg.inv(next(hessian_generator)) @ gradients[:, i] for i in range(gradients.shape[1]))
 
 		current_weights = parameters_to_ndarrays(self.current_weights)
-		current_weights[0] += update[:, 1:]
-		current_weights[1] += update[:, 0]
+		current_weights = np.concatenate((np.expand_dims(current_weights[1], axis=1), current_weights[0]), axis=1)
+		for i, update in enumerate(updates):
+			current_weights[i] += update
 
-		self.current_weights = ndarrays_to_parameters(current_weights)
+		self.current_weights = ndarrays_to_parameters([current_weights[:, 1:], current_weights[:, 0]])
 		return self.current_weights, {}
+
+
+class PickleableGenerator:
+	def __init__(self, generator, *args, **kwargs):
+		self.generator = generator
+		self.args = args
+		self.kwargs = kwargs
+
+	def __iter__(self):
+		return iter(self.generator(*self.args, **self.kwargs))
+
+
+def pickleable_generator(generator):
+	@wraps(generator)
+	def wrapper(*args, **kwargs):
+		return PickleableGenerator(generator, *args, **kwargs)
+
+	generator.__qualname__ += ".__wrapped__"
+	return wrapper
