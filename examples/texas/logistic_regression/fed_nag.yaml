@@ -35,11 +35,27 @@ attack:
       eps: 0.0001
     model_architecture:
       components:
-        label: False
-        loss: True
-        activation: False
-        gradient: False
-        metrics: False
+        values:
+          - label: False
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: False
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
       gradient_component:
         - type: Dropout
           p: 0.2
