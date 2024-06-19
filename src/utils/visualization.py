@@ -34,3 +34,22 @@ def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
 	ax.legend(loc="lower right")
 
 	return plt
+
+
+def visualize_distribution(tensor1, tensor2, labels, title, bins=None):
+	if bins is None:
+		# Set the number of bins to the maximum of the two tensors
+		bins = max(len(tensor1), len(tensor2))
+
+	# Define the range for the bins (min and max values across both tensors)
+	bins_range = (min(tensor1.min(), tensor2.min()), max(tensor1.max(), tensor2.max()))
+
+	plt.hist(tensor1, bins=bins, range=bins_range, label=labels[0], histtype='step')
+	plt.hist(tensor2, bins=bins, range=bins_range, label=labels[1], histtype='step')
+
+	plt.title(title)
+	plt.xlabel("Value")
+	plt.ylabel("Frequency")
+	plt.legend()
+	plt.show()
+	pass
