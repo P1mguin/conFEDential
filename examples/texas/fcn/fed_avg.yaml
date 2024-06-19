@@ -39,7 +39,10 @@ simulation:
         in_features: 256
         out_features: 100
 attack:
-  data_access: 1.0
+  data_access:
+    values:
+      - 1.0
+      - 0.1
   message_access: server
   aggregate_access: 1
   repetitions: 0
