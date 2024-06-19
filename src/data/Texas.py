@@ -15,8 +15,8 @@ class Texas(Dataset):
 		dataset = load_dataset("parquet", data_files=f"{cache_root}data/texas/texas/texas.parquet")
 
 		train_size = 10000
-		test_size = 2000
-		non_member_size = dataset["train"].shape[0] - train_size - test_size
+		test_size = 2500
+		non_member_size = 7500
 
 		train_dataset = dataset["train"].select(range(train_size))
 		test_dataset = dataset["train"].select(range(train_size, train_size + test_size))
