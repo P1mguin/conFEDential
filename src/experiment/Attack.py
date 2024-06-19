@@ -16,7 +16,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import src.training as training
-import src.utils as utils
 from src.experiment import AttackSimulation
 
 
@@ -253,23 +252,6 @@ class Attack:
 
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))
-
-		if len(dataloader.dataset) != 1:
-			non_members_loss = torch.stack([x[0][3] for x in dataloader.dataset if x[1] == 0]).flatten().numpy()
-			members_loss = torch.stack([x[0][3] for x in dataloader.dataset if x[1] == 1]).flatten().numpy()
-
-			utils.visualize_distribution(non_members_loss, members_loss, ["Non-Members", "Members"],
-										 "(Test) Loss distribution over all classes", bins=300)
-
-			class_count = len(next(iter(dataloader.dataset))[0][4])
-			dataloader.dataset.reset_generator()
-			for i in range(class_count):
-				non_members_loss = torch.stack(
-					[x[0][3] for x in dataloader.dataset if x[1] == 0 and x[0][4][i] == 1]).flatten().numpy()
-				members_loss = torch.stack(
-					[x[0][3] for x in dataloader.dataset if x[1] == 1 and x[0][4][i] == 1]).flatten().numpy()
-				utils.visualize_distribution(non_members_loss, members_loss, ["Non-Members", "Members"],
-											 f"(Test) Loss distribution over class {i}")
 
 		fpr, tpr, _ = roc_curve(is_members, predictions)
 		roc_auc = auc(fpr, tpr)
