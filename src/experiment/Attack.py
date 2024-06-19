@@ -376,8 +376,9 @@ class Attack:
 		else:
 			# Pick any value from the test dataset
 			test_loader = simulation.test_loader
+			non_member_loader = simulation.non_member_loader
 			self._target_client = None
-			self._target = random.choice(test_loader.dataset)
+			self._target = random.choice([*test_loader.dataset, *non_member_loader.dataset])
 
 		return self._target, self._is_target_member, self._target_client
 

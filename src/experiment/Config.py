@@ -174,12 +174,14 @@ class Config:
 		# Combine the data in one big dataset, annotated with the client origin and if it is trained on
 		train_loaders = self.simulation.train_loaders
 		test_loader = self.simulation.test_loader
+		non_member_loader = self.simulation.non_member_loader
 		training_data = [
 			(sample, True, client_id) for client_id, train_loader in enumerate(train_loaders)
 			for sample in train_loader.dataset if sample is not target
 		]
 		testing_data = [(sample, False, None) for sample in test_loader.dataset if sample is not target]
-		data = [*training_data, *testing_data]
+		non_member_data = [(sample, False, None) for sample in non_member_loader.dataset if sample is not target]
+		data = [*training_data, *testing_data, *non_member_data]
 		num_elements = round(self.attack.data_access * len(data))
 
 		intercepted_indices = set(random.sample(range(len(data)), num_elements))
