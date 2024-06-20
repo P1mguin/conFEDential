@@ -6,6 +6,7 @@ import torch
 import yaml
 from flwr.common import log
 
+from src import utils
 from src.attacks import MembershipNet
 from src.experiment import Attack, Simulation
 
@@ -92,6 +93,10 @@ class Config:
 				validation_dataset,
 				test_dataset
 			) = self._get_attack_datasets(fraction_train, fraction_test)
+
+			utils.visualize_loss_difference(validation_dataset)
+			utils.visualize_confidence_difference(validation_dataset)
+			utils.visualize_logit_difference(validation_dataset)
 
 			# Get the template model and train it
 			membership_net = self._construct_membership_net(train_dataset)
