@@ -3,6 +3,7 @@ import uuid
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 
 def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
@@ -38,25 +39,22 @@ def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
 	return plt
 
 
-def _visualize_distribution(tensor1, tensor2, labels, title, bins=None):
-	if bins is None:
-		# Set the number of bins to the maximum of the two tensors
-		bins = max(len(tensor1), len(tensor2)) // 10
+def _visualize_distribution(tensor1, tensor2, labels, title, log_scale=True):
+	if log_scale:
+		tensor1 = np.log10(tensor1)
+		tensor2 = np.log10(tensor2)
 
-	x_min = 10e-6
-	x_max = 10e1
+	plt.figure()
 
-	plt.hist(tensor1, bins=np.logspace(np.log10(x_min), np.log10(x_max), bins), alpha=0.5, label=labels[0])
-	plt.hist(tensor2, bins=np.logspace(np.log10(x_min), np.log10(x_max), bins), alpha=0.5, label=labels[1])
-
-	x_ticks = [10 ** i for i in range(-6, 2)]
-	plt.xticks(x_ticks, [f'$10^{{{i}}}$' for i in range(-6, 2)])
-	plt.xscale('log')
+	sns.kdeplot(tensor1, bw_adjust=0.2, label=labels[0], fill=True, log_scale=log_scale)
+	sns.kdeplot(tensor2, bw_adjust=0.2, label=labels[1], fill=True, log_scale=log_scale)
 
 	plt.title(title)
 	plt.xlabel("Value")
 	plt.ylabel("Frequency")
-	plt.legend()
+
+	# Place the legend top left
+	plt.legend(loc="upper left")
 	plt.show()
 
 
@@ -80,8 +78,12 @@ def visualize_loss_difference(dataloader):
 	members_loss = np.concatenate(list(members_dict.values()))
 
 	_visualize_distribution(non_members_loss, members_loss, ["Non-Members", "Members"],
-							"(Test) Loss distribution over all classes", bins=300)
+							"(Test) Loss distribution over all classes")
 
 	for i, (non_members_loss, members_loss) in enumerate(zip(non_members_dict.values(), members_dict.values())):
-		_visualize_distribution(non_members_loss, members_loss, ["Non-Members", "Members"],
-								f"(Test) Loss distribution over class {i}")
+		_visualize_distribution(
+			non_members_loss,
+			members_loss,
+			["Non-Members", "Members"],
+			f"(Test) Loss distribution over class {i}"
+		)
