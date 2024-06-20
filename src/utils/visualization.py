@@ -1,3 +1,4 @@
+import collections
 import uuid
 
 import matplotlib.pyplot as plt
@@ -37,10 +38,10 @@ def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
 	return plt
 
 
-def visualize_distribution(tensor1, tensor2, labels, title, bins=None):
+def _visualize_distribution(tensor1, tensor2, labels, title, bins=None):
 	if bins is None:
 		# Set the number of bins to the maximum of the two tensors
-		bins = max(len(tensor1), len(tensor2))
+		bins = max(len(tensor1), len(tensor2)) // 10
 
 	x_min = 10e-6
 	x_max = 10e1
@@ -57,3 +58,30 @@ def visualize_distribution(tensor1, tensor2, labels, title, bins=None):
 	plt.ylabel("Frequency")
 	plt.legend()
 	plt.show()
+
+
+def visualize_loss_difference(dataloader):
+	"""
+	Visualizes the difference in loss distribution for members and non-members for the entire dataset and per class
+	"""
+	non_members_dict = collections.defaultdict(list)
+	members_dict = collections.defaultdict(list)
+
+	for x in dataloader.dataset:
+		if x[1] == 0:
+			non_members_dict[np.argmax(x[0][4]).item()].append(x[0][3].item())
+		else:
+			members_dict[np.argmax(x[0][4]).item()].append(x[0][3].item())
+
+	non_members_dict = {key: np.array(value) for key, value in non_members_dict.items()}
+	members_dict = {key: np.array(value) for key, value in members_dict.items()}
+
+	non_members_loss = np.concatenate(list(non_members_dict.values()))
+	members_loss = np.concatenate(list(members_dict.values()))
+
+	_visualize_distribution(non_members_loss, members_loss, ["Non-Members", "Members"],
+							"(Test) Loss distribution over all classes", bins=300)
+
+	for i, (non_members_loss, members_loss) in enumerate(zip(non_members_dict.values(), members_dict.values())):
+		_visualize_distribution(non_members_loss, members_loss, ["Non-Members", "Members"],
+								f"(Test) Loss distribution over class {i}")
