@@ -98,7 +98,7 @@ class SingleLayerFedNL(Strategy):
 			total = sum(counts)
 			multiplied_values = ((layer * weight / total for layer in value) for value, weight in zip(hessian_results, counts))
 			for hessian in zip(*multiplied_values):
-				yield sum(hessian)
+				yield sum(hessian).cpu().numpy()
 
 		# Update the weights using the least squares problem as that is equivalent to the newton method for logistic
 		# regression
