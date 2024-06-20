@@ -11,6 +11,7 @@ import torch.nn as nn
 import torch.utils.data as data
 import wandb
 from flwr.common import log
+from rdp import rdp
 from sklearn.metrics import auc, roc_curve
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -177,6 +178,12 @@ class Attack:
 			# Get the performance after the epoch
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
 			train_roc_auc = auc(train_fpr, train_tpr)
+
+			# Downsample the fpr and tpr
+			line = np.stack([train_fpr, train_tpr], axis=1)
+			lines = rdp(line, epsilon=0.0001)
+			train_fpr, train_tpr = lines[:, 0], lines[:, 1]
+
 			train_loss = criterion(predictions, is_members)
 			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
 			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
@@ -191,7 +198,7 @@ class Attack:
 				self._log_aucs(
 					[train_roc_auc, val_roc_auc],
 					[train_fpr, val_fpr],
-					[train_tpr, val_fpr],
+					[train_tpr, val_tpr],
 					[train_loss, val_loss, test_loss],
 					["Train", "Validation", "Test"],
 					step=i
