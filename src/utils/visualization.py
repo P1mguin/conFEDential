@@ -1,6 +1,7 @@
 import uuid
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
@@ -41,15 +42,18 @@ def visualize_distribution(tensor1, tensor2, labels, title, bins=None):
 		# Set the number of bins to the maximum of the two tensors
 		bins = max(len(tensor1), len(tensor2))
 
-	# Define the range for the bins (min and max values across both tensors)
-	bins_range = (min(tensor1.min(), tensor2.min()), max(tensor1.max(), tensor2.max()))
+	x_min = 10e-6
+	x_max = 10e1
 
-	plt.hist(tensor1, bins=bins, range=bins_range, label=labels[0], histtype='step')
-	plt.hist(tensor2, bins=bins, range=bins_range, label=labels[1], histtype='step')
+	plt.hist(tensor1, bins=np.logspace(np.log10(x_min), np.log10(x_max), bins), alpha=0.5, label=labels[0])
+	plt.hist(tensor2, bins=np.logspace(np.log10(x_min), np.log10(x_max), bins), alpha=0.5, label=labels[1])
+
+	x_ticks = [10 ** i for i in range(-6, 2)]
+	plt.xticks(x_ticks, [f'$10^{{{i}}}$' for i in range(-6, 2)])
+	plt.xscale('log')
 
 	plt.title(title)
 	plt.xlabel("Value")
 	plt.ylabel("Frequency")
 	plt.legend()
 	plt.show()
-	pass
