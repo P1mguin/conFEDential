@@ -164,14 +164,15 @@ class Attack:
 				# Delete memory heavy objects
 				del gradient, activation_value, metrics, loss_value, label
 
-				predictions = torch.cat((predictions, prediction.detach()))
-				is_members = torch.cat((is_members, is_value_member.detach()))
+				# Do the backwards step
 				loss = criterion(prediction, is_value_member)
-
-				del prediction
-
 				loss.backward()
 				optimizer.step()
+
+				# Log the prediction for later performance evaluation
+				predictions = torch.cat((predictions, prediction.detach()))
+				is_members = torch.cat((is_members, is_value_member.detach()))
+				del prediction
 
 			# Get the performance after the epoch
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
