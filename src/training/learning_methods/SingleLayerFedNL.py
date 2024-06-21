@@ -105,6 +105,9 @@ class SingleLayerFedNL(Strategy):
 		self.current_weights = ndarrays_to_parameters([current_weights[:, 1:], current_weights[:, 0]])
 		return self.current_weights, {}
 
+	def get_server_exclusive_metrics(self):
+		return ["hessian"]
+
 
 class PickleableGenerator:
 	def __init__(self, generator, *args, **kwargs):

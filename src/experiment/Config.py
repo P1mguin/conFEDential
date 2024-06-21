@@ -135,7 +135,8 @@ class Config:
 		# Get the captured server aggregates
 		aggregate_path = f"{self.simulation.get_capture_directory()}aggregates/aggregates.hdf5"
 		aggregate_access_indices = self.attack.get_aggregate_access_indices(aggregate_path)
-		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates(aggregate_access_indices)
+		message_access = self.attack.message_access
+		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates(aggregate_access_indices, message_access)
 
 		# Get the intercepted samples
 		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_test)

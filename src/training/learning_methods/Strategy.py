@@ -103,3 +103,9 @@ class Strategy(ABC):
 		:param parameters: the new parameters
 		"""
 		self.current_weights = parameters
+
+	def get_server_exclusive_metrics(self):
+		"""
+		Returns the metric keys that are exclusive to the server
+		"""
+		return []

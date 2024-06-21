@@ -83,6 +83,10 @@ class Attack:
 		return self._data_access
 
 	@property
+	def message_access(self) -> str:
+		return self._message_access
+
+	@property
 	def repetitions(self) -> int:
 		return self._repetitions
 

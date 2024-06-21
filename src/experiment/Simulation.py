@@ -193,7 +193,7 @@ class Simulation:
 		# Shut ray down
 		ray.shutdown()
 
-	def get_server_aggregates(self, aggregate_access_indices):
+	def get_server_aggregates(self, aggregate_access_indices, message_access):
 		"""
 		Returns the aggregates of the model parameters and metrics of the simulation over all global rounds.
 		"""
@@ -207,9 +207,11 @@ class Simulation:
 		# Get and return the variables
 		aggregates = self._get_captured_aggregates(aggregate_file, aggregate_access_indices)
 		metrics = {}
+		server_exclusive_metrics = self.learning_method.get_server_exclusive_metrics()
 		for metric_file in metric_files:
 			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
-			metrics[metric_name] = self._get_captured_aggregates(metric_file, aggregate_access_indices)
+			if message_access == "server" or metric_name not in server_exclusive_metrics:
+				metrics[metric_name] = self._get_captured_aggregates(metric_file, aggregate_access_indices)
 
 		return aggregates, metrics
 
