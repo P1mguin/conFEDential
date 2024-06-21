@@ -99,4 +99,3 @@ attack:
           in_features: 64
           out_features: 1
         - type: ReLU
-        - type: Sigmoid
