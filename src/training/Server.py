@@ -6,6 +6,7 @@ import flwr as fl
 import h5py
 import numpy as np
 import numpy.typing as npt
+import torch
 import wandb
 from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
 from flwr.server.client_proxy import ClientProxy
@@ -149,7 +150,7 @@ class Server(FedAvg):
 
 		# Capture all metrics
 		for key, value in {**metrics, **non_aggregate_metrics}.items():
-			value = [layer for layer in value]
+			value = [layer.cpu() for layer in value]
 			self._capture_aggregate_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
 	def _capture_message_round(
@@ -203,6 +204,8 @@ class Server(FedAvg):
 					client_layer_group["values"].resize((included_round_total + 1, *value.shape))
 					client_layer_group["server_rounds"].resize((included_round_total + 1,))
 
+					if isinstance(value, torch.Tensor):
+						value = value.cpu().numpy()
 					client_layer_group["values"][-1] = value
 					client_layer_group["server_rounds"][-1] = server_round
 
