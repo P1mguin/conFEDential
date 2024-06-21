@@ -143,7 +143,7 @@ class Server(FedAvg):
 			key: [fitres.metrics[key] for _, fitres in results] for key in non_included_metric_keys
 		}
 		non_aggregate_metrics = {
-			key: utils.common.compute_weighted_average(non_aggregate_metrics["hessian"], counts)
+			key: utils.common.compute_weighted_average(non_aggregate_metrics[key], counts)
 			for key in non_included_metric_keys
 		}
 

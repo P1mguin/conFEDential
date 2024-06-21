@@ -90,20 +90,12 @@ class SingleLayerFedNL(Strategy):
 
 		# Aggregate the gradients
 		gradient_results = (parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results)
-		gradients = utils.common.compute_weighted_average(gradient_results, counts)[0]
+		gradients = next(utils.common.compute_weighted_average(gradient_results, counts))
 
 		# Aggregate the hessians, do not do it via the weighted computation as the hessian is transmitted as a matrix
 		hessian_results = (fit_res.metrics["hessian"] for _, fit_res in results)
-		def hessians():
-			total = sum(counts)
-			multiplied_values = ((layer * weight / total for layer in value) for value, weight in zip(hessian_results, counts))
-			for hessian in zip(*multiplied_values):
-				yield sum(hessian.cpu().numpy())
-
-		# Update the weights using the least squares problem as that is equivalent to the newton method for logistic
-		# regression
-		hessian_generator = hessians()
-		updates = (np.linalg.inv(next(hessian_generator)) @ gradients[:, i] for i in range(gradients.shape[1]))
+		hessians = utils.compute_weighted_average(hessian_results, counts)
+		updates = (np.linalg.inv(next(hessians).cpu()) @ gradients[:, i] for i in range(gradients.shape[1]))
 
 		current_weights = parameters_to_ndarrays(self.current_weights)
 		current_weights = np.concatenate((np.expand_dims(current_weights[1], axis=1), current_weights[0]), axis=1)
