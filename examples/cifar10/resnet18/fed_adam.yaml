@@ -51,11 +51,11 @@ attack:
           activation: False
           gradient: False
           metrics: False
-        - label: True
-          loss: True
-          activation: True
-          gradient: True
-          metrics: True
+#        - label: True
+#          loss: True
+#          activation: True
+#          gradient: True
+#          metrics: True
       gradient_component:
         - type: Dropout
           p: 0.2
