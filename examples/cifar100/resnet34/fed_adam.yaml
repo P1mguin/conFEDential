@@ -34,7 +34,7 @@ attack:
   data_access:
     values:
       - 1.0
-      - 0.01
+#      - 0.01
   message_access: server
   aggregate_access: 1
   repetitions: 0
