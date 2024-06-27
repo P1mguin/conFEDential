@@ -1,6 +1,5 @@
 from typing import Any, List, Tuple, Type
 
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -12,8 +11,9 @@ def compute_weighted_average(values, counts) -> Any:
 	"""
 	total = sum(counts)
 	multiplied_values = ((layer * weight / total for layer in value) for value, weight in zip(values, counts))
-	mean_values = list(np.sum(layer, axis=0) for layer in zip(*multiplied_values))
-	return mean_values
+
+	for layer in zip(*multiplied_values):
+		yield sum(layer)
 
 
 def find_all_paths(dictionary: dict, key: str, path=None):

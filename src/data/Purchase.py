@@ -8,25 +8,30 @@ from src.data.Dataset import Dataset
 
 class Purchase(Dataset):
 	@staticmethod
-	def load_dataset() -> Tuple[HuggingFaceDataset, HuggingFaceDataset]:
-		Dataset.is_data_downloaded("purchase")
+	def load_dataset(cache_root: str) -> Tuple[HuggingFaceDataset, HuggingFaceDataset, HuggingFaceDataset]:
+		Dataset.is_data_downloaded("purchase", cache_root)
 
 		# Get the file from the locally downloaded files
-		train_dataset = load_dataset(
-			"csv", data_files=".cache/data/purchase/purchase/purchase100.csv", split="train[:85%]"
-		)
-		test_dataset = load_dataset(
-			"csv", data_files=".cache/data/purchase/purchase/purchase100.csv", split="train[-15%:]"
+		dataset = load_dataset("parquet", data_files=f"{cache_root}data/purchase/purchase/purchase.parquet")
+		train_size = 10000
+		test_size = 2500
+		non_member_size = 7500
+
+		train_dataset = dataset["train"].select(range(train_size))
+		test_dataset = dataset["train"].select(range(train_size, train_size + test_size))
+		non_member_dataset = dataset["train"].select(
+			range(train_size + test_size, train_size + test_size + non_member_size)
 		)
 
 		def split_label_and_features(entry):
 			entry = np.array(list(entry.values()))
 			return {
-				"label": entry[-1].astype(np.int64),
-				"features": entry[:-1].astype(np.float32)
+				"label": entry[0].astype(np.int64),
+				"features": entry[1:].astype(np.float32)
 			}
 
 		train_dataset = train_dataset.map(split_label_and_features)
 		test_dataset = test_dataset.map(split_label_and_features)
+		non_member_dataset = non_member_dataset.map(split_label_and_features)
 
-		return train_dataset, test_dataset
+		return train_dataset, test_dataset, non_member_dataset

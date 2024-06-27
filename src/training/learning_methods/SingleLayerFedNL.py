@@ -1,6 +1,6 @@
+from functools import wraps
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
-import flwr as fl
 import numpy as np
 import torch
 from flwr.common import FitRes, ndarrays_to_parameters, Parameters, parameters_to_ndarrays
@@ -17,12 +17,6 @@ from src.training.learning_methods.Strategy import Strategy
 class SingleLayerFedNL(Strategy):
 	def __init__(self, **kwargs):
 		super(SingleLayerFedNL, self).__init__(**kwargs)
-
-	@staticmethod
-	def get_initial_parameters(model):
-		model_weights = [np.zeros(val.shape) for val in model.state_dict().values()]
-		initial_parameters = fl.common.ndarrays_to_parameters(model_weights)
-		return initial_parameters
 
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# The newton method makes use of our custom newton optimizer
@@ -52,19 +46,34 @@ class SingleLayerFedNL(Strategy):
 
 			# Add a bias element to the features
 			features = torch.cat([torch.ones_like(features[:, 0:1]), features], dim=1)
-			diagonal = features.T @ features
 
-			for _ in range(local_rounds):
-				prediction = functional.softmax(features @ model_weights.T)
+			for i in range(local_rounds):
+				prediction = functional.sigmoid(features @ model_weights.T)
+				likelihood = prediction * (1 - prediction)
+				weight_matrices = torch.stack([torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])])
 
-				hessian = diagonal * torch.sum(prediction.T @ (1 - prediction))
-				inverse_hessian = torch.linalg.pinv(hessian)
-				gradient = (prediction - labels).T @ features
+				# Add regularization to the hessian to make it invertible and to prevent overfitting
+				identity = torch.eye(features.size(1), device=training.DEVICE)
 
-				model_weights -= gradient @ inverse_hessian
+				@pickleable_generator
+				def hessians():
+					for weight_matrix in weight_matrices:
+						hessian = features.T @ weight_matrix @ features
+						yield hessian + 1e-3 * identity
+
+				gradient = features.T @ (labels - prediction)
+
+				# Update the weights with the inverse only if necessary for the next local round
+				if i != local_rounds - 1:
+					hessian_generator = hessians()
+					updates = (torch.linalg.inv(next(hessian_generator)) @ gradient[:, i] for i in
+							   range(gradient.shape[1]))
+					for j, update in enumerate(updates):
+						model_weights[j] += update
 
 		data_size = len(train_loader.dataset)
-		return [gradient.cpu().numpy()], data_size, {"hessian": [hessian.cpu().numpy()]}
+		hessian_generator = PickleableGenerator(hessians)
+		return [gradient.cpu().numpy()], data_size, {"hessian": hessian_generator}
 
 	def aggregate_fit(
 			self,
@@ -81,18 +90,39 @@ class SingleLayerFedNL(Strategy):
 
 		# Aggregate the gradients
 		gradient_results = (parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results)
-		gradients = utils.common.compute_weighted_average(gradient_results, counts)[0]
+		gradients = next(utils.common.compute_weighted_average(gradient_results, counts))
 
-		# Aggregate the hessians
+		# Aggregate the hessians, do not do it via the weighted computation as the hessian is transmitted as a matrix
 		hessian_results = (fit_res.metrics["hessian"] for _, fit_res in results)
-		hessians = utils.common.compute_weighted_average(hessian_results, counts)[0]
+		hessians = utils.compute_weighted_average(hessian_results, counts)
+		updates = (np.linalg.inv(next(hessians).cpu()) @ gradients[:, i] for i in range(gradients.shape[1]))
 
-		# Compute the inverse hessian and update the weights
-		inverse_hessian = np.linalg.pinv(hessians)
-		update = gradients @ inverse_hessian
 		current_weights = parameters_to_ndarrays(self.current_weights)
-		current_weights[0] -= update[:, 1:]
-		current_weights[1] -= update[:, 0]
+		current_weights = np.concatenate((np.expand_dims(current_weights[1], axis=1), current_weights[0]), axis=1)
+		for i, update in enumerate(updates):
+			current_weights[i] += update
 
-		self.current_weights = ndarrays_to_parameters(current_weights)
+		self.current_weights = ndarrays_to_parameters([current_weights[:, 1:], current_weights[:, 0]])
 		return self.current_weights, {}
+
+	def get_server_exclusive_metrics(self):
+		return ["hessian"]
+
+
+class PickleableGenerator:
+	def __init__(self, generator, *args, **kwargs):
+		self.generator = generator
+		self.args = args
+		self.kwargs = kwargs
+
+	def __iter__(self):
+		return iter(self.generator(*self.args, **self.kwargs))
+
+
+def pickleable_generator(generator):
+	@wraps(generator)
+	def wrapper(*args, **kwargs):
+		return PickleableGenerator(generator, *args, **kwargs)
+
+	generator.__qualname__ += ".__wrapped__"
+	return wrapper

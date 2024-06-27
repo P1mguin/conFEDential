@@ -1,8 +1,9 @@
 import math
 import random
-from logging import INFO
+from logging import DEBUG, INFO
 from typing import List
 
+import h5py
 import more_itertools
 import numpy as np
 import torch
@@ -10,6 +11,7 @@ import torch.nn as nn
 import torch.utils.data as data
 import wandb
 from flwr.common import log
+from rdp import rdp
 from sklearn.metrics import auc, roc_curve
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -23,11 +25,13 @@ class Attack:
 			self,
 			data_access: float,
 			message_access: str,
+			aggregate_access: List[int] | int | float,
 			repetitions: int,
 			attack_simulation=None
 	):
 		self._data_access = data_access
 		self._message_access = message_access
+		self._aggregate_access = aggregate_access
 		self._repetitions = repetitions
 		self._attack_simulation = attack_simulation
 
@@ -40,6 +44,7 @@ class Attack:
 		result = "Attack:"
 		result += f"\n\tdata_access: {self._data_access}"
 		result += f"\n\tmessage_access: {self._message_access}"
+		result += f"\n\taggregate_access: {self._aggregate_access}"
 		result += f"\n\trepetitions: {self._repetitions}"
 		result += "\n\t{}".format("\n\t".join(str(self._attack_simulation).split("\n")))
 		return result
@@ -48,6 +53,7 @@ class Attack:
 		result = "Attack("
 		result += f"data_access={self._data_access}, "
 		result += f"message_access={self._message_access}, "
+		result += f"aggregate_access={self._aggregate_access}, "
 		result += f"repetitions={self._repetitions}, "
 		result += f"{repr(self._attack_simulation)}"
 		result += ")"
@@ -59,6 +65,7 @@ class Attack:
 		return Attack(
 			data_access=config['data_access'],
 			message_access=config['message_access'],
+			aggregate_access=config['aggregate_access'],
 			repetitions=config['repetitions'],
 			attack_simulation=attack_simulation,
 		)
@@ -76,6 +83,10 @@ class Attack:
 		return self._data_access
 
 	@property
+	def message_access(self) -> str:
+		return self._message_access
+
+	@property
 	def repetitions(self) -> int:
 		return self._repetitions
 
@@ -83,7 +94,7 @@ class Attack:
 	def attack_simulation(self):
 		return self._attack_simulation
 
-	def membership_inference_attack_model(
+	def train_membership_inference_net(
 			self,
 			attack_model,
 			train_loader,
@@ -94,8 +105,12 @@ class Attack:
 		wandb_kwargs = self._get_wandb_kwargs("membership-inference", wandb_kwargs)
 		wandb.init(**wandb_kwargs)
 
+		# Get training algorithm variables and set model in training mode
+		attack_model = attack_model.to(training.DEVICE)
+		criterion = nn.MSELoss()
+		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
+
 		# Set initial parameters and get initial performance
-		i = 0
 		test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
 		val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
 
@@ -124,24 +139,15 @@ class Attack:
 				step=-1
 			)
 
-		# Get training algorithm variables and set model in training mode
-		attack_model = attack_model.to(training.DEVICE)
-		attack_model.train()
-		criterion = nn.MSELoss()
-		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
-
 		# Training loop with early stopping
-		previous_val_roc_auc = 0.
-		total_buffer_iterations = 5
-		buffer_iterations = total_buffer_iterations
-		while buffer_iterations > 0 or (
-				val_roc_auc > previous_val_roc_auc and buffer_iterations == total_buffer_iterations
-		):
-			if val_roc_auc <= previous_val_roc_auc or buffer_iterations < total_buffer_iterations:
-				log(INFO, f"Early stopping: {buffer_iterations} iterations left")
-				buffer_iterations -= 1
+		patience = 10
+		patience_counter = 0
+		relative_tolerance = 1e-3
 
-			previous_val_roc_auc = val_roc_auc
+		attack_model.train()
+		i = 0
+		while True:
+			previous_val_loss = val_loss
 			predictions = torch.Tensor()
 			is_members = torch.Tensor()
 			for (
@@ -163,18 +169,25 @@ class Attack:
 				# Delete memory heavy objects
 				del gradient, activation_value, metrics, loss_value, label
 
-				predictions = torch.cat((predictions, prediction.detach()))
-				is_members = torch.cat((is_members, is_value_member.detach()))
+				# Do the backwards step
 				loss = criterion(prediction, is_value_member)
-
-				del prediction
-
 				loss.backward()
 				optimizer.step()
+
+				# Log the prediction for later performance evaluation
+				predictions = torch.cat((predictions, prediction.detach()))
+				is_members = torch.cat((is_members, is_value_member.detach()))
+				del prediction
 
 			# Get the performance after the epoch
 			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
 			train_roc_auc = auc(train_fpr, train_tpr)
+
+			# Downsample the fpr and tpr
+			line = np.stack([train_fpr, train_tpr], axis=1)
+			lines = rdp(line, epsilon=0.0001)
+			train_fpr, train_tpr = lines[:, 0], lines[:, 1]
+
 			train_loss = criterion(predictions, is_members)
 			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
 			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
@@ -183,13 +196,13 @@ class Attack:
 			log(
 				INFO,
 				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
-				f"train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
+				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
 			)
 			if len(test_loader.dataset) == 1:
 				self._log_aucs(
 					[train_roc_auc, val_roc_auc],
 					[train_fpr, val_fpr],
-					[train_tpr, val_fpr],
+					[train_tpr, val_tpr],
 					[train_loss, val_loss, test_loss],
 					["Train", "Validation", "Test"],
 					step=i
@@ -203,6 +216,23 @@ class Attack:
 					["Train", "Validation", "Test"],
 					step=i
 				)
+
+			# Early stopping
+			loss_decrease = -(val_loss - previous_val_loss) / previous_val_loss
+			log(DEBUG, f"Loss decrease: {loss_decrease}")
+
+			if loss_decrease < relative_tolerance:
+				patience_counter += 1
+				if patience_counter >= patience:
+					log(
+						INFO,
+						"Early stopping at round %s, loss %s",
+						i,
+						val_loss
+					)
+					break
+			else:
+				patience_counter = 0
 
 			i += 1
 		wandb.finish()
@@ -285,6 +315,25 @@ class Attack:
 		else:
 			return []
 
+	def get_aggregate_access_indices(self, aggregate_path):
+		# Get how many rounds there were (including the initial model)
+		with h5py.File(aggregate_path, 'r') as hf:
+			global_rounds = hf["0"].shape[0]
+
+		if isinstance(self._aggregate_access, int):
+			# Return the last n rounds
+			aggregate_access_indices = list(range(global_rounds - self._aggregate_access, global_rounds))
+		elif isinstance(self._aggregate_access, float):
+			# Return n fraction of the rounds counting from the back
+			aggregate_access_indices = list(range(global_rounds - int(global_rounds * self._aggregate_access), global_rounds))
+		elif isinstance(self._aggregate_access, list):
+			# Return the specified rounds
+			aggregate_access_indices = self._aggregate_access
+		else:
+			raise ValueError("Aggregate access should be an int, float or list of ints")
+
+		return aggregate_access_indices
+
 	def get_target_sample(self, simulation):
 		"""
 		Function that selects the target to attack based on the configuration. Samples one random target from all the
@@ -302,8 +351,9 @@ class Attack:
 		else:
 			# Pick any value from the test dataset
 			test_loader = simulation.test_loader
+			non_member_loader = simulation.non_member_loader
 			self._target_client = None
-			self._target = random.choice(test_loader.dataset)
+			self._target = random.choice([*test_loader.dataset, *non_member_loader.dataset])
 
 		return self._target, self._is_target_member, self._target_client
 
@@ -336,10 +386,13 @@ class Attack:
 		is_member = is_member.int()
 
 		# Reshape the metrics so they are 5D and can fit in a gradient component
-		metrics = {
-			key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
-			metrics.items()
-		}
+		if self.attack_simulation.model_architecture.use_metrics:
+			metrics = {
+				key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
+				metrics.items()
+			}
+		else:
+			metrics = {}
 
 		process_amount = math.ceil(len(features) / process_batch_size)
 
@@ -378,7 +431,10 @@ class Attack:
 					# Gradient, activation values and loss values have a grad_fn detach the tensor from it
 					gradient = [layer[j] for layer in gradients]
 					activation_value = [layer[j].detach() for layer in activation_values]
-					loss_value = loss[j].detach().unsqueeze(-1)
+					if self.attack_simulation.model_architecture.use_loss:
+						loss_value = loss[j].detach().unsqueeze(-1)
+					else:
+						loss_value = torch.tensor(-1)
 
 					is_value_member = batch_is_member[j].detach()
 					value_origin = batch_member_origins[j].detach()
@@ -405,7 +461,7 @@ class Attack:
 		"""
 		# Get the models from the parameter iterations
 		template_model = simulation.model
-		global_rounds = simulation.global_rounds + 1
+		intercepted_aggregate_round_count = model_iterations[0].shape[0]
 
 		# Convert model iterations to state dicts
 		keys = template_model.state_dict().keys()
@@ -414,35 +470,42 @@ class Attack:
 			model_iterations[j][i],
 			dtype=torch.float32,
 			requires_grad=(key in parameter_keys)
-		) for j, key in enumerate(keys)} for i in range(global_rounds)]
+		) for j, key in enumerate(keys)} for i in range(intercepted_aggregate_round_count)]
 
 		# Get the activation values
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
-		losses = self._get_losses(predictions, labels, simulation)
-		gradients = self._get_gradients(losses, state_dicts, simulation)
-		losses = losses.T
+
+		gradients, losses = [], []
+		if self.attack_simulation.model_architecture.use_loss or self.attack_simulation.model_architecture.use_gradient:
+			losses = self._get_losses(predictions, labels, simulation)
+			if self.attack_simulation.model_architecture.use_gradient:
+				gradients = self._get_gradients(losses, state_dicts, simulation)
+			if self.attack_simulation.model_architecture.use_loss:
+				losses = losses.T
+
 		return activation_values, gradients, losses
 
 	def _get_activation_values(self, model_state_dicts, features, simulation):
 		# Helper variables
 		template_model = simulation.model
-		global_rounds = simulation.global_rounds + 1
+		intercepted_aggregate_round_count = len(model_state_dicts)
 
 		# Attach the hooks that will get the intermediate value of each layer
-		activation = {}
+		if self.attack_simulation.model_architecture.use_activation:
+			activation = {}
 
-		def get_activation(name):
-			def hook(model, input, output):
-				activation[name] = output.detach()
+			def get_activation(name):
+				def hook(model, input, output):
+					activation[name] = output.detach()
 
-			return hook
+				return hook
 
-		# Attack activation hook to all leaf modules
-		hooks = [
-			module.register_forward_hook(get_activation(name)) for name, module in template_model.named_modules()
-			if len(list(module.children())) == 0
-		]
+			# Attack activation hook to all leaf modules
+			hooks = [
+				module.register_forward_hook(get_activation(name)) for name, module in template_model.named_modules()
+				if len(list(module.children())) == 0
+			]
 
 		# Predict the features for each model iteration and capture the activation values from the dict
 		activation_values = []
@@ -453,15 +516,19 @@ class Attack:
 		if is_singular_batch:
 			features = torch.cat([features, features])
 
-		for i in range(global_rounds):
+		for i in range(intercepted_aggregate_round_count):
 			prediction = torch.func.functional_call(template_model, model_state_dicts[i], features)
 
 			# Append prediction separately so grad_fn stays intact
-			activation_values.append(list(activation.values())[:-1])
-			activation_values[-1].append(prediction)
+			if self.attack_simulation.model_architecture.use_activation:
+				activation_values.append(list(activation.values())[:-1])
+				activation_values[-1].append(prediction)
+			else:
+				activation_values.append([prediction])
 
 		# Remove the hooks
-		[h.remove() for h in hooks]
+		if self.attack_simulation.model_architecture.use_activation:
+			[h.remove() for h in hooks]
 
 		if is_singular_batch:
 			activation_values = [
@@ -476,10 +543,9 @@ class Attack:
 		"""
 		Gets the losses of a list of predictions and a list of labels
 		"""
-		global_rounds = simulation.global_rounds + 1
 		criterion = simulation.criterion
 		criterion.reduction = "none"
-		losses = torch.stack([criterion(predictions[:, i], label) for i in range(global_rounds)])
+		losses = torch.stack([criterion(predictions[:, i], label) for i in range(predictions.shape[1])])
 		return losses
 
 	def _get_gradients(self, losses, model_state_dicts, simulation):
@@ -499,11 +565,18 @@ class Attack:
 	def _get_wandb_kwargs(self, attack_type, simulation_wandb_kwargs):
 		simulation_wandb_kwargs["tags"][0] = f"Attack-{attack_type}"
 		simulation_wandb_kwargs["config"] = {"simulation": simulation_wandb_kwargs["config"]}
+		model_config = self._attack_simulation.model_architecture
 		simulation_wandb_kwargs["config"]["attack"] = {
 			"data_access": self._data_access,
 			"message_access": self._message_access,
+			"aggregate_access": self._aggregate_access,
 			"batch_size": self._attack_simulation.batch_size,
 			"optimizer": self._attack_simulation.optimizer_name,
+			"label": model_config.use_label,
+			"loss": model_config.use_loss,
+			"activation": model_config.use_activation,
+			"gradient": model_config.use_gradient,
+			"metrics": model_config.use_metrics,
 			**self._attack_simulation.optimizer_parameters
 		}
 		return simulation_wandb_kwargs

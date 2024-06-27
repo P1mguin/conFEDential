@@ -74,6 +74,7 @@ class Strategy(ABC):
 		if parameters is not None:
 			training.set_weights(net, parameters)
 		criterion = simulation.criterion
+		criterion.reduction = "sum"
 		correct, total_loss = 0, 0.
 
 		# Disable gradient calculation for testing
@@ -102,3 +103,9 @@ class Strategy(ABC):
 		:param parameters: the new parameters
 		"""
 		self.current_weights = parameters
+
+	def get_server_exclusive_metrics(self):
+		"""
+		Returns the metric keys that are exclusive to the server
+		"""
+		return []

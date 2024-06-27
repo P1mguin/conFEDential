@@ -2,10 +2,12 @@ import os
 import random
 from logging import INFO
 
+import torch
 import yaml
 from flwr.common import log
 
-from src.attacks import AttackNet
+from src import utils
+from src.attacks import MembershipNet
 from src.experiment import Attack, Simulation
 
 
@@ -32,16 +34,16 @@ class Config:
 		return result
 
 	@staticmethod
-	def from_yaml_file(yaml_file: str) -> 'Config':
+	def from_yaml_file(yaml_file: str, cache_root) -> 'Config':
 		with open(yaml_file, "r") as f:
 			config = yaml.safe_load(f)
 
-		return Config.from_dict(config)
+		return Config.from_dict(config, cache_root)
 
 	@staticmethod
-	def from_dict(config: dict) -> 'Config':
+	def from_dict(config: dict, cache_root: str) -> 'Config':
 		return Config(
-			simulation=Simulation.from_dict(config['simulation']),
+			simulation=Simulation.from_dict(config['simulation'], cache_root),
 			attack=Attack.from_dict(config['attack'])
 		)
 
@@ -62,20 +64,23 @@ class Config:
 			is_ray_initialised: bool,
 			is_online: bool,
 			is_capturing: bool,
-			run_name: str
+			run_name: str,
 	):
 		log(INFO, "Starting conFEDential simulation")
 		# If nothing has been captured for this simulation, capture the simulation
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
+		capture_hash = federation_simulation_capture_directory.split("/")[-2]
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
-			log(INFO, "No previous federated learning simulation found, starting training simulation...")
+			log(INFO, f"No previous federated learning simulation found with hash {capture_hash}, starting training simulation...")
 			self.simulation.simulate_federation(
 				concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_capturing, is_online, run_name
 			)
 		else:
-			log(INFO, "Found previous federated learning simulation, continuing to attack simulation...")
+			log(INFO,
+				f"Found previous federated learning simulation with hash {capture_hash}, continuing to attack simulation...")
 
-		for _ in range(self.attack.repetitions):
+		for i in range(self.attack.repetitions):
+			log(INFO, f"Starting {i + 1}th repetition of the attack simulation")
 			# Clean the variables of the attack
 			self.attack.reset_variables()
 
@@ -89,17 +94,21 @@ class Config:
 				test_dataset
 			) = self._get_attack_datasets(fraction_train, fraction_test)
 
+			utils.visualize_loss_difference(validation_dataset)
+			utils.visualize_confidence_difference(validation_dataset)
+			utils.visualize_logit_difference(validation_dataset)
+
 			# Get the template model and train it
-			attack_model = self._get_attack_model(train_dataset)
+			membership_net = self._construct_membership_net(train_dataset)
 
 			wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
 			mode = "online" if is_online else "offline"
 			wandb_kwargs = {**wandb_kwargs, "mode": mode}
-			self.attack.membership_inference_attack_model(
-				attack_model, train_dataset, validation_dataset, test_dataset, wandb_kwargs
+			self.attack.train_membership_inference_net(
+				membership_net, train_dataset, validation_dataset, test_dataset, wandb_kwargs
 			)
 
-	def _get_attack_model(self, attack_dataset):
+	def _construct_membership_net(self, attack_dataset):
 		(
 			gradient,
 			activation_value,
@@ -113,19 +122,21 @@ class Config:
 		gradient_shapes = [gradient.shape[1:] for gradient in gradient]
 		activation_shapes = [activation.shape[1:] for activation in activation_value]
 		metrics_shapes = {key: [layer.shape[1:] for layer in metric] for key, metric in metrics.items()}
-		label_shape = label.shape[1:]
+		if self.attack.attack_simulation.model_architecture.use_label:
+			label_shape = label.shape[1:]
+		else:
+			label_shape = torch.empty(0, )
 
 		# Get the attack model
-		attack_model = AttackNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
-		return attack_model
+		membership_net = MembershipNet(self, gradient_shapes, activation_shapes, metrics_shapes, label_shape)
+		return membership_net
 
 	def _get_attack_datasets(self, fraction_train: float = 0.85, fraction_test: float = 1.0):
 		# Get the captured server aggregates
-		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates()
-
-		# Get the captured messages
-		# intercepted_client_ids = self.attack.get_message_access_indices(self.simulation.client_count)
-		# model_messages, metric_messages = self.simulation.get_messages(intercepted_client_ids)
+		aggregate_path = f"{self.simulation.get_capture_directory()}aggregates/aggregates.hdf5"
+		aggregate_access_indices = self.attack.get_aggregate_access_indices(aggregate_path)
+		message_access = self.attack.message_access
+		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates(aggregate_access_indices, message_access)
 
 		# Get the intercepted samples
 		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_test)
@@ -169,12 +180,14 @@ class Config:
 		# Combine the data in one big dataset, annotated with the client origin and if it is trained on
 		train_loaders = self.simulation.train_loaders
 		test_loader = self.simulation.test_loader
+		non_member_loader = self.simulation.non_member_loader
 		training_data = [
 			(sample, True, client_id) for client_id, train_loader in enumerate(train_loaders)
 			for sample in train_loader.dataset if sample is not target
 		]
 		testing_data = [(sample, False, None) for sample in test_loader.dataset if sample is not target]
-		data = [*training_data, *testing_data]
+		non_member_data = [(sample, False, None) for sample in non_member_loader.dataset if sample is not target]
+		data = [*training_data, *testing_data, *non_member_data]
 		num_elements = round(self.attack.data_access * len(data))
 
 		intercepted_indices = set(random.sample(range(len(data)), num_elements))

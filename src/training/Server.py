@@ -6,11 +6,13 @@ import flwr as fl
 import h5py
 import numpy as np
 import numpy.typing as npt
+import torch
 import wandb
 from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
+import src.utils as utils
 from src import training
 from src.training.learning_methods import Strategy
 
@@ -95,7 +97,7 @@ class Server(FedAvg):
 			aggregated_parameters: Parameters,
 			metrics: dict
 	) -> None:
-		self._capture_aggregates(server_round, aggregated_parameters, metrics)
+		self._capture_aggregates(server_round, results, aggregated_parameters, metrics)
 		self._capture_messages(server_round, results)
 
 	def _capture_messages(self, server_round, messages: List[Tuple[ClientProxy, FitRes]]) -> None:
@@ -116,7 +118,13 @@ class Server(FedAvg):
 		for key, value in metrics.items():
 			self._capture_message_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
-	def _capture_aggregates(self, server_round: int, aggregated_parameters: Parameters, metrics: dict):
+	def _capture_aggregates(
+			self,
+			server_round: int,
+			results: List[Tuple[ClientProxy, FitRes]],
+			aggregated_parameters: Parameters,
+			metrics: dict
+	):
 		base_path = self.simulation.get_capture_directory()
 		base_path = f"{base_path}aggregates/"
 
@@ -129,9 +137,20 @@ class Server(FedAvg):
 			is_parameters=True
 		)
 
+		# Add the message metrics that are not in the aggregated metrics
+		non_included_metric_keys = results[0][1].metrics.keys() - metrics.keys()
+		counts = [fitres.num_examples for _, fitres in results]
+		non_aggregate_metrics = {
+			key: [fitres.metrics[key] for _, fitres in results] for key in non_included_metric_keys
+		}
+		non_aggregate_metrics = {
+			key: utils.common.compute_weighted_average(non_aggregate_metrics[key], counts)
+			for key in non_included_metric_keys
+		}
+
 		# Capture all metrics
-		for key, value in metrics.items():
-			value = [layer for layer in value]
+		for key, value in {**metrics, **non_aggregate_metrics}.items():
+			value = [layer.cpu() for layer in value]
 			self._capture_aggregate_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
 	def _capture_message_round(
@@ -148,7 +167,6 @@ class Server(FedAvg):
 			initial_values = [np.zeros((1, *value_shape)) for value_shape in value_shapes]
 
 			client_count = self.simulation.client_count
-			global_rounds = self.simulation.global_rounds
 			with h5py.File(path, 'w') as hf:
 				for client_id in range(client_count):
 					client_group = hf.create_group(str(client_id))
@@ -158,11 +176,23 @@ class Server(FedAvg):
 						client_layer_group = client_group.create_group(str(i))
 
 						client_layer_group.create_dataset(
-							"server_rounds", data=np.array([0]), maxshape=(global_rounds + 1,), chunks=True
+							"server_rounds",
+							data=np.array([0]),
+							maxshape=(None,),
+							chunks=True,
+							compression="gzip",
+							shuffle=True,
+							fletcher32=True
 						)
-						max_layer_shape = (global_rounds + 1, *value_shape)
+						max_layer_shape = (None, *value_shape)
 						client_layer_group.create_dataset(
-							"values", data=initial_value, maxshape=max_layer_shape, chunks=True
+							"values",
+							data=initial_value,
+							maxshape=max_layer_shape,
+							chunks=(1, *value_shape),
+							compression="gzip",
+							shuffle=True,
+							fletcher32=True
 						)
 
 		with h5py.File(path, 'r+') as hf:
@@ -174,6 +204,8 @@ class Server(FedAvg):
 					client_layer_group["values"].resize((included_round_total + 1, *value.shape))
 					client_layer_group["server_rounds"].resize((included_round_total + 1,))
 
+					if isinstance(value, torch.Tensor):
+						value = value.cpu().numpy()
 					client_layer_group["values"][-1] = value
 					client_layer_group["server_rounds"][-1] = server_round
 
@@ -194,11 +226,18 @@ class Server(FedAvg):
 			else:
 				initial_values = [np.zeros((1, *value_shape)) for value_shape in value_shapes]
 
-			global_rounds = self.simulation.global_rounds
 			with h5py.File(path, 'w') as hf:
 				for i, (initial_value, value_shape) in enumerate(zip(initial_values, value_shapes)):
-					max_shape = (global_rounds + 1, *value_shape)
-					hf.create_dataset(str(i), data=initial_value, maxshape=max_shape, chunks=True)
+					max_shape = (None, *value_shape)
+					hf.create_dataset(
+						str(i),
+						data=initial_value,
+						maxshape=max_shape,
+						chunks=(1, *value_shape),
+						compression="gzip",
+						shuffle=True,
+						fletcher32=True
+					)
 
 		with h5py.File(path, 'r+') as hf:
 			for i, value in enumerate(values):

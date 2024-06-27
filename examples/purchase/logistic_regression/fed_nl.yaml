@@ -11,7 +11,6 @@ simulation:
   federation:
     client_count: 10
     fraction_fit: 1.0
-    global_rounds: 20
     local_rounds: 1
   model:
     optimizer_name: SingleLayerFedNL
@@ -22,18 +21,42 @@ simulation:
       - type: Linear
         in_features: 600
         out_features: 100
-      - type: Softmax
-        dim: -1
 attack:
-  data_access: 1.0
+  data_access:
+    values:
+      - 1.0
+#      - 0.1
   message_access: server
-  repetitions: 1
+  aggregate_access: 1
+  repetitions: 0
   attack_simulation:
     batch_size: 64
-    optimizer_name: FedAvg
+    optimizer_name: Adam
     optimizer_parameters:
-      lr: 0.1
+      eps: 0.0001
     model_architecture:
+      components:
+        values:
+          - label: False
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+#          - label: False
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: True
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: True
       gradient_component:
         - type: Dropout
           p: 0.2
@@ -78,4 +101,3 @@ attack:
           in_features: 64
           out_features: 1
         - type: ReLU
-        - type: Sigmoid

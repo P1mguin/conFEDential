@@ -65,16 +65,18 @@ def _get_stepped_config(config: dict) -> List[dict]:
 	return configs
 
 
-def generate_configs_from_yaml_file(file_path: str) -> List[Config]:
+def generate_configs_from_yaml_file(file_path: str, cache_root: str) -> List[Config]:
 	"""
 	Generates a list of Config from the path to a batch_configuration YAML file.
 	:param file_path: the path to the batch_configuration YAML file
+	:param cache_root: the directory in which downloaded and generated files will be resulted, these include
+	datasets, model architectures, federation simulations, etc.
 	"""
 	with open(file_path, "r") as f:
 		yaml_file = yaml.safe_load(f)
 
 	raw_configs = generate_configs_from_batch_config(yaml_file)
-	configs = [Config.from_dict(raw_config) for raw_config in raw_configs]
+	configs = [Config.from_dict(raw_config, cache_root) for raw_config in raw_configs]
 	return configs
 
 

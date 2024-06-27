@@ -24,14 +24,16 @@ PROJECT_DIRECTORY = os.path.abspath(os.path.join(os.getcwd(), "./"))
 
 
 class Simulation:
-	def __init__(self, data, federation, model):
+	def __init__(self, cache_root, data, federation, model):
+		self._cache_root = cache_root
 		self._data = data
 		self._federation = federation
 		self._model = model
 
 		# Set the train and test loaders based on the dataset and the federation
-		self.train_loaders = None
-		self.test_loader = None
+		self._train_loaders = None
+		self._test_loader = None
+		self._non_member_loader = None
 
 		log(INFO, "Preparing datasets for federated learning simulation")
 		self._prepare_loaders()
@@ -52,11 +54,12 @@ class Simulation:
 		return result
 
 	@staticmethod
-	def from_dict(config: dict) -> 'Simulation':
+	def from_dict(config: dict, cache_root: str) -> 'Simulation':
 		return Simulation(
-			data=Data.from_dict(config['data']),
+			cache_root=cache_root,
+			data=Data.from_dict(config['data'], cache_root),
 			federation=Federation.from_dict(config['federation']),
-			model=Model.from_dict(config['model'])
+			model=Model.from_dict(config['model'], cache_root)
 		)
 
 	@property
@@ -74,6 +77,14 @@ class Simulation:
 	@test_loader.setter
 	def test_loader(self, test_loader: DataLoader):
 		self._test_loader = test_loader
+
+	@property
+	def non_member_loader(self) -> DataLoader:
+		return self._non_member_loader
+
+	@non_member_loader.setter
+	def non_member_loader(self, non_member_loader: DataLoader):
+		self._non_member_loader = non_member_loader
 
 	@property
 	def model(self):
@@ -100,10 +111,6 @@ class Simulation:
 		return self._federation.fraction_fit
 
 	@property
-	def global_rounds(self):
-		return self._federation.global_rounds
-
-	@property
 	def batch_size(self):
 		return self._data.batch_size
 
@@ -124,7 +131,7 @@ class Simulation:
 		simulation_string = str(self)
 		simulation_hash = hashlib.sha256(simulation_string.encode()).hexdigest()
 
-		capture_directory = f".cache/data/{dataset}/training/{model_name}/{optimizer}/{simulation_hash}/"
+		capture_directory = f"{self._cache_root}data/{dataset}/training/{model_name}/{optimizer}/{simulation_hash}/"
 
 		# Ensure the directory exists
 		os.makedirs(capture_directory, exist_ok=True)
@@ -165,7 +172,7 @@ class Simulation:
 					num_clients=self.client_count,
 					client_resources=client_resources,
 					keep_initialised=is_ray_initialised,
-					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					config=fl.server.ServerConfig(num_rounds=int(1e4)),
 					strategy=strategy
 				)
 			else:
@@ -175,9 +182,10 @@ class Simulation:
 					num_clients=self.client_count,
 					client_resources=client_resources,
 					ray_init_args=ray_init_args,
-					config=fl.server.ServerConfig(num_rounds=self._federation.global_rounds),
+					config=fl.server.ServerConfig(num_rounds=int(1e4)),
 					strategy=strategy
 				)
+			wandb.finish()
 		except Exception as e:
 			log(ERROR, e)
 			wandb.finish(exit_code=1)
@@ -185,7 +193,7 @@ class Simulation:
 		# Shut ray down
 		ray.shutdown()
 
-	def get_server_aggregates(self):
+	def get_server_aggregates(self, aggregate_access_indices, message_access):
 		"""
 		Returns the aggregates of the model parameters and metrics of the simulation over all global rounds.
 		"""
@@ -197,18 +205,21 @@ class Simulation:
 		metric_files = [metric_directory + file for file in os.listdir(metric_directory)]
 
 		# Get and return the variables
-		aggregates = self._get_captured_aggregates(aggregate_file)
+		aggregates = self._get_captured_aggregates(aggregate_file, aggregate_access_indices)
 		metrics = {}
+		server_exclusive_metrics = self.learning_method.get_server_exclusive_metrics()
 		for metric_file in metric_files:
 			metric_name = ".".join(metric_file.split("/")[-1].split(".")[:-1])
-			metrics[metric_name] = self._get_captured_aggregates(metric_file)
+			if message_access == "server" or metric_name not in server_exclusive_metrics:
+				metrics[metric_name] = self._get_captured_aggregates(metric_file, aggregate_access_indices)
+
 		return aggregates, metrics
 
-	def _get_captured_aggregates(self, path):
+	def _get_captured_aggregates(self, path, aggregate_access_indices):
 		aggregate_rounds = []
 		with h5py.File(path, 'r') as hf:
-			for key in range(len(hf.keys())):
-				value = hf[str(key)][:]
+			for layer_index in range(len(hf.keys())):
+				value = hf[str(layer_index)][aggregate_access_indices]
 				aggregate_rounds.append(value)
 		return aggregate_rounds
 
@@ -231,7 +242,7 @@ class Simulation:
 			metrics[metric_name] = self._get_captured_messages(metric_file, intercepted_client_ids)
 		return messages, metrics
 
-	def _get_captured_messages(self, path, intercepted_client_ids):
+	def _get_captured_messages(self, path, intercepted_client_ids, aggregate_access_indices):
 		def get_client_messages(client_id):
 			with h5py.File(path, 'r') as hf:
 				client_group = hf[str(client_id)]
@@ -241,7 +252,7 @@ class Simulation:
 					if server_rounds is None:
 						server_rounds = client_group[str(client_layer_group_key)]["server_rounds"][:]
 
-					values = client_group[str(client_layer_group_key)]["values"][:]
+					values = client_group[str(client_layer_group_key)]["values"][aggregate_access_indices]
 					client_layers.append(values)
 				yield server_rounds, client_layers
 
@@ -256,23 +267,25 @@ class Simulation:
 		:return:
 		"""
 		split_cache_path = self._get_split_cache_path()
+		split_hash = split_cache_path.split("/")[-1].split(".")[0]
 
 		# If the split dataloaders are available, load it
 		if os.path.exists(split_cache_path):
-			log(INFO, "Found previously split dataloaders, loading them")
+			log(INFO, f"Found previously split dataloaders with hash {split_hash}, loading them")
 			with open(split_cache_path, "rb") as file:
-				self.train_loaders, self.test_loader = pickle.load(file)
+				self.train_loaders, self.test_loader, self.non_member_loader = pickle.load(file)
 				return
 		else:
-			log(INFO, "Found no previously split dataloaders, splitting the data now")
+			log(INFO, f"Found no previously split dataloaders with hash {split_hash}, splitting the data now")
 
-		train_dataset, test_dataset = self._data.dataset
+		train_dataset, test_dataset, non_member_dataset = self._data.dataset
 
 		# Split the train dataset
 		train_datasets = self._split_data(train_dataset)
 
 		# Convert the test dataset to a tuple
 		test_dataset = [(torch.tensor(value["x"]), value["y"]) for value in test_dataset]
+		non_member_dataset = [(torch.tensor(value["x"]), value["y"]) for value in non_member_dataset]
 
 		# Bundle the information in a dataloader
 		train_loaders = []
@@ -286,15 +299,17 @@ class Simulation:
 
 		# Create the test loader
 		test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
+		non_member_loader = DataLoader(non_member_dataset, batch_size=len(non_member_dataset))
 
 		# Cache the train and test loaders
 		split_preprocessed_directory = self._data.get_preprocessed_cache_directory() + "split/"
 		os.makedirs(split_preprocessed_directory, exist_ok=True)
 		with open(split_cache_path, "wb") as file:
-			pickle.dump((train_loaders, test_loader), file)
+			pickle.dump((train_loaders, test_loader, non_member_loader), file)
 
 		self.train_loaders = train_loaders
 		self.test_loader = test_loader
+		self.non_member_loader = non_member_loader
 
 	def _get_split_cache_path(self):
 		"""
