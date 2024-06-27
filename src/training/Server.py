@@ -150,7 +150,7 @@ class Server(FedAvg):
 
 		# Capture all metrics
 		for key, value in {**metrics, **non_aggregate_metrics}.items():
-			value = [layer.cpu() for layer in value]
+			value = [layer.cpu() if isinstance(layer, torch.Tensor) else layer for layer in value]
 			self._capture_aggregate_round(server_round, value, f"{base_path}metrics/{key}.hdf5")
 
 	def _capture_message_round(
