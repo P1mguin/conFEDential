@@ -98,6 +98,7 @@ def visualize_loss_difference(dataloader, visualize_per_class=False):
 				log_scale=True
 			)
 
+
 def visualize_confidence_difference(dataloader, visualize_per_class=False):
 	"""
 	Visualizes the difference in confidence in the correct label for members and non-members for the entire dataset and per class
@@ -119,10 +120,12 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 	non_members_confidence = np.concatenate(list(non_members_dict.values()))
 	members_confidence = np.concatenate(list(members_dict.values()))
 
-	_visualize_distribution(non_members_confidence, members_confidence, ["Non-Members", "Members"], "(Test) Confidence distribution over all classes")
+	_visualize_distribution(non_members_confidence, members_confidence, ["Non-Members", "Members"],
+							"(Test) Confidence distribution over all classes")
 
 	if visualize_per_class:
-		for i, (non_members_confidence, members_confidence) in enumerate(zip(non_members_dict.values(), members_dict.values())):
+		for i, (non_members_confidence, members_confidence) in enumerate(
+				zip(non_members_dict.values(), members_dict.values())):
 			_visualize_distribution(
 				non_members_confidence,
 				members_confidence,
@@ -152,10 +155,12 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 	non_members_confidence = np.concatenate(list(non_members_dict.values()))
 	members_confidence = np.concatenate(list(members_dict.values()))
 
-	_visualize_distribution(non_members_confidence, members_confidence, ["Non-Members", "Members"], "(Test) Logit confidence distribution over all classes")
+	_visualize_distribution(non_members_confidence, members_confidence, ["Non-Members", "Members"],
+							"(Test) Logit confidence distribution over all classes")
 
 	if visualize_per_class:
-		for i, (non_members_confidence, members_confidence) in enumerate(zip(non_members_dict.values(), members_dict.values())):
+		for i, (non_members_confidence, members_confidence) in enumerate(
+				zip(non_members_dict.values(), members_dict.values())):
 			_visualize_distribution(
 				non_members_confidence,
 				members_confidence,

@@ -148,6 +148,7 @@ class SingleLayerFedNL(Strategy):
 		])
 		return {"hessians": [hessians]}
 
+
 class PickleableGenerator:
 	def __init__(self, generator, *args, **kwargs):
 		self.generator = generator

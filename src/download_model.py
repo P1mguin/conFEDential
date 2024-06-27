@@ -24,6 +24,7 @@ parser.add_argument(
 	help="Absolute path to root of the directory in which the model architecture will be saved"
 )
 
+
 def main() -> None:
 	args = parser.parse_args()
 	repo = args.repo

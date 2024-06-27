@@ -313,7 +313,8 @@ class Attack:
 			aggregate_access_indices = list(range(global_rounds - self._aggregate_access, global_rounds))
 		elif isinstance(self._aggregate_access, float):
 			# Return n fraction of the rounds counting from the back
-			aggregate_access_indices = list(range(global_rounds - int(global_rounds * self._aggregate_access), global_rounds))
+			aggregate_access_indices = list(
+				range(global_rounds - int(global_rounds * self._aggregate_access), global_rounds))
 		elif isinstance(self._aggregate_access, list):
 			# Return the specified rounds
 			aggregate_access_indices = self._aggregate_access

@@ -108,15 +108,18 @@ class Data:
 
 		# If the preprocessed dataset is available, load it
 		if os.path.exists(preprocessed_cache_path):
-			log(INFO, f"Found preprocessed data for the given preprocess function with hash {preprocessed_hash}, returning")
+			log(INFO,
+				f"Found preprocessed data for the given preprocess function with hash {preprocessed_hash}, returning")
 			with open(preprocessed_cache_path, "rb") as file:
 				self.dataset = pickle.load(file)
 				return
 		else:
-			log(INFO, f"No preprocessed data found for the given preprocess function with hash {preprocessed_hash}, preprocessing now")
+			log(INFO,
+				f"No preprocessed data found for the given preprocess function with hash {preprocessed_hash}, preprocessing now")
 
 		# Load the raw dataset
-		train_dataset, test_dataset, non_member_dataset = getattr(data, self._dataset_name).load_dataset(self._cache_root)
+		train_dataset, test_dataset, non_member_dataset = getattr(data, self._dataset_name).load_dataset(
+			self._cache_root)
 
 		# Apply the preprocess function to the train and test dataset
 		train_dataset = train_dataset.map(self._preprocess_fn)

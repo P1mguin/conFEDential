@@ -145,6 +145,7 @@ parser.add_argument(
 	help="Absolute path to root of the directory in which the model architecture will be saved"
 )
 
+
 def main():
 	args = parser.parse_args()
 	cache_root = f"{os.path.abspath(args.cache_root)}/"
