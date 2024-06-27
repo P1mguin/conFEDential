@@ -108,6 +108,8 @@ class SingleLayerFedNL(Strategy):
 	def get_server_exclusive_metrics(self):
 		return ["hessian"]
 
+	def compute_metric_update(self, metric, data_point):
+		pass
 
 class PickleableGenerator:
 	def __init__(self, generator, *args, **kwargs):
