@@ -18,7 +18,7 @@ scripts=(
 # Function to get the computation nodes on which jobs of a user are already running
 function get_exclusion_list() {
     local user=$1
-    local exclusion_list=""
+    local exclusion_list="caserta"
     for job in $(squeue -u $user -h -o "%i"); do
         node=$(squeue -j $job -h -o "%N")
         if [ -n "$node" ]; then
