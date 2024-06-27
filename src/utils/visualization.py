@@ -1,5 +1,7 @@
 import collections
+import math
 import uuid
+from typing import List, Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,22 +42,88 @@ def get_auc_curve(roc_auc, fpr, tpr, log_scale: bool = False):
 	return plt
 
 
-def _visualize_distribution(tensor1, tensor2, labels, title, log_scale=False):
+def _visualize_distributions(
+		tensors1: List[Sequence] | Sequence,
+		tensors2: List[Sequence] | Sequence,
+		labels: List[str],
+		titles: List[str] | str,
+		is_singular: bool = False,
+		log_scale: bool = False,
+		font_size: int = 14,
+):
+	"""
+	Visualizes the distributions of two given sequences of distributions. Each distribution is visualized as a KDE plot
+	in a subplot where tensors1[i] and tensors2[i] are plotted in the same subplot. The labels are used to label the
+	distributions in the legend. The titles are used to label the subplots. The tensors can also represent one distribution
+	instead of a sequence, then title must also be singular.
+	:param tensors1: A list of sequences of values to plot
+	:param tensors2: A list of sequences of values to plot
+	:param labels: The labels of the distributions
+	:param titles: The titles of the subplots
+	:param is_singular: Whether the tensors represent one distribution instead of a sequence
+	:param log_scale: Whether to plot the distributions on a log scale
+	:param font_size: The font size of the plot
+	"""
+	# Expand the tensors if only two distributions (in total) are given
+	if is_singular:
+		tensors1 = [tensors1]
+		tensors2 = [tensors2]
+		titles = [titles]
+
+	# Ensure there are equally many distributions
+	assert len(tensors1) == len(tensors2)
+
+	# Try to make a square plot for the tensors
+	plot_width, plot_height = _get_plot_dimensions(len(tensors1))
+	fig_size = (5 * plot_width, 5 * plot_height)
+
+	# Put the tensors in log values if they should be plotted on a log scale
 	if log_scale:
-		tensor1 = np.log10(tensor1)
-		tensor2 = np.log10(tensor2)
+		tensors1 = [np.log10(tensor) for tensor in tensors1]
+		tensors2 = [np.log10(tensor) for tensor in tensors2]
 
-	plt.figure()
+	# Create a plot with plot_width and plot_height subplots
+	fig, axs = plt.subplots(ncols=plot_width, nrows=plot_height, figsize=fig_size, sharex=True, sharey=True)
 
-	sns.kdeplot(tensor1, bw_adjust=0.2, label=labels[0], fill=True, log_scale=log_scale)
-	sns.kdeplot(tensor2, bw_adjust=0.2, label=labels[1], fill=True, log_scale=log_scale)
+	for i, (tensor1, tensor2, title) in enumerate(zip(tensors1, tensors2, titles)):
+		# Get the correct subplot to plot in
+		x = i % plot_width
+		y = i // plot_width
+		if plot_height > 1:
+			ax = axs[y, x]
+		elif plot_width > 1:
+			ax = axs[x]
+		else:
+			ax = axs
 
-	plt.title(title)
-	plt.xlabel("Value")
-	plt.ylabel("Frequency")
+		# Plot a KDE plot
+		sns.kdeplot(tensor1, ax=ax, bw_adjust=0.2, label=labels[0], fill=True, log_scale=log_scale, legend=False)
+		sns.kdeplot(tensor2, ax=ax, bw_adjust=0.2, label=labels[1], fill=True, log_scale=log_scale, legend=False)
 
-	# Place the legend top left
-	plt.legend(loc="upper left")
+		# Set the title of the subplot
+		ax.set_title(title)
+		ax.set_ylabel('')
+
+	# If only one plot is made, the x and y labels are not centred in the plot if we treat it as a collection of subplots
+	if is_singular:
+		# Set the x and y labels in a larger font
+		axs.set_xlabel("Value")
+		axs.set_ylabel("Density", x=0.)
+
+		# Place the legend in the top left subplot
+		axs.legend(labels=labels, loc="upper left")
+	else:
+		# Set the x and y labels in a larger font
+		fig.supxlabel("Value", fontsize=font_size)
+		fig.supylabel("Density", x=0., fontsize=font_size)
+
+		# Place the legend in the top left subplot
+		fig.legend(labels=labels, loc="upper left", bbox_to_anchor=(0.035, 0.96), fontsize=round(font_size / 14 * 12))
+
+	# Adjust the layout
+	plt.tight_layout()
+
+	# Show the plot
 	plt.show()
 
 
@@ -80,23 +148,28 @@ def visualize_loss_difference(dataloader, visualize_per_class=False):
 	non_members_loss = np.concatenate(list(non_members_dict.values()))
 	members_loss = np.concatenate(list(members_dict.values()))
 
-	_visualize_distribution(
+	_visualize_distributions(
 		non_members_loss,
 		members_loss,
 		["Non-Members", "Members"],
-		"(Test) Loss distribution over all classes",
-		log_scale=True
+		"Loss distribution over all classes",
+		is_singular=True,
+		log_scale=True,
+		font_size=12
 	)
 
 	if visualize_per_class:
-		for i, (non_members_loss, members_loss) in enumerate(zip(non_members_dict.values(), members_dict.values())):
-			_visualize_distribution(
-				non_members_loss,
-				members_loss,
-				["Non-Members", "Members"],
-				f"(Test) Loss distribution over class {i}",
-				log_scale=True
-			)
+		class_keys = sorted(members_dict.keys())
+		members_losses = [members_dict[key] for key in class_keys]
+		non_members_losses = [non_members_dict[key] for key in class_keys]
+		titles = [f"Loss distribution over class {i}" for i in class_keys]
+		_visualize_distributions(
+			non_members_losses,
+			members_losses,
+			["Non-Members", "Members"],
+			titles,
+			log_scale=True
+		)
 
 
 def visualize_confidence_difference(dataloader, visualize_per_class=False):
@@ -120,18 +193,26 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 	non_members_confidence = np.concatenate(list(non_members_dict.values()))
 	members_confidence = np.concatenate(list(members_dict.values()))
 
-	_visualize_distribution(non_members_confidence, members_confidence, ["Non-Members", "Members"],
-							"(Test) Confidence distribution over all classes")
+	_visualize_distributions(
+		non_members_confidence,
+		members_confidence,
+		["Non-Members", "Members"],
+		"Confidence distribution over all classes",
+		is_singular=True,
+		font_size=12,
+	)
 
 	if visualize_per_class:
-		for i, (non_members_confidence, members_confidence) in enumerate(
-				zip(non_members_dict.values(), members_dict.values())):
-			_visualize_distribution(
-				non_members_confidence,
-				members_confidence,
-				["Non-Members", "Members"],
-				f"(Test) Confidence distribution over class {i}"
-			)
+		class_keys = sorted(members_dict.keys())
+		members_confidences = [members_dict[key] for key in class_keys]
+		non_members_confidences = [non_members_dict[key] for key in class_keys]
+		_visualize_distributions(
+			non_members_confidences,
+			members_confidences,
+			["Non-Members", "Members"],
+			[f"Confidence distribution over class {i}" for i in class_keys],
+			font_size=12
+		)
 
 
 def visualize_logit_difference(dataloader, visualize_per_class=False):
@@ -155,15 +236,36 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 	non_members_confidence = np.concatenate(list(non_members_dict.values()))
 	members_confidence = np.concatenate(list(members_dict.values()))
 
-	_visualize_distribution(non_members_confidence, members_confidence, ["Non-Members", "Members"],
-							"(Test) Logit confidence distribution over all classes")
+	_visualize_distributions(
+		non_members_confidence,
+		members_confidence,
+		["Non-Members", "Members"],
+		"Logit confidence distribution over all classes",
+		is_singular=True
+	)
 
 	if visualize_per_class:
-		for i, (non_members_confidence, members_confidence) in enumerate(
-				zip(non_members_dict.values(), members_dict.values())):
-			_visualize_distribution(
-				non_members_confidence,
-				members_confidence,
-				["Non-Members", "Members"],
-				f"(Test) Logit confidence distribution over class {i}"
-			)
+		class_keys = sorted(members_dict.keys())
+		members_confidences = [members_dict[key] for key in class_keys]
+		non_members_confidences = [non_members_dict[key] for key in class_keys]
+		_visualize_distributions(
+			non_members_confidences,
+			members_confidences,
+			["Non-Members", "Members"],
+			[f"Logit confidence distribution over class {i}" for i in class_keys],
+		)
+
+
+def _get_plot_dimensions(n_plots):
+	"""
+	Helper function to get the dimensions of the plot
+	"""
+	ncols = int(math.sqrt(n_plots))
+	nrows = math.ceil(n_plots / ncols)
+
+	# Adjust if ncols and nrows don't multiply to n exactly
+	while nrows * ncols != n_plots:
+		ncols += 1
+		nrows = math.ceil(n_plots / ncols)
+
+	return ncols, nrows

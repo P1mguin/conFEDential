@@ -96,9 +96,9 @@ class Config:
 			) = self._get_attack_datasets(fraction_train, fraction_test)
 
 			# Uncomment to visualize the difference between members and non-members
-			# utils.visualize_loss_difference(validation_dataset)
-			# utils.visualize_confidence_difference(validation_dataset)
-			# utils.visualize_logit_difference(validation_dataset)
+			# utils.visualize_loss_difference(validation_dataset, visualize_per_class=True)
+			# utils.visualize_confidence_difference(validation_dataset, visualize_per_class=True)
+			# utils.visualize_logit_difference(validation_dataset, visualize_per_class=True)
 
 			# Get the template model and train it
 			membership_net = self._construct_membership_net(train_dataset)
