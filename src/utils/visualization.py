@@ -49,7 +49,7 @@ def _visualize_distributions(
 		titles: List[str] | str,
 		is_singular: bool = False,
 		log_scale: bool = False,
-		font_size: int = 14,
+		save_path: str | None = None
 ):
 	"""
 	Visualizes the distributions of two given sequences of distributions. Each distribution is visualized as a KDE plot
@@ -62,7 +62,7 @@ def _visualize_distributions(
 	:param titles: The titles of the subplots
 	:param is_singular: Whether the tensors represent one distribution instead of a sequence
 	:param log_scale: Whether to plot the distributions on a log scale
-	:param font_size: The font size of the plot
+	:param save_path: The path to save the plot to
 	"""
 	# Expand the tensors if only two distributions (in total) are given
 	if is_singular:
@@ -114,17 +114,22 @@ def _visualize_distributions(
 		axs.legend(labels=labels, loc="upper left")
 	else:
 		# Set the x and y labels in a larger font
-		fig.supxlabel("Value", fontsize=font_size)
-		fig.supylabel("Density", x=0., fontsize=font_size)
+		fig.supxlabel("Value", fontsize=12)
+		fig.supylabel("Density", x=0., fontsize=12)
 
 		# Place the legend in the top left subplot
-		fig.legend(labels=labels, loc="upper left", bbox_to_anchor=(0.035, 0.96), fontsize=round(font_size / 14 * 12))
+		fig.legend(labels=labels, loc="upper left", bbox_to_anchor=(0.035, 0.96), fontsize=12)
 
 	# Adjust the layout
 	plt.tight_layout()
 
 	# Show the plot
-	plt.show()
+	if not save_path:
+		plt.show()
+	else:
+		plt.savefig(save_path)
+		plt.show()
+		plt.close()
 
 
 def visualize_loss_difference(dataloader, visualize_per_class=False):
@@ -155,7 +160,7 @@ def visualize_loss_difference(dataloader, visualize_per_class=False):
 		"Loss distribution over all classes",
 		is_singular=True,
 		log_scale=True,
-		font_size=12
+		save_path="images/loss_distribution.png"
 	)
 
 	if visualize_per_class:
@@ -168,7 +173,8 @@ def visualize_loss_difference(dataloader, visualize_per_class=False):
 			members_losses,
 			["Non-Members", "Members"],
 			titles,
-			log_scale=True
+			log_scale=True,
+			save_path="images/loss_distribution_per_class.png"
 		)
 
 
@@ -199,7 +205,7 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 		["Non-Members", "Members"],
 		"Confidence distribution over all classes",
 		is_singular=True,
-		font_size=12,
+		save_path="images/confidence_distribution.png",
 	)
 
 	if visualize_per_class:
@@ -211,7 +217,7 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 			members_confidences,
 			["Non-Members", "Members"],
 			[f"Confidence distribution over class {i}" for i in class_keys],
-			font_size=12
+			save_path="images/confidence_distribution_per_class.png",
 		)
 
 
@@ -241,7 +247,8 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 		members_confidence,
 		["Non-Members", "Members"],
 		"Logit confidence distribution over all classes",
-		is_singular=True
+		is_singular=True,
+		save_path="images/logit_confidence_distribution.png",
 	)
 
 	if visualize_per_class:
@@ -253,6 +260,7 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 			members_confidences,
 			["Non-Members", "Members"],
 			[f"Logit confidence distribution over class {i}" for i in class_keys],
+			save_path="images/logit_confidence_distribution_per_class.png",
 		)
 
 

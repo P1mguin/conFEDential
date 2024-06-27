@@ -260,3 +260,5 @@ wandb/
 /.captured/
 /.shadow_models/
 /.attack_dataset/
+images/*
+!images/.keep
