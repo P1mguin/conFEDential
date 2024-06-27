@@ -79,6 +79,7 @@ class FedNAG(Strategy):
 		# Aggregate the velocities
 		velocity_results = (fit_res.metrics["velocity"] for _, fit_res in results)
 		velocity_aggregated = utils.common.compute_weighted_average(velocity_results, counts)
+		velocity_aggregated = [layer for layer in velocity_aggregated]
 
 		# Return the aggregated results and velocities
 		return parameters_aggregated, {"velocity": velocity_aggregated}
