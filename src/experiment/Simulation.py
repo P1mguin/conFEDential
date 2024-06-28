@@ -298,7 +298,7 @@ class Simulation:
 			train_loaders.append(data_loader)
 
 		# Create the test loader
-		test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
+		test_loader = DataLoader(test_dataset, batch_size=int(math.sqrt(len(test_dataset))))
 		non_member_loader = DataLoader(non_member_dataset, batch_size=len(non_member_dataset))
 
 		# Cache the train and test loaders
