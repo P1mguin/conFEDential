@@ -159,12 +159,6 @@ class Attack:
 					label
 			), is_value_member, _ in tqdm(train_loader, leave=True):
 				optimizer.zero_grad()
-				gradient = [layer for layer in gradient]
-				activation_value = [layer for layer in activation_value]
-				metrics = {key: [layer for layer in value] for key, value in metrics.items()}
-				loss_value = loss_value
-				label = label
-
 				prediction = attack_model(gradient, activation_value, metrics, loss_value, label)
 
 				# Delete memory heavy objects
@@ -181,7 +175,7 @@ class Attack:
 				del prediction
 
 			# Get the performance after the epoch
-			train_fpr, train_tpr, _ = roc_curve(is_members, predictions)
+			train_fpr, train_tpr, _ = roc_curve(is_members.cpu(), predictions.cpu())
 			train_roc_auc = auc(train_fpr, train_tpr)
 
 			# Downsample the fpr and tpr
@@ -255,18 +249,11 @@ class Attack:
 				label
 		), is_value_member, _ in tqdm(dataloader, leave=True):
 			with torch.no_grad():
-				gradient = [layer for layer in gradient]
-				activation_value = [layer for layer in activation_value]
-				metrics = {key: [layer for layer in value] for key, value in metrics.items()}
-				loss_value = loss_value
-				label = label
-
 				prediction = model(gradient, activation_value, metrics, loss_value, label)
-
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))
 
-		fpr, tpr, _ = roc_curve(is_members, predictions)
+		fpr, tpr, _ = roc_curve(is_members.cpu(), predictions.cpu())
 		roc_auc = auc(fpr, tpr)
 		loss = criterion(predictions, is_members)
 		return roc_auc, fpr, tpr, loss
