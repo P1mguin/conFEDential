@@ -67,7 +67,7 @@ def visualize_loss_difference(dataloader, visualize_per_class=False):
 	members_dict = collections.defaultdict(list)
 
 	for x in dataloader.dataset:
-		label = np.argmax(x[0][4]).item()
+		label = torch.argmax(x[0][4]).item()
 		loss = x[0][3].item()
 		if x[1] == 0:
 			non_members_dict[label].append(loss)
@@ -106,7 +106,7 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 	members_dict = collections.defaultdict(list)
 
 	for x in dataloader.dataset:
-		label = np.argmax(x[0][4]).item()
+		label = torch.argmax(x[0][4]).item()
 		confidence = torch.nn.Softmax(dim=0)(x[0][1][-1][0])[label].item()
 		if x[1] == 0:
 			non_members_dict[label].append(confidence)
@@ -139,7 +139,7 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 	members_dict = collections.defaultdict(list)
 
 	for x in dataloader.dataset:
-		label = np.argmax(x[0][4]).item()
+		label = torch.argmax(x[0][4]).item()
 		confidence = x[0][1][-1][0][label].item()
 		if x[1] == 0:
 			non_members_dict[label].append(confidence)
