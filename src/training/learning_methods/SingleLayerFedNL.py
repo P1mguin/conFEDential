@@ -102,6 +102,7 @@ class SingleLayerFedNL(Strategy):
 		current_weights = np.concatenate((np.expand_dims(current_weights[1], axis=1), current_weights[0]), axis=1)
 		for i, update in enumerate(updates):
 			current_weights[i] += update
+			del update
 
 		self.current_weights = ndarrays_to_parameters([current_weights[:, 1:], current_weights[:, 0]])
 		return self.current_weights, {}
