@@ -149,8 +149,8 @@ class Attack:
 		i = 0
 		while True:
 			previous_val_loss = val_loss
-			predictions = torch.Tensor(device=training.DEVICE)
-			is_members = torch.Tensor(device=training.DEVICE)
+			predictions = torch.Tensor().to(training.DEVICE)
+			is_members = torch.Tensor().to(training.DEVICE)
 			for (
 					gradient,
 					activation_value,
@@ -245,8 +245,8 @@ class Attack:
 
 		criterion = nn.MSELoss()
 
-		predictions = torch.Tensor(device=training.DEVICE)
-		is_members = torch.Tensor(device=training.DEVICE)
+		predictions = torch.Tensor().to(training.DEVICE)
+		is_members = torch.Tensor().to(training.DEVICE)
 		for (
 				gradient,
 				activation_value,
