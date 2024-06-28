@@ -149,8 +149,8 @@ class Attack:
 		i = 0
 		while True:
 			previous_val_loss = val_loss
-			predictions = torch.Tensor()
-			is_members = torch.Tensor()
+			predictions = torch.Tensor(device=training.DEVICE)
+			is_members = torch.Tensor(device=training.DEVICE)
 			for (
 					gradient,
 					activation_value,
@@ -159,11 +159,11 @@ class Attack:
 					label
 			), is_value_member, _ in tqdm(train_loader, leave=True):
 				optimizer.zero_grad()
-				gradient = [layer.to(training.DEVICE) for layer in gradient]
-				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
-				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
-				loss_value = loss_value.to(training.DEVICE)
-				label = label.to(training.DEVICE)
+				gradient = [layer for layer in gradient]
+				activation_value = [layer for layer in activation_value]
+				metrics = {key: [layer for layer in value] for key, value in metrics.items()}
+				loss_value = loss_value
+				label = label
 
 				prediction = attack_model(gradient, activation_value, metrics, loss_value, label)
 
@@ -245,8 +245,8 @@ class Attack:
 
 		criterion = nn.MSELoss()
 
-		predictions = torch.Tensor()
-		is_members = torch.Tensor()
+		predictions = torch.Tensor(device=training.DEVICE)
+		is_members = torch.Tensor(device=training.DEVICE)
 		for (
 				gradient,
 				activation_value,
@@ -255,11 +255,11 @@ class Attack:
 				label
 		), is_value_member, _ in tqdm(dataloader, leave=True):
 			with torch.no_grad():
-				gradient = [layer.to(training.DEVICE) for layer in gradient]
-				activation_value = [layer.to(training.DEVICE) for layer in activation_value]
-				metrics = {key: [layer.to(training.DEVICE) for layer in value] for key, value in metrics.items()}
-				loss_value = loss_value.to(training.DEVICE)
-				label = label.to(training.DEVICE)
+				gradient = [layer for layer in gradient]
+				activation_value = [layer for layer in activation_value]
+				metrics = {key: [layer for layer in value] for key, value in metrics.items()}
+				loss_value = loss_value
+				label = label
 
 				prediction = model(gradient, activation_value, metrics, loss_value, label)
 
@@ -377,10 +377,10 @@ class Attack:
 		process_batch_size = 16
 
 		# Extract the value that will be used in the attack dataset into separate variables
-		features = torch.stack([torch.tensor(value[0][0]) for value in intercepted_data])
-		labels = torch.stack([torch.tensor(value[0][1]) for value in intercepted_data])
-		is_member = torch.stack([torch.tensor(value[1]) for value in intercepted_data])
-		member_origins = torch.tensor([value[2] if value[2] else -1 for value in intercepted_data])
+		features = torch.stack([torch.tensor(value[0][0], device=training.DEVICE) for value in intercepted_data])
+		labels = torch.stack([torch.tensor(value[0][1], device=training.DEVICE) for value in intercepted_data])
+		is_member = torch.stack([torch.tensor(value[1], device=training.DEVICE) for value in intercepted_data])
+		member_origins = torch.tensor([value[2] if value[2] else -1 for value in intercepted_data], device=training.DEVICE)
 		num_classes = simulation.model_config.get_num_classes()
 
 		# Translate the boolean to an integer
