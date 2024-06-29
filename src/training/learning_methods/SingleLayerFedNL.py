@@ -18,6 +18,10 @@ class SingleLayerFedNL(Strategy):
 	def __init__(self, **kwargs):
 		super(SingleLayerFedNL, self).__init__(**kwargs)
 
+	@property
+	def reuses_gradients_for_metric_update(self):
+		return True
+
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# The newton method makes use of our custom newton optimizer
 		pass
@@ -108,7 +112,7 @@ class SingleLayerFedNL(Strategy):
 	def get_server_exclusive_metrics(self):
 		return ["hessian"]
 
-	def compute_metric_update(self, metric, data_point):
+	def compute_metric_updates(self, **kwargs):
 		pass
 
 class PickleableGenerator:

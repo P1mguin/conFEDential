@@ -16,6 +16,10 @@ class Strategy(ABC):
 		self.kwargs = kwargs
 		self.current_weights = None
 
+	@property
+	def reuses_gradients_for_metric_update(self):
+		return False
+
 	@abstractmethod
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		"""
@@ -109,3 +113,9 @@ class Strategy(ABC):
 		Returns the metric keys that are exclusive to the server
 		"""
 		return []
+
+	def compute_metric_updates(self, **kwargs):
+		"""
+		Returns the update the metric would get if the server were to use the given parameters
+		"""
+		return {}

@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import torch
@@ -82,10 +83,16 @@ class FedNAG(Strategy):
 		# Return the aggregated results and velocities
 		return parameters_aggregated, {"velocity": velocity_aggregated}
 
-	def compute_metric_updates(self, state_dicts, metrics, features, labels, simulation):
+	def compute_metric_updates(self, **kwargs):
+		state_dicts = copy.deepcopy(kwargs.get("state_dicts"))
+		metrics = copy.deepcopy(kwargs.get("metrics"))
+		features = kwargs.get("features")
+		labels = kwargs.get("labels")
+		simulation = kwargs.get("simulation")
 		if metrics.get("velocity") is None:
 			return None
 
+		# Find the parameters in the Nesterov loss
 		friction = self.kwargs.get("friction", 0.9)
 		state_dict_keys = state_dicts[0].keys()
 		metric_layers = [key for key in state_dict_keys if state_dicts[0][key].requires_grad]
@@ -98,10 +105,17 @@ class FedNAG(Strategy):
 		criterion = simulation.criterion
 		criterion.reduction = "none"
 
+		is_singular_batch = features.size(0) == 1
+		if is_singular_batch:
+			features = torch.cat([features, features])
+
 		predictions = torch.stack([
 			torch.func.functional_call(template_model, state_dict, features)
 			for state_dict in state_dicts
 		])
+
+		if is_singular_batch:
+			predictions = torch.stack([global_round_value[0].unsqueeze(0) for global_round_value in predictions])
 
 		losses = torch.stack([criterion(prediction, labels) for prediction in predictions])
 
