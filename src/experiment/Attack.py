@@ -487,14 +487,13 @@ class Attack:
 		gradients, losses, metric_update = [], [], {}
 		if model_architecture.use_loss or model_architecture.use_gradient or model_architecture.use_metrics:
 			losses = self._get_losses(predictions, labels, simulation)
-			if model_architecture.use_gradient or simulation.learning_method.reuses_gradients_for_metric_update:
+			if model_architecture.use_gradient:
 				gradients = self._get_gradients(losses, state_dicts, simulation)
 			if model_architecture.use_loss:
 				losses = losses.T
 			if model_architecture.use_metrics:
 				metric_update = simulation.learning_method.compute_metric_updates(
 					state_dicts=state_dicts,
-					gradients=gradients,
 					metrics=metrics,
 					features=features,
 					labels=labels,

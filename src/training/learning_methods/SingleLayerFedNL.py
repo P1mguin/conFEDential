@@ -1,3 +1,4 @@
+import copy
 from functools import wraps
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -17,10 +18,6 @@ from src.training.learning_methods.Strategy import Strategy
 class SingleLayerFedNL(Strategy):
 	def __init__(self, **kwargs):
 		super(SingleLayerFedNL, self).__init__(**kwargs)
-
-	@property
-	def reuses_gradients_for_metric_update(self):
-		return True
 
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		# The newton method makes use of our custom newton optimizer
@@ -113,7 +110,36 @@ class SingleLayerFedNL(Strategy):
 		return ["hessian"]
 
 	def compute_metric_updates(self, **kwargs):
-		pass
+		state_dicts = copy.deepcopy(kwargs.get("state_dicts"))
+		features = kwargs.get("features")
+
+		# Concatenate the bias and weights
+		model_weights = torch.stack([
+			torch.cat([model["layers.0.bias"].unsqueeze(dim=1), model["layers.0.weight"]], dim=1)
+			for model in state_dicts
+		])
+
+		# Add a bias element to the features
+		features = torch.cat([torch.ones_like(features[:, 0:1]), features], dim=1)
+
+		# Compute the prediction and likelihood
+		predictions = torch.stack([torch.stack([functional.sigmoid(feature @ model.T) for model in model_weights]) for feature in features])
+		likelihoods = torch.stack([(prediction * (1 - prediction)) for prediction in predictions])
+
+		# Compute the diagonal matrices
+		weight_matrices = torch.stack([
+			torch.stack([torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])])
+			for likelihood in likelihoods
+		])
+
+		# Add regularization to the hessian to make it invertible and to prevent overfitting
+		identity = torch.eye(features.size(1), device=training.DEVICE)
+
+		hessians = torch.stack([
+			feature.T @ feature_weight_matrix @ feature + 1e-3 * identity
+			for feature, feature_weight_matrix in zip(features.unsqueeze(1), weight_matrices)
+		])
+		return {"hessians": [hessians]}
 
 class PickleableGenerator:
 	def __init__(self, generator, *args, **kwargs):

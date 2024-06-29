@@ -16,10 +16,6 @@ class Strategy(ABC):
 		self.kwargs = kwargs
 		self.current_weights = None
 
-	@property
-	def reuses_gradients_for_metric_update(self):
-		return False
-
 	@abstractmethod
 	def get_optimizer(self, parameters: Iterator[nn.Parameter]) -> torch.optim.Optimizer:
 		"""
