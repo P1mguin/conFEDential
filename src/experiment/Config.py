@@ -97,6 +97,7 @@ class Config:
 
 			# Uncomment to visualize the difference between members and non-members
 			# utils.visualize_loss_difference(validation_dataset, visualize_per_class=True)
+			# utils.visualize_loss_difference(validation_dataset, log_scale=True, visualize_per_class=True)
 			# utils.visualize_confidence_difference(validation_dataset, visualize_per_class=True)
 			# utils.visualize_logit_difference(validation_dataset, visualize_per_class=True)
 

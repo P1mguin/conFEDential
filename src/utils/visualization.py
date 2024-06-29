@@ -79,8 +79,8 @@ def _visualize_distributions(
 
 	# Put the tensors in log values if they should be plotted on a log scale
 	if log_scale:
-		tensors1 = [np.log10(tensor) for tensor in tensors1]
-		tensors2 = [np.log10(tensor) for tensor in tensors2]
+		tensors1 = [np.log10(tensor + 1e-8) for tensor in tensors1]
+		tensors2 = [np.log10(tensor + 1e-8) for tensor in tensors2]
 
 	# Create a plot with plot_width and plot_height subplots
 	fig, axs = plt.subplots(ncols=plot_width, nrows=plot_height, figsize=fig_size, sharex=True, sharey=True)
@@ -132,7 +132,7 @@ def _visualize_distributions(
 		plt.close()
 
 
-def visualize_loss_difference(dataloader, visualize_per_class=False):
+def visualize_loss_difference(dataloader, log_scale=False, visualize_per_class=False):
 	"""
 	Visualizes the difference in loss distribution for members and non-members for the entire dataset and per class
 	"""
@@ -159,21 +159,23 @@ def visualize_loss_difference(dataloader, visualize_per_class=False):
 		["Non-Members", "Members"],
 		"Loss distribution over all classes",
 		is_singular=True,
-		log_scale=True,
+		log_scale=log_scale,
 		save_path="images/loss_distribution.png"
 	)
 
 	if visualize_per_class:
 		class_keys = sorted(members_dict.keys())
-		members_losses = [members_dict[key] for key in class_keys]
-		non_members_losses = [non_members_dict[key] for key in class_keys]
+		members_losses = [np.array([]) if not key in members_dict else members_dict[key] for key in class_keys]
+		non_members_losses = [
+			np.array([]) if not key in non_members_dict else non_members_dict[key] for key in class_keys
+		]
 		titles = [f"Loss distribution over class {i}" for i in class_keys]
 		_visualize_distributions(
 			non_members_losses,
 			members_losses,
 			["Non-Members", "Members"],
 			titles,
-			log_scale=True,
+			log_scale=log_scale,
 			save_path="images/loss_distribution_per_class.png"
 		)
 
@@ -210,8 +212,10 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 
 	if visualize_per_class:
 		class_keys = sorted(members_dict.keys())
-		members_confidences = [members_dict[key] for key in class_keys]
-		non_members_confidences = [non_members_dict[key] for key in class_keys]
+		members_confidences = [np.array([]) if not key in members_dict else members_dict[key] for key in class_keys]
+		non_members_confidences = [
+			np.array([]) if not key in non_members_dict else non_members_dict[key] for key in class_keys
+		]
 		_visualize_distributions(
 			non_members_confidences,
 			members_confidences,
@@ -253,8 +257,10 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 
 	if visualize_per_class:
 		class_keys = sorted(members_dict.keys())
-		members_confidences = [members_dict[key] for key in class_keys]
-		non_members_confidences = [non_members_dict[key] for key in class_keys]
+		members_confidences = [np.array([]) if not key in members_dict else members_dict[key] for key in class_keys]
+		non_members_confidences = [
+			np.array([]) if not key in non_members_dict else non_members_dict[key] for key in class_keys
+		]
 		_visualize_distributions(
 			non_members_confidences,
 			members_confidences,
