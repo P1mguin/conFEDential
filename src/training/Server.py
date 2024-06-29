@@ -1,5 +1,8 @@
 import collections
+import gc
 import os
+import sys
+from logging import DEBUG
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
@@ -8,7 +11,7 @@ import numpy as np
 import numpy.typing as npt
 import torch
 import wandb
-from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar
+from flwr.common import FitRes, Parameters, parameters_to_ndarrays, Scalar, log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
@@ -73,6 +76,11 @@ class Server(FedAvg):
 	) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
 		# Call the actual learning method
 		learning_method = self.simulation.learning_method
+		memory_usage = get_objects_memory_usage()
+		log(
+			DEBUG,
+			[(x[0], f"{x[1] / 1024 / 1024}MB") for x in list(reversed(sorted(memory_usage, key=lambda x: x[1])))][:1000]
+		)
 		aggregated_parameters, config = learning_method.aggregate_fit(server_round, results, failures, self.simulation)
 
 		# Capture the results
@@ -243,3 +251,18 @@ class Server(FedAvg):
 			for i, value in enumerate(values):
 				hf[str(i)].resize((server_round + 1, *value.shape))
 				hf[str(i)][server_round] = value
+
+
+def get_objects_memory_usage():
+	objects = gc.get_objects()  # Get a list of all objects tracked by the garbage collector
+
+	result = []
+	for obj in objects:
+		try:
+			size = sys.getsizeof(obj)  # Get the size of the object
+			result.append((obj, size))
+		except TypeError:
+			# In case the object type is not supported by sys.getsizeof()
+			continue
+
+	return result
