@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import src.training as training
+import src.utils as utils
 from src.experiment import AttackSimulation
 
 
@@ -385,10 +386,10 @@ class Attack:
 		# Translate the boolean to an integer
 		is_member = is_member.int()
 
-		# Reshape the metrics so they are 5D and can fit in a gradient component
+		# Convert the elements in the metrics to a tensor
 		if self.attack_simulation.model_architecture.use_metrics:
 			metrics = {
-				key: [reshape_to_4d(torch.tensor(layer), True).detach().float() for layer in value] for key, value in
+				key: [torch.tensor(layer).detach().float() for layer in value] for key, value in
 				metrics.items()
 			}
 		else:
@@ -417,8 +418,8 @@ class Attack:
 
 				iteration_batch_size = len(batch_indices)
 
-				activation_values, gradients, loss = self._precompute_attack_features(
-					batch_features, batch_labels, models, simulation
+				activation_values, gradients, loss, metric_update = self._precompute_attack_features(
+					batch_features, batch_labels, models, metrics, simulation
 				)
 
 				# One-hot encode the labels
@@ -431,6 +432,9 @@ class Attack:
 					# Gradient, activation values and loss values have a grad_fn detach the tensor from it
 					gradient = [layer[j] for layer in gradients]
 					activation_value = [layer[j].detach() for layer in activation_values]
+					metric_update_value = {
+						key: [layer[j].detach() for layer in value] for key, value in metric_update.items()
+					}
 					if self.attack_simulation.model_architecture.use_loss:
 						loss_value = loss[j].detach().unsqueeze(-1)
 					else:
@@ -440,7 +444,9 @@ class Attack:
 					value_origin = batch_member_origins[j].detach()
 
 					yield (
-						(gradient, activation_value, metrics, loss_value, label), is_value_member.float(), value_origin
+						(gradient, activation_value, metric_update_value, loss_value, label),
+						is_value_member.float(),
+						value_origin
 					)
 
 		# Helper variables for clarity
@@ -455,13 +461,14 @@ class Attack:
 		attack_dataloader = DataLoader(dataset, batch_size=batch_size)
 		return attack_dataloader
 
-	def _precompute_attack_features(self, features, labels, model_iterations, simulation):
+	def _precompute_attack_features(self, features, labels, model_iterations, metrics, simulation):
 		"""
 		Gets the loss, activation functions and gradients for a list of parameters
 		"""
 		# Get the models from the parameter iterations
 		template_model = simulation.model
 		intercepted_aggregate_round_count = model_iterations[0].shape[0]
+		model_architecture = self.attack_simulation.model_architecture
 
 		# Convert model iterations to state dicts
 		keys = template_model.state_dict().keys()
@@ -469,22 +476,31 @@ class Attack:
 		state_dicts = [{key: torch.tensor(
 			model_iterations[j][i],
 			dtype=torch.float32,
-			requires_grad=(key in parameter_keys)
+			requires_grad=(key in parameter_keys),
+			device=training.DEVICE
 		) for j, key in enumerate(keys)} for i in range(intercepted_aggregate_round_count)]
 
 		# Get the activation values
 		activation_values = self._get_activation_values(state_dicts, features, simulation)
 		predictions = activation_values[-1]
 
-		gradients, losses = [], []
-		if self.attack_simulation.model_architecture.use_loss or self.attack_simulation.model_architecture.use_gradient:
+		gradients, losses, metric_update = [], [], {}
+		if model_architecture.use_loss or model_architecture.use_gradient or model_architecture.use_metrics:
 			losses = self._get_losses(predictions, labels, simulation)
-			if self.attack_simulation.model_architecture.use_gradient:
+			if model_architecture.use_gradient:
 				gradients = self._get_gradients(losses, state_dicts, simulation)
-			if self.attack_simulation.model_architecture.use_loss:
+			if model_architecture.use_loss:
 				losses = losses.T
+			if model_architecture.use_metrics:
+				metric_update = simulation.learning_method.compute_metric_updates(
+					state_dicts=state_dicts,
+					metrics=metrics,
+					features=features,
+					labels=labels,
+					simulation=simulation
+				)
 
-		return activation_values, gradients, losses
+		return activation_values, gradients, losses, metric_update
 
 	def _get_activation_values(self, model_state_dicts, features, simulation):
 		# Helper variables
@@ -555,7 +571,7 @@ class Attack:
 			model_gradients = []
 			for loss in losses[i]:
 				loss.backward(retain_graph=True)
-				model_gradients.append((reshape_to_4d(state_dict[key].grad) for key in parameter_keys))
+				model_gradients.append((utils.reshape_to_4d(state_dict[key].grad) for key in parameter_keys))
 			gradients.append((torch.stack(layers) for layers in zip(*model_gradients)))
 
 		# Transpose the gradients so that they are bundled per layer instead of per model iteration
@@ -580,25 +596,6 @@ class Attack:
 			**self._attack_simulation.optimizer_parameters
 		}
 		return simulation_wandb_kwargs
-
-
-def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Tensor:
-	if batched:
-		unsqueeze_dim = 2
-		target_dim = 5
-	else:
-		unsqueeze_dim = 1
-		target_dim = 4
-
-	if input_tensor.ndim > target_dim:
-		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim - 1)], -1)
-	elif input_tensor.ndim < target_dim:
-		tensor_shape = input_tensor.shape
-		target_shape = (
-			*tensor_shape[:unsqueeze_dim], *(1,) * (target_dim - input_tensor.ndim), *tensor_shape[unsqueeze_dim:]
-		)
-		input_tensor = input_tensor.view(target_shape)
-	return input_tensor
 
 
 class IterableDataset(data.IterableDataset):

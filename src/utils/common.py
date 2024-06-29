@@ -80,3 +80,22 @@ def set_dict_value_from_path(dictionary: dict, new_value: Any, *path: Tuple[str]
 
 	dictionary[path[-1]] = new_value
 	return dictionary
+
+
+def reshape_to_4d(input_tensor: torch.Tensor, batched: bool = False) -> torch.Tensor:
+	if batched:
+		unsqueeze_dim = 2
+		target_dim = 5
+	else:
+		unsqueeze_dim = 1
+		target_dim = 4
+
+	if input_tensor.ndim > target_dim:
+		input_tensor = input_tensor.view(*input_tensor.shape[:(target_dim - 1)], -1)
+	elif input_tensor.ndim < target_dim:
+		tensor_shape = input_tensor.shape
+		target_shape = (
+			*tensor_shape[:unsqueeze_dim], *(1,) * (target_dim - input_tensor.ndim), *tensor_shape[unsqueeze_dim:]
+		)
+		input_tensor = input_tensor.view(target_shape)
+	return input_tensor

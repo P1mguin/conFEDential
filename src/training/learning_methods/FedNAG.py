@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import torch
@@ -81,3 +82,62 @@ class FedNAG(Strategy):
 
 		# Return the aggregated results and velocities
 		return parameters_aggregated, {"velocity": velocity_aggregated}
+
+	def compute_metric_updates(self, **kwargs):
+		state_dicts = copy.deepcopy(kwargs.get("state_dicts"))
+		metrics = copy.deepcopy(kwargs.get("metrics"))
+		features = kwargs.get("features")
+		labels = kwargs.get("labels")
+		simulation = kwargs.get("simulation")
+		if metrics.get("velocity") is None:
+			return None
+
+		# Find the parameters in the Nesterov loss
+		friction = self.kwargs.get("friction", 0.9)
+		state_dict_keys = state_dicts[0].keys()
+		metric_layers = [key for key in state_dict_keys if state_dicts[0][key].requires_grad]
+		for i, metric_layer in enumerate(metric_layers):
+			updates = metrics["velocity"][i] * friction
+			for j, update in enumerate(updates):
+				state_dicts[j][metric_layer] = torch.tensor(state_dicts[j][metric_layer] + update, requires_grad=True)
+
+		template_model = simulation.model
+		criterion = simulation.criterion
+		criterion.reduction = "none"
+
+		is_singular_batch = features.size(0) == 1
+		if is_singular_batch:
+			features = torch.cat([features, features])
+
+		predictions = torch.stack([
+			torch.func.functional_call(template_model, state_dict, features)
+			for state_dict in state_dicts
+		])
+
+		if is_singular_batch:
+			predictions = torch.stack([global_round_value[0].unsqueeze(0) for global_round_value in predictions])
+
+		losses = torch.stack([criterion(prediction, labels) for prediction in predictions])
+
+		gradients = []
+		parameter_keys = [name for name, _ in template_model.named_parameters()]
+		for i, state_dict in enumerate(state_dicts):
+			model_gradients = []
+			for loss in losses[i]:
+				loss.backward(retain_graph=True)
+				model_gradients.append((state_dict[key].grad for key in parameter_keys))
+			gradients.append((torch.stack(layers) for layers in zip(*model_gradients)))
+		gradients = (torch.stack(layers, dim=1) for layers in zip(*gradients))
+
+		learning_rate = self.kwargs.get("lr", 0.001)
+		metrics["velocity"] = [
+			friction * velocity - learning_rate * gradient
+			for velocity, gradient in zip(metrics["velocity"], gradients)
+		]
+
+		# Expand the tensors to 5D
+		metrics["velocity"] = [
+			torch.stack([utils.reshape_to_4d(x, batched=True) for x in layer]) for layer in metrics["velocity"]
+		]
+
+		return metrics
