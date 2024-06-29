@@ -25,14 +25,14 @@ attack:
   data_access:
     steps:
       - 1.0
-      - 1.0
-      - 1.0
-      - 1.0
-      - 0.1
-      - 0.1
+#      - 1.0
+#      - 1.0
+#      - 1.0
+#      - 0.1
+#      - 0.1
   message_access: server
   aggregate_access: 1
-  repetitions: 1
+  repetitions: 0
   attack_simulation:
     batch_size: 64
     optimizer_name: Adam
@@ -46,31 +46,31 @@ attack:
             activation: False
             gradient: False
             metrics: False
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: True
-          - label: True
-            loss: True
-            activation: True
-            gradient: True
-            metrics: False
-          - label: True
-            loss: True
-            activation: True
-            gradient: True
-            metrics: True
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: False
-          - label: True
-            loss: True
-            activation: True
-            gradient: True
-            metrics: True
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: True
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: True
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: True
       gradient_component:
         - type: Dropout
           p: 0.2
