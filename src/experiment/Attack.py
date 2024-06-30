@@ -376,7 +376,7 @@ class Attack:
 		# Convert the elements in the metrics to a tensor
 		if self.attack_simulation.model_architecture.use_metrics:
 			metrics = {
-				key: [torch.tensor(layer).detach().float() for layer in value] for key, value in
+				key: [torch.tensor(layer, device=training.DEVICE).detach().float() for layer in value] for key, value in
 				metrics.items()
 			}
 		else:
@@ -417,7 +417,7 @@ class Attack:
 					label = batch_labels[j].float()
 
 					# Gradient, activation values and loss values have a grad_fn detach the tensor from it
-					gradient = [layer[j] for layer in gradients]
+					gradient = [layer[j].detach() for layer in gradients]
 					activation_value = [layer[j].detach() for layer in activation_values]
 					metric_update_value = {
 						key: [layer[j].detach() for layer in value] for key, value in metric_update.items()

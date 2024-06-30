@@ -100,7 +100,9 @@ class FedNAG(Strategy):
 		for i, metric_layer in enumerate(metric_layers):
 			updates = metrics["velocity"][i] * friction
 			for j, update in enumerate(updates):
-				state_dicts[j][metric_layer] = torch.tensor(state_dicts[j][metric_layer] + update, requires_grad=True)
+				state_dicts[j][metric_layer] = torch.tensor(
+					state_dicts[j][metric_layer] + update, requires_grad=True, device=training.DEVICE
+				)
 
 		template_model = simulation.model
 		criterion = simulation.criterion
