@@ -16,4 +16,4 @@ source venv/bin/activate
 wandb sync --sync-all
 wandb sync --clean-force
 
-sbatch hpc_runs/run_experiments.sbatch
+sbatch --nodelist caserta hpc_runs/run_experiments.sbatch
