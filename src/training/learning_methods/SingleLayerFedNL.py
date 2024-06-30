@@ -137,7 +137,7 @@ class SingleLayerFedNL(Strategy):
 		identity = torch.eye(features.size(1), device=training.DEVICE)
 
 		hessians = torch.stack([
-			feature.T @ feature_weight_matrix @ feature + 1e-3 * identity
+			utils.reshape_to_4d(feature.T @ feature_weight_matrix @ feature + 1e-3 * identity, batched=True)
 			for feature, feature_weight_matrix in zip(features.unsqueeze(1), weight_matrices)
 		])
 		return {"hessians": [hessians]}
