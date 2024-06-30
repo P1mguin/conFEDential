@@ -28,13 +28,99 @@ attack:
       - 1.0
       - 1.0
       - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
+      - 1.0
       - 0.1
       - 0.1
-  message_access: server
+      - 0.1
+      - 0.1
+      - 0.1
+      - 0.1
+      - 0.1
+      - 0.1
+      - 0.1
+      - 0.1
+  message_access:
+    steps:
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - server
+      - client
+      - client
+      - client
+      - client
+      - client
+      - client
+      - client
+      - client
+      - client
+      - client
   aggregate_access: 1
   repetitions: 1
   attack_simulation:
-    batch_size: 64
+    batch_size:
+      steps:
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
     optimizer_name: Adam
     optimizer_parameters:
       eps: 0.0001
@@ -50,12 +136,92 @@ attack:
             loss: True
             activation: False
             gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
             metrics: True
           - label: True
             loss: True
             activation: True
             gradient: True
             metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
           - label: True
             loss: True
             activation: True
@@ -66,6 +232,46 @@ attack:
             activation: False
             gradient: False
             metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
           - label: True
             loss: True
             activation: True
