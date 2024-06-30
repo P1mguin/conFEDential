@@ -28,7 +28,7 @@ attack:
   data_access:
     values:
       - 1.0
-      - 0.01
+#      - 0.01
   message_access: server
   aggregate_access: 1
   repetitions: 1
@@ -46,21 +46,21 @@ attack:
     model_architecture:
       components:
         values:
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: False
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: True
-          - label: True
-            loss: True
-            activation: True
-            gradient: True
-            metrics: False
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: True
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: False
           - label: True
             loss: True
             activation: True
