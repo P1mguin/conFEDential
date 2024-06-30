@@ -7,7 +7,7 @@ sys.path.append(PROJECT_DIRECTORY)
 
 import argparse
 import random
-from logging import INFO
+from logging import INFO, ERROR
 from pathlib import Path
 
 import numpy as np
@@ -110,16 +110,19 @@ def main():
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		log(INFO, config)
-		config.run_simulation(
-			concurrent_clients,
-			memory,
-			num_cpus,
-			num_gpus,
-			is_ray_initialised,
-			is_online,
-			is_capturing,
-			run_name,
-		)
+		try:
+			config.run_simulation(
+				concurrent_clients,
+				memory,
+				num_cpus,
+				num_gpus,
+				is_ray_initialised,
+				is_online,
+				is_capturing,
+				run_name,
+			)
+		except Exception as e:
+			log(ERROR, f"Failed to run simulation {e}")
 
 
 if __name__ == '__main__':
