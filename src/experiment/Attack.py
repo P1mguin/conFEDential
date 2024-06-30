@@ -249,7 +249,6 @@ class Attack:
 				label
 		), is_value_member, _ in tqdm(dataloader, leave=True):
 			with torch.no_grad():
-				# Log the device of all tensors
 				prediction = model(gradient, activation_value, metrics, loss_value, label)
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))

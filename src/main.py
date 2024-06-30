@@ -14,6 +14,7 @@ import numpy as np
 import torch
 from flwr.common import log
 
+import logging
 from src.utils import batch_config
 
 torch.manual_seed(78)
@@ -122,7 +123,7 @@ def main():
 				run_name,
 			)
 		except Exception as e:
-			log(ERROR, f"Failed to run simulation {e}")
+			logging.exception(e)
 
 
 if __name__ == '__main__':
