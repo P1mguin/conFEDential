@@ -125,20 +125,26 @@ class SingleLayerFedNL(Strategy):
 
 		# Compute the prediction and likelihood
 		predictions = torch.stack([torch.stack([functional.sigmoid(feature @ model.T) for model in model_weights]) for feature in features])
-		likelihoods = torch.stack([(prediction * (1 - prediction)) for prediction in predictions])
+		likelihoods = torch.stack([(prediction * (1 - prediction)) for prediction in predictions]).unsqueeze(-2)
 
 		# Compute the diagonal matrices
 		weight_matrices = torch.stack([
-			torch.stack([torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])])
-			for likelihood in likelihoods
+			torch.stack([
+				torch.stack([
+					torch.diag(likelihood[:, i]) for i in range(likelihood.shape[1])
+				]) for likelihood in sample_likelihoods
+			]) for sample_likelihoods in likelihoods
 		])
 
 		# Add regularization to the hessian to make it invertible and to prevent overfitting
-		identity = torch.eye(features.size(1), device=training.DEVICE)
+		identity = torch.eye(features.size(1), device=training.DEVICE) * 1e-3
+		unsqueezed_features = features.unsqueeze(1)
 
 		hessians = torch.stack([
-			utils.reshape_to_4d(feature.T @ feature_weight_matrix @ feature + 1e-3 * identity, batched=True)
-			for feature, feature_weight_matrix in zip(features.unsqueeze(1), weight_matrices)
+			torch.stack([
+				utils.reshape_to_4d(feature.T @ feature_weight_matrix @ feature + identity)
+				for feature, feature_weight_matrix in zip(unsqueezed_features, sample_weight_matrices)
+			]) for sample_weight_matrices in weight_matrices
 		])
 		return {"hessians": [hessians]}
 
