@@ -26,40 +26,75 @@ simulation:
       out_features: 10
 attack:
   data_access:
-    values:
+    steps:
       - 1.0
-#      - 0.01
+      - 0.01
+      - 1.0
+      - 0.01
+      - 1.0
+      - 0.01
+      - 1.0
+      - 0.01
   message_access: server
   aggregate_access: 1
-  repetitions: 0
+  repetitions: 1
   attack_simulation:
-    batch_size: 64
+    batch_size:
+      steps:
+        - 512
+        - 512
+        - 16
+        - 16
+        - 32
+        - 32
+        - 8
+        - 8
     optimizer_name: Adam
     optimizer_parameters:
       eps: 0.0001
     model_architecture:
       components:
-        values:
+        steps:
           - label: True
             loss: True
             activation: False
             gradient: False
             metrics: False
-#          - label: True
-#            loss: True
-#            activation: False
-#            gradient: False
-#            metrics: True
-#          - label: True
-#            loss: True
-#            activation: True
-#            gradient: True
-#            metrics: False
-#          - label: True
-#            loss: True
-#            activation: True
-#            gradient: True
-#            metrics: True
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: False
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: False
+            gradient: False
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: False
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
+          - label: True
+            loss: True
+            activation: True
+            gradient: True
+            metrics: True
       gradient_component:
         - type: Dropout
           p: 0.2
