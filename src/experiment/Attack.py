@@ -252,8 +252,6 @@ class Attack:
 				prediction = model(gradient, activation_value, metrics, loss_value, label)
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))
-				if len(predictions) > 1:
-					raise Exception("Thank you")
 
 		fpr, tpr, _ = roc_curve(is_members.cpu(), predictions.cpu())
 		roc_auc = auc(fpr, tpr)
