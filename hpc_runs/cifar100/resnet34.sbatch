@@ -4,6 +4,7 @@
 #SBATCH --mem=16G
 #SBATCH --job-name=CIFAR100-ResNet34
 #SBATCH --output hpc_runs/cifar100/outputs/resnet34/slurm-%j.out
+#SBATCH --mail-type=END
 
 # Show node in output file
 hostname

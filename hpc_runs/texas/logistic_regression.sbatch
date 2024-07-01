@@ -4,6 +4,7 @@
 #SBATCH --mem=32G
 #SBATCH --job-name=TEXAS-LogRes
 #SBATCH --output hpc_runs/texas/outputs/logistic_regression/slurm-%j.out
+#SBATCH --mail-type=END
 
 # Show node in output file
 hostname

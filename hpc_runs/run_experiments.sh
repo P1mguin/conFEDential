@@ -16,4 +16,9 @@ source venv/bin/activate
 wandb sync --sync-all
 wandb sync --clean-force
 
-sbatch hpc_runs/run_experiments.sbatch
+sbatch --exclude=caserta,ctit081,ctit087 hpc_runs/cifar10/resnet18.sbatch
+sbatch --exclude=caserta,ctit081,ctit087 hpc_runs/cifar100/resnet34.sbatch
+sbatch --exclude=caserta,ctit081,ctit087 hpc_runs/purchase/fcn.sbatch
+sbatch --exclude=caserta,ctit081,ctit087 hpc_runs/purchase/logistic_regression.sbatch
+sbatch --exclude=caserta,ctit081,ctit087 hpc_runs/texas/fcn.sbatch
+sbatch --exclude=caserta,ctit081,ctit087 hpc_runs/texas/logistic_regression.sbatch

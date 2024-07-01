@@ -7,13 +7,14 @@ sys.path.append(PROJECT_DIRECTORY)
 
 import argparse
 import random
-from logging import INFO
+from logging import INFO, ERROR
 from pathlib import Path
 
 import numpy as np
 import torch
 from flwr.common import log
 
+import logging
 from src.utils import batch_config
 
 torch.manual_seed(78)
@@ -110,16 +111,19 @@ def main():
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
 		log(INFO, config)
-		config.run_simulation(
-			concurrent_clients,
-			memory,
-			num_cpus,
-			num_gpus,
-			is_ray_initialised,
-			is_online,
-			is_capturing,
-			run_name,
-		)
+		try:
+			config.run_simulation(
+				concurrent_clients,
+				memory,
+				num_cpus,
+				num_gpus,
+				is_ray_initialised,
+				is_online,
+				is_capturing,
+				run_name,
+			)
+		except Exception as e:
+			logging.exception(e)
 
 
 if __name__ == '__main__':

@@ -166,7 +166,7 @@ class Simulation:
 		log(INFO, "Starting federated learning simulation")
 		try:
 			if is_ray_initialised:
-				ray.init(address='auto')
+				ray.init(_temp_dir="/local/ray")
 				fl.simulation.start_simulation(
 					client_fn=client_fn,
 					num_clients=self.client_count,
@@ -298,7 +298,7 @@ class Simulation:
 			train_loaders.append(data_loader)
 
 		# Create the test loader
-		test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
+		test_loader = DataLoader(test_dataset, batch_size=int(math.sqrt(len(test_dataset))))
 		non_member_loader = DataLoader(non_member_dataset, batch_size=len(non_member_dataset))
 
 		# Cache the train and test loaders

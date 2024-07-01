@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 
 import src.attacks.component_constructor as component_constructor
+from src import training
 
 
 class AttackNet(nn.Module):
@@ -38,12 +39,12 @@ class AttackNet(nn.Module):
 		batch_size = loss.size(0)
 
 		model_config = self.config.attack.attack_simulation.model_architecture
-		label = self.label_component(label) if model_config.use_label else torch.empty(0, )
-		loss = self.loss_component(loss) if model_config.use_loss else torch.empty(0, )
+		label = self.label_component(label) if model_config.use_label else torch.empty(0, device=training.DEVICE)
+		loss = self.loss_component(loss) if model_config.use_loss else torch.empty(0, device=training.DEVICE)
 		activation = torch.cat([
 			activation_component(activation_value).view(batch_size, -1)
 			for activation_component, activation_value in zip(self.activation_components, activation_values)
-		], dim=1) if model_config.use_activation else torch.empty(0, )
+		], dim=1) if model_config.use_activation else torch.empty(0, device=training.DEVICE)
 
 		# The input shape of the gradients and metrics is:
 		# (in_channels/in_features, out_channels/1, kernel_width/1, kernel_height/out_features)
@@ -54,7 +55,7 @@ class AttackNet(nn.Module):
 				for gradient_component, gradient in zip(self.gradient_components, gradients)
 			], dim=1)
 		else:
-			gradients = torch.empty(0, )
+			gradients = torch.empty(0, device=training.DEVICE)
 
 		if model_config.use_metrics:
 			metrics = {
@@ -68,7 +69,7 @@ class AttackNet(nn.Module):
 				], dim=1) for key in metrics.keys()
 			]
 		else:
-			metrics = [torch.empty(0, ) for _ in metrics.keys()]
+			metrics = [torch.empty(0, device=training.DEVICE) for _ in metrics.keys()]
 
 		# Concatenate the activation, label, loss, gradient and metric components
 		encoder_input = torch.cat((label, loss, activation, gradients, *metrics), dim=1)
