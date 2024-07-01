@@ -20,5 +20,5 @@ ray start --head --num-cpus 4 --temp-dir /local/ray --memory 36507222016
 srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_adam.yaml --ray --memory 32 --num-cpus 4 --clients 1 --run-name TEXAS-LOG_RES-FEDADAM
 srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_avg.yaml --ray --memory 32 --num-cpus 4 --clients 1 --run-name TEXAS-LOG_RES-FEDAVG
 srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_nag.yaml --ray --memory 32 --num-cpus 4 --clients 1 --run-name TEXAS-LOG_RES-FEDNAG
-#srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_nl.yaml --ray --memory 32 --num-cpus 4 --clients 1 --run-name TEXAS-LOG_RES-FEDNL
+srun python src/main.py --yaml-file examples/texas/logistic_regression/fed_nl.yaml --ray --memory 32 --num-cpus 4 --clients 1 --run-name TEXAS-LOG_RES-FEDNL
 ray stop
