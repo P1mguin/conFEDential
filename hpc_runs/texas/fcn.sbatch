@@ -4,6 +4,7 @@
 #SBATCH --mem=16G
 #SBATCH --job-name=TEXAS-FCN
 #SBATCH --output hpc_runs/texas/outputs/fcn/slurm-%j.out
+#SBATCH --mail-type=END
 
 # Show node in output file
 hostname
