@@ -6,6 +6,7 @@ from typing import List, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import tikzplotlib
 import torch
 
 
@@ -83,7 +84,7 @@ def _visualize_distributions(
 		tensors2 = [np.log10(tensor + 1e-8) for tensor in tensors2]
 
 	# Create a plot with plot_width and plot_height subplots
-	fig, axs = plt.subplots(ncols=plot_width, nrows=plot_height, figsize=fig_size, sharex=True, sharey=True)
+	fig, axs = plt.subplots(ncols=plot_width, nrows=plot_height, figsize=fig_size, sharex=False, sharey=False)
 
 	for i, (tensor1, tensor2, title) in enumerate(zip(tensors1, tensors2, titles)):
 		# Get the correct subplot to plot in
@@ -127,7 +128,9 @@ def _visualize_distributions(
 	if not save_path:
 		plt.show()
 	else:
-		plt.savefig(save_path)
+		plt.savefig(f"{save_path}.png")
+		tikzplotlib.clean_figure()
+		tikzplotlib.save(f"{save_path}.tex")
 		plt.show()
 		plt.close()
 
@@ -153,6 +156,8 @@ def visualize_loss_difference(dataloader, log_scale=False, visualize_per_class=F
 	non_members_loss = np.concatenate(list(non_members_dict.values()))
 	members_loss = np.concatenate(list(members_dict.values()))
 
+	save_path_prefix = "images/loss_distribution_log_scale" if log_scale else "images/loss_distribution"
+
 	_visualize_distributions(
 		non_members_loss,
 		members_loss,
@@ -160,7 +165,7 @@ def visualize_loss_difference(dataloader, log_scale=False, visualize_per_class=F
 		"Loss distribution over all classes",
 		is_singular=True,
 		log_scale=log_scale,
-		save_path="images/loss_distribution.png"
+		save_path=save_path_prefix
 	)
 
 	if visualize_per_class:
@@ -176,7 +181,7 @@ def visualize_loss_difference(dataloader, log_scale=False, visualize_per_class=F
 			["Non-Members", "Members"],
 			titles,
 			log_scale=log_scale,
-			save_path="images/loss_distribution_per_class.png"
+			save_path=f"{save_path_prefix}_per_class"
 		)
 
 
@@ -207,7 +212,7 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 		["Non-Members", "Members"],
 		"Confidence distribution over all classes",
 		is_singular=True,
-		save_path="images/confidence_distribution.png",
+		save_path="images/confidence_distribution",
 	)
 
 	if visualize_per_class:
@@ -221,7 +226,7 @@ def visualize_confidence_difference(dataloader, visualize_per_class=False):
 			members_confidences,
 			["Non-Members", "Members"],
 			[f"Confidence distribution over class {i}" for i in class_keys],
-			save_path="images/confidence_distribution_per_class.png",
+			save_path="images/confidence_distribution_per_class",
 		)
 
 
@@ -252,7 +257,7 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 		["Non-Members", "Members"],
 		"Logit confidence distribution over all classes",
 		is_singular=True,
-		save_path="images/logit_confidence_distribution.png",
+		save_path="images/logit_confidence_distribution",
 	)
 
 	if visualize_per_class:
@@ -266,7 +271,7 @@ def visualize_logit_difference(dataloader, visualize_per_class=False):
 			members_confidences,
 			["Non-Members", "Members"],
 			[f"Logit confidence distribution over class {i}" for i in class_keys],
-			save_path="images/logit_confidence_distribution_per_class.png",
+			save_path="images/logit_confidence_distribution_per_class",
 		)
 
 
