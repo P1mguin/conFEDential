@@ -128,6 +128,7 @@ class Attack:
 				[val_tpr],
 				[val_loss, test_loss],
 				["Validation", "Test"],
+				log_roc=False,
 				step=-1
 			)
 		else:
@@ -137,6 +138,7 @@ class Attack:
 				[val_tpr, test_tpr],
 				[val_loss, test_loss],
 				["Validation", "Test"],
+				log_roc=False,
 				step=-1
 			)
 
@@ -150,6 +152,7 @@ class Attack:
 
 		attack_model.train()
 		i = 0
+		breaking = False
 		while True:
 			previous_average_loss = average_loss
 			predictions = torch.Tensor().to(training.DEVICE)
@@ -190,31 +193,6 @@ class Attack:
 			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
 			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
 
-			# Log the performance
-			log(
-				INFO,
-				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
-				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
-			)
-			if len(test_loader.dataset) == 1:
-				self._log_aucs(
-					[train_roc_auc, val_roc_auc],
-					[train_fpr, val_fpr],
-					[train_tpr, val_tpr],
-					[train_loss, val_loss, test_loss],
-					["Train", "Validation", "Test"],
-					step=i
-				)
-			else:
-				self._log_aucs(
-					[train_roc_auc, val_roc_auc, test_roc_auc],
-					[train_fpr, val_fpr, test_fpr],
-					[train_tpr, val_tpr, test_tpr],
-					[train_loss, val_loss, test_loss],
-					["Train", "Validation", "Test"],
-					step=i
-				)
-
 			# Get the average loss over the last 5 values
 			losses.append(val_loss)
 			if len(losses) > average_over:
@@ -234,9 +212,39 @@ class Attack:
 						i,
 						val_loss
 					)
-					break
+					breaking = True
 			else:
 				patience_counter = 0
+
+			# Log the performance
+			log(
+				INFO,
+				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
+				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
+			)
+			if len(test_loader.dataset) == 1:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc],
+					[train_fpr, val_fpr],
+					[train_tpr, val_tpr],
+					[train_loss, val_loss, test_loss],
+					["Train", "Validation", "Test"],
+					log_roc=breaking,
+					step=i
+				)
+			else:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc, test_roc_auc],
+					[train_fpr, val_fpr, test_fpr],
+					[train_tpr, val_tpr, test_tpr],
+					[train_loss, val_loss, test_loss],
+					["Train", "Validation", "Test"],
+					log_roc=breaking,
+					step=i
+				)
+
+			if breaking:
+				break
 
 			i += 1
 		wandb.finish()
@@ -267,7 +275,7 @@ class Attack:
 		loss = criterion(predictions, is_members)
 		return roc_auc, fpr, tpr, loss
 
-	def _log_aucs(self, roc_aucs, fprs, tprs, losses, titles, step: int):
+	def _log_aucs(self, roc_aucs, fprs, tprs, losses, titles, log_roc: bool, step: int):
 		wandb_log = {}
 
 		# Add the losses to the wandb log
@@ -283,19 +291,20 @@ class Attack:
 			wandb_log[f"{title} ROC AUC"] = roc_auc
 			titles[i] = f"{title} (area = {round(roc_auc, 2)})"
 
-		# Remove the titles that do not have a roc auc
-		titles = titles[:len(roc_aucs)]
+		if log_roc:
+			# Remove the titles that do not have a roc auc
+			titles = titles[:len(roc_aucs)]
 
-		# Add guessing as a line to the plot
-		fprs += [np.array([0., 1.])]
-		tprs += [np.array([0., 1.])]
-		titles += ["Guessing (area = 0.50)"]
+			# Add guessing as a line to the plot
+			fprs += [np.array([0., 1.])]
+			tprs += [np.array([0., 1.])]
+			titles += ["Guessing (area = 0.50)"]
 
-		# Add the roc curve to the wandb log
-		plot_title = f"ROC AUCs at epoch {step}"
-		wandb_log[plot_title] = wandb.plot.line_series(
-			xs=fprs, ys=tprs, keys=titles, title=plot_title, xname="False Positive Rate"
-		)
+			# Add the roc curve to the wandb log
+			plot_title = f"ROC AUCs at epoch {step}"
+			wandb_log[plot_title] = wandb.plot.line_series(
+				xs=fprs, ys=tprs, keys=titles, title=plot_title, xname="False Positive Rate"
+			)
 		wandb.log(wandb_log)
 
 	def reset_variables(self):
