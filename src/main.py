@@ -94,6 +94,7 @@ parser.add_argument(
 
 
 def main():
+	log(INFO, f"Starting simulation")
 	args = parser.parse_args()
 
 	concurrent_clients = args.clients
