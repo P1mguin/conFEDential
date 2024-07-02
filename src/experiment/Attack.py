@@ -140,15 +140,18 @@ class Attack:
 				step=-1
 			)
 
-		# Training loop with early stopping
+		# Training loop with early stopping over the average loss of the last 5 rounds with patience of 10 rounds
 		patience = 10
 		patience_counter = 0
 		relative_tolerance = 1e-3
+		average_over = 5
+		losses = [val_loss]
+		average_loss = val_loss
 
 		attack_model.train()
 		i = 0
 		while True:
-			previous_val_loss = val_loss
+			previous_average_loss = average_loss
 			predictions = torch.Tensor().to(training.DEVICE)
 			is_members = torch.Tensor().to(training.DEVICE)
 			for (
@@ -212,8 +215,14 @@ class Attack:
 					step=i
 				)
 
+			# Get the average loss over the last 5 values
+			losses.append(val_loss)
+			if len(losses) > average_over:
+				losses.pop(0)
+			average_loss = sum(losses) / len(losses)
+
 			# Early stopping
-			loss_decrease = -(val_loss - previous_val_loss) / previous_val_loss
+			loss_decrease = -(average_loss - previous_average_loss) / previous_average_loss
 			log(DEBUG, f"Loss decrease: {loss_decrease}")
 
 			if loss_decrease < relative_tolerance:
