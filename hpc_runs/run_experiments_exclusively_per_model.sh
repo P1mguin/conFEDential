@@ -16,4 +16,4 @@ source venv/bin/activate
 wandb sync --sync-all
 wandb sync --clean-force
 
-sbatch --nodelist caserta hpc_runs/run_experiments_exclusively.sbatch
+sbatch --nodelist caserta hpc_runs/run_experiments_exclusively_per_model.sbatch
