@@ -112,14 +112,15 @@ class Attack:
 		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
 
 		# Set initial parameters and get initial performance
-		test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
-		val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
+		test_roc_auc, test_fpr, test_tpr, test_loss, test_accuracy = self._test_model(attack_model, test_loader)
+		val_roc_auc, val_fpr, val_tpr, val_loss, val_accuracy = self._test_model(attack_model, validation_loader)
 
 		# Log the initial performance
 		log(
 			INFO,
 			f"Initial performance: validation auc {val_roc_auc}, test auc {test_roc_auc},"
-			f" validation loss {val_loss}, test loss {test_loss}"
+			f" validation loss {val_loss}, test loss {test_loss},"
+			f" validation accuracy {val_accuracy}, test accuracy {test_accuracy}"
 		)
 		if len(test_loader.dataset) == 1:
 			self._log_aucs(
@@ -127,6 +128,7 @@ class Attack:
 				[val_fpr],
 				[val_tpr],
 				[val_loss, test_loss],
+				[val_accuracy, test_accuracy],
 				["Validation", "Test"],
 				log_roc=False,
 				step=-1
@@ -137,6 +139,7 @@ class Attack:
 				[val_fpr, test_fpr],
 				[val_tpr, test_tpr],
 				[val_loss, test_loss],
+				[val_accuracy, test_accuracy],
 				["Validation", "Test"],
 				log_roc=False,
 				step=-1
@@ -189,9 +192,12 @@ class Attack:
 			lines = rdp(line, epsilon=0.0001)
 			train_fpr, train_tpr = lines[:, 0], lines[:, 1]
 
+			# Get the train loss and accuracy
 			train_loss = criterion(predictions, is_members)
-			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
-			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
+			train_accuracy = (predictions.round() == is_members).sum().item() / is_members.size(0)
+
+			test_roc_auc, test_fpr, test_tpr, test_loss, test_accuracy = self._test_model(attack_model, test_loader)
+			val_roc_auc, val_fpr, val_tpr, val_loss, val_accuracy = self._test_model(attack_model, validation_loader)
 
 			# Get the average loss over the last 5 values
 			losses.append(val_loss)
@@ -220,7 +226,8 @@ class Attack:
 			log(
 				INFO,
 				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
-				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
+				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}",
+				f" train accuracy {train_accuracy}, validation accuracy {val_accuracy}, test accuracy {test_accuracy}"
 			)
 			if len(test_loader.dataset) == 1:
 				self._log_aucs(
@@ -228,6 +235,7 @@ class Attack:
 					[train_fpr, val_fpr],
 					[train_tpr, val_tpr],
 					[train_loss, val_loss, test_loss],
+					[train_accuracy, val_accuracy, test_accuracy],
 					["Train", "Validation", "Test"],
 					log_roc=breaking,
 					step=i
@@ -238,6 +246,7 @@ class Attack:
 					[train_fpr, val_fpr, test_fpr],
 					[train_tpr, val_tpr, test_tpr],
 					[train_loss, val_loss, test_loss],
+					[train_accuracy, val_accuracy, test_accuracy],
 					["Train", "Validation", "Test"],
 					log_roc=breaking,
 					step=i
@@ -270,12 +279,19 @@ class Attack:
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))
 
+		# Compute the roc auc
 		fpr, tpr, _ = roc_curve(is_members.cpu(), predictions.cpu())
 		roc_auc = auc(fpr, tpr)
-		loss = criterion(predictions, is_members)
-		return roc_auc, fpr, tpr, loss
 
-	def _log_aucs(self, roc_aucs, fprs, tprs, losses, titles, log_roc: bool, step: int):
+		# Get the loss
+		loss = criterion(predictions, is_members)
+
+		# Get the accuracy
+		accuracy = (predictions.round() == is_members).sum().item() / is_members.size(0)
+
+		return roc_auc, fpr, tpr, loss, accuracy
+
+	def _log_aucs(self, roc_aucs, fprs, tprs, losses, accuracies, titles, log_roc: bool, step: int):
 		wandb_log = {}
 
 		# Add the losses to the wandb log
@@ -283,6 +299,12 @@ class Attack:
 			loss = losses[i]
 			title = titles[i]
 			wandb_log[f"{title} loss"] = loss
+
+		# Add the accuracies to the wandb log
+		for i in range(len(accuracies)):
+			accuracy = accuracies[i]
+			title = titles[i]
+			wandb_log[f"{title} accuracy"] = accuracy
 
 		# Add the auc to the wandb log
 		for i in range(len(roc_aucs)):
