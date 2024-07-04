@@ -43,7 +43,7 @@ attack:
       - server
       - client
   aggregate_access: [3]
-  repetitions: 1
+  repetitions: 3
   attack_simulation:
     batch_size:
       steps:
