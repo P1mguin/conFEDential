@@ -19,10 +19,6 @@ from flwr.common import log
 import logging
 from src.utils import batch_config
 
-torch.manual_seed(78)
-random.seed(78)
-np.random.seed(78)
-
 parser = argparse.ArgumentParser(description="Running conFEDential simulation for a variety of configurations")
 
 parser.add_argument(
@@ -113,6 +109,10 @@ def main():
 
 	log(INFO, f"Loaded {len(configs)} configs with name {run_name}, running...")
 	for config in configs:
+		torch.manual_seed(78)
+		random.seed(78)
+		np.random.seed(78)
+
 		log(INFO, config)
 		finished = False
 		while not finished:
