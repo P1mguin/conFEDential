@@ -149,7 +149,7 @@ class Attack:
 		patience = 10
 		patience_counter = 0
 		relative_tolerance = 1e-3
-		average_over = 5
+		average_over = 3
 		losses = [val_loss]
 		average_loss = val_loss
 
