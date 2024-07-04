@@ -66,6 +66,20 @@ function get_node() {
     echo "$node"
 }
 
+# Function to get the status of a job
+function get_job_status() {
+    local job_id=$1
+    status=$(squeue -j $job_id -h -o "%T")
+    echo "$status"
+}
+
+# Function to get the first job in the queue
+function get_first_queued_job() {
+    local user=$1
+    queued_job=$(squeue -u $user -t PD -h -o "%i" | head -n 1)
+    echo "$queued_job"
+}
+
 for script in "${scripts[@]}"; do
     # Submit jobs and build exclusion list
     exclusion_list=$(get_exclusion_list $USER)
@@ -80,12 +94,26 @@ for script in "${scripts[@]}"; do
       sleep 1
     done
 
-    # Add the node to the exclusion list
-    if [ -n "$exclusion_list" ]; then
-      exclusion_list="$exclusion_list,$node"
-    else
-      exclusion_list="$node"
-    fi
+    # Start a background process to monitor the job status
+    (
+        while true; do
+            status=$(get_job_status $job_id)
+            if [[ "$status" != "R" ]]; then
+                # If the job is not running, it means it has finished
+                # Check if there is a job in the queue
+                queued_job=$(get_first_queued_job $USER)
+                if [ -n "$queued_job" ]; then
+                    # If there is a queued job, cancel it
+                    scancel $queued_job
+                    # Update the exclusion list
+                    exclusion_list=$(get_exclusion_list $USER)
+                fi
+                # Exit the loop
+                break
+            fi
+            sleep 1
+        done
+    ) &
 
     # Log the job and node
     echo "Submitted $script as job $job_id on node $node"
