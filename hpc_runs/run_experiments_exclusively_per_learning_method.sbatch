@@ -33,7 +33,7 @@ scripts=(
 function get_exclusion_list() {
     local user=$1
     local exclusion_list="caserta,ctit081,ctit087"
-    for job in $(squeue -u $user -h -o "%i"); do
+    for job in $(squeue -u $USER -h -o "%i"); do
         node=$(squeue -j $job -h -o "%N")
         if [ -n "$node" ]; then
             if [ -n "$exclusion_list" ]; then
@@ -80,6 +80,34 @@ function get_first_queued_job() {
     echo "$queued_job"
 }
 
+# Function to monitor a job and handle re-submission logic
+function monitor_job() {
+    local script=$1
+    local job_id=$2
+
+    while true; do
+        status=$(get_job_status $job_id)
+        if [[ "$status" != "R" ]]; then
+            # If the job is not running, it means it has finished
+            # Check if there is a job in the queue
+            queued_job=$(get_first_queued_job $USER)
+            if [ -n "$queued_job" ]; then
+                # If there is a queued job, cancel it
+                scancel $queued_job
+                # Update the exclusion list
+                exclusion_list=$(get_exclusion_list $USER)
+                # Submit the job with the updated exclusion list
+                new_job_id=$(submit_job $script "$exclusion_list")
+                # Start monitoring the new job
+                monitor_job $script $new_job_id &
+            fi
+            # Exit the loop
+            break
+        fi
+        sleep 1
+    done
+}
+
 for script in "${scripts[@]}"; do
     # Submit jobs and build exclusion list
     exclusion_list=$(get_exclusion_list $USER)
@@ -87,33 +115,15 @@ for script in "${scripts[@]}"; do
 
     # Wait until the job is assigned to a node
     while true; do
-      node=$(get_node $job_id)
-      if [ -n "$node" ]; then
-        break
-      fi
-      sleep 1
+        node=$(get_node $job_id)
+        if [ -n "$node" ]; then
+            break
+        fi
+        sleep 1
     done
 
     # Start a background process to monitor the job status
-    (
-        while true; do
-            status=$(get_job_status $job_id)
-            if [[ "$status" != "R" ]]; then
-                # If the job is not running, it means it has finished
-                # Check if there is a job in the queue
-                queued_job=$(get_first_queued_job $USER)
-                if [ -n "$queued_job" ]; then
-                    # If there is a queued job, cancel it
-                    scancel $queued_job
-                    # Update the exclusion list
-                    exclusion_list=$(get_exclusion_list $USER)
-                fi
-                # Exit the loop
-                break
-            fi
-            sleep 1
-        done
-    ) &
+    monitor_job $script $job_id &
 
     # Log the job and node
     echo "Submitted $script as job $job_id on node $node"
