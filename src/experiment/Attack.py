@@ -146,10 +146,10 @@ class Attack:
 			)
 
 		# Training loop with early stopping over the average loss of the last 5 rounds with patience of 10 rounds
-		patience = 10
+		patience = 20
 		patience_counter = 0
 		relative_tolerance = 1e-3
-		average_over = 3
+		average_over = 5
 		losses = [val_loss]
 		average_loss = val_loss
 
@@ -199,7 +199,7 @@ class Attack:
 			test_roc_auc, test_fpr, test_tpr, test_loss, test_accuracy = self._test_model(attack_model, test_loader)
 			val_roc_auc, val_fpr, val_tpr, val_loss, val_accuracy = self._test_model(attack_model, validation_loader)
 
-			# Get the average loss over the last 5 values
+			# Get the average loss over the last few values
 			losses.append(val_loss)
 			if len(losses) > average_over:
 				losses.pop(0)
