@@ -153,10 +153,10 @@ class Attack:
 		losses = [val_loss]
 		average_loss = val_loss
 
-		attack_model.train()
 		i = 0
 		breaking = False
 		while True:
+			attack_model.train()
 			previous_average_loss = average_loss
 			predictions = torch.Tensor().to(training.DEVICE)
 			is_members = torch.Tensor().to(training.DEVICE)
