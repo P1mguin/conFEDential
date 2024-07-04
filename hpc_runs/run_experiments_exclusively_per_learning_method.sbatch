@@ -66,9 +66,9 @@ function get_node() {
     echo "$node"
 }
 
-# Submit jobs and build exclusion list
-exclusion_list=$(get_exclusion_list $USER)
 for script in "${scripts[@]}"; do
+    # Submit jobs and build exclusion list
+    exclusion_list=$(get_exclusion_list $USER)
     job_id=$(submit_job $script "$exclusion_list")
 
     # Wait until the job is assigned to a node
