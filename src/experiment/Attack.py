@@ -226,7 +226,7 @@ class Attack:
 			log(
 				INFO,
 				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
-				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}",
+				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss},"
 				f" train accuracy {train_accuracy}, validation accuracy {val_accuracy}, test accuracy {test_accuracy}"
 			)
 			if len(test_loader.dataset) == 1:
