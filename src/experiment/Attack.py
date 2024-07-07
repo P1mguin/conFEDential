@@ -146,7 +146,7 @@ class Attack:
 			)
 
 		# Training loop with early stopping over the average loss of the last 5 rounds with patience of 10 rounds
-		patience = 20
+		patience = 10
 		patience_counter = 0
 		relative_tolerance = 1e-3
 		average_over = 5
