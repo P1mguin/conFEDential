@@ -95,6 +95,9 @@ class Config:
 				test_dataset
 			) = self._get_attack_datasets(fraction_train, fraction_test)
 
+			# Uncomment to analyse the kullback-leibler divergence of each variable
+			# utils.kullback_leibler_analysis(validation_dataset)
+
 			# Uncomment to visualize the difference between members and non-members
 			# utils.visualize_loss_difference(validation_dataset, visualize_per_class=True)
 			# utils.visualize_loss_difference(validation_dataset, log_scale=True, visualize_per_class=True)
