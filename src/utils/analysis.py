@@ -1,20 +1,19 @@
 import collections
+from logging import INFO
 
 import numpy as np
 import torch
+from flwr.common import log
 from scipy.interpolate import interp1d
+from scipy.spatial.distance import jensenshannon
 from scipy.stats import entropy
 from tqdm import tqdm
 
 
-def compute_kullback_leibler_divergence(p, q):
-	min_value = min(*p, *q)
-	p = [x - min_value + 1e-8 for x in p]
-	q = [x - min_value + 1e-8 for x in q]
-
-	# Ensure the distributions are valid
-	p /= np.sum(p)
-	q /= np.sum(q)
+def _sample_vectors_to_same_size(p, q):
+	# Ensure the distributions are normalized
+	p = normalize(p) + 1e-8
+	q = normalize(q) + 1e-8
 
 	# Ensure the distributions have the same length
 	if len(p) != len(q):
@@ -27,14 +26,24 @@ def compute_kullback_leibler_divergence(p, q):
 			interpolator = interp1d(x_p, p, kind='linear')
 			p = interpolator(x_q)
 
-		p /= np.sum(p)
-		q /= np.sum(q)
+	p = normalize(p) + 1e-8
+	q = normalize(q) + 1e-8
+	return p, q
 
+
+def compute_jensen_shannon_divergence(p, q):
+	p, q = _sample_vectors_to_same_size(p, q)
+	js = jensenshannon(p, q)
+	return js
+
+
+def compute_kullback_leibler_divergence(p, q):
+	p, q = _sample_vectors_to_same_size(p, q)
 	kl_pq = entropy(p, q)
 	return kl_pq
 
 
-def kullback_leibler_analysis(dataloader):
+def do_analyses(dataloader):
 	non_members_dict = {
 		"label": [],
 		"loss": [],
@@ -71,12 +80,40 @@ def kullback_leibler_analysis(dataloader):
 			sample_dict["metrics"][key].append(value)
 
 	# Organise the activation, gradient and metric per layer
-	members_dict["activation"] = list(map(list, zip(*members_dict["activation"])))
-	non_members_dict["activation"] = list(map(list, zip(*non_members_dict["activation"])))
-	members_dict["gradient"] = list(map(list, zip(*members_dict["gradient"])))
-	non_members_dict["gradient"] = list(map(list, zip(*non_members_dict["gradient"])))
-	members_dict["metrics"] = {metrics_key: list(map(list, zip(*metrics_value))) for metrics_key, metrics_value in members_dict["metrics"].items()}
-	non_members_dict["metrics"] = {metrics_key: list(map(list, zip(*metrics_value))) for metrics_key, metrics_value in non_members_dict["metrics"].items()}
+	members_dict["activation"] = np.array(list(map(list, zip(*members_dict["activation"]))))
+	non_members_dict["activation"] = np.array(list(map(list, zip(*non_members_dict["activation"]))))
+	members_dict["gradient"] = np.array(list(map(list, zip(*members_dict["gradient"]))))
+	non_members_dict["gradient"] = np.array(list(map(list, zip(*non_members_dict["gradient"]))))
+	members_dict["metrics"] = {metrics_key: np.array(list(map(list, zip(*metrics_value)))) for
+							   metrics_key, metrics_value in members_dict["metrics"].items()}
+	non_members_dict["metrics"] = {metrics_key: np.array(list(map(list, zip(*metrics_value)))) for
+								   metrics_key, metrics_value in non_members_dict["metrics"].items()}
+
+	# Convert all other variables to NumPy array
+	members_dict["label"] = np.array(members_dict["label"])
+	non_members_dict["label"] = np.array(non_members_dict["label"])
+	members_dict["loss"] = np.array(members_dict["loss"])
+	non_members_dict["loss"] = np.array(non_members_dict["loss"])
+
+	# Compute the Jensen-Shannon divergence for each variable
+	loss_js = compute_jensen_shannon_divergence(non_members_dict["loss"], members_dict["loss"])
+	label_js = compute_jensen_shannon_divergence(non_members_dict["label"], members_dict["label"])
+	activation_jss = [compute_jensen_shannon_divergence(non_member, member) for non_member, member in
+					  zip(non_members_dict["activation"], members_dict["activation"])]
+	gradient_jss = [compute_jensen_shannon_divergence(non_member, member) for non_member, member in
+					zip(non_members_dict["gradient"], members_dict["gradient"])]
+	metrics_jss = {
+		metric_key: [
+			compute_jensen_shannon_divergence(non_member, member) for non_member, member in
+			zip(non_members_dict["metrics"][metric_key], members_dict["metrics"][metric_key])
+		]
+		for metric_key in members_dict["metrics"].keys()
+	}
+	log(INFO, f"Loss JS: {loss_js}")
+	log(INFO, f"Label JS: {label_js}")
+	log(INFO, f"Activation JS: {activation_jss}")
+	log(INFO, f"Gradient JS: {gradient_jss}")
+	log(INFO, f"Metrics JS: {metrics_jss}")
 
 	# Compute the kullback-leibler divergence for each variable
 	loss_kl = compute_kullback_leibler_divergence(non_members_dict["loss"], members_dict["loss"])
@@ -89,4 +126,12 @@ def kullback_leibler_analysis(dataloader):
 		]
 		for metric_key in members_dict["metrics"].keys()
 	}
-	return loss_kl, label_kl, activation_kls, gradient_kls, metrics_kls
+	log(INFO, f"Loss KL: {loss_kl}")
+	log(INFO, f"Label KL: {label_kl}")
+	log(INFO, f"Activation KL: {activation_kls}")
+	log(INFO, f"Gradient KL: {gradient_kls}")
+	log(INFO, f"Metrics KL: {metrics_kls}")
+
+
+def normalize(data):
+	return (data - data.min()) / (data.max() - data.min())
