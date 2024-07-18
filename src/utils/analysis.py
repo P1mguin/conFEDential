@@ -6,7 +6,7 @@ import torch
 from flwr.common import log
 from scipy.interpolate import interp1d
 from scipy.spatial.distance import jensenshannon
-from scipy.stats import entropy
+from scipy.stats import entropy, wasserstein_distance
 from tqdm import tqdm
 
 
@@ -41,6 +41,11 @@ def compute_kullback_leibler_divergence(p, q):
 	p, q = _sample_vectors_to_same_size(p, q)
 	kl_pq = entropy(p, q)
 	return kl_pq
+
+def compute_wasserstein_distance(p, q):
+	p, q = _sample_vectors_to_same_size(p, q)
+	wasserstein = wasserstein_distance(p, q)
+	return wasserstein
 
 
 def do_analyses(dataloader):
@@ -131,6 +136,23 @@ def do_analyses(dataloader):
 	log(INFO, f"Activation KL: {activation_kls}")
 	log(INFO, f"Gradient KL: {gradient_kls}")
 	log(INFO, f"Metrics KL: {metrics_kls}")
+
+	# Compute the kullback-leibler divergence for each variable
+	loss_wass = compute_wasserstein_distance(non_members_dict["loss"], members_dict["loss"])
+	label_wass = compute_wasserstein_distance(non_members_dict["label"], members_dict["label"])
+	activation_wasss = [compute_wasserstein_distance(non_member, member) for non_member, member in zip(non_members_dict["activation"], members_dict["activation"])]
+	gradient_wasss = [compute_wasserstein_distance(non_member, member) for non_member, member in zip(non_members_dict["gradient"], members_dict["gradient"])]
+	metrics_wasss = {
+		metric_key: [
+			compute_wasserstein_distance(non_member, member) for non_member, member in zip(non_members_dict["metrics"][metric_key], members_dict["metrics"][metric_key])
+		]
+		for metric_key in members_dict["metrics"].keys()
+	}
+	log(INFO, f"Loss Wasserstein: {loss_wass}")
+	log(INFO, f"Label Wasserstein: {label_wass}")
+	log(INFO, f"Activation Wasserstein: {activation_wasss}")
+	log(INFO, f"Gradient Wasserstein: {gradient_wasss}")
+	log(INFO, f"Metrics Wasserstein: {metrics_wasss}")
 
 
 def normalize(data):
