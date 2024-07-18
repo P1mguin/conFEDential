@@ -60,8 +60,8 @@ attack:
       steps:
         - 512
         - 512
-        - 64
-        - 64
+        - 32
+        - 32
     optimizer_name: Adam
     optimizer_parameters:
       eps: 0.0001

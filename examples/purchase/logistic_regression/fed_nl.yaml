@@ -53,8 +53,8 @@ attack:
         - 16
         - 256
         - 256
-        - 16
-        - 16
+        - 8
+        - 8
     optimizer_name: Adam
     optimizer_parameters:
       eps: 0.0001
