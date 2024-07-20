@@ -27,9 +27,7 @@ attack:
       - 1.0
       - 0.1
       - 1.0
-      - 0.1
       - 1.0
-      - 0.1
       - 1.0
       - 0.1
   message_access:
@@ -37,9 +35,7 @@ attack:
       - server
       - client
       - server
-      - client
       - server
-      - client
       - server
       - client
   aggregate_access: [3]
@@ -50,11 +46,9 @@ attack:
         - 512
         - 512
         - 16
+        - 256
         - 16
-        - 256
-        - 256
-        - 8
-        - 8
+        - 16
     optimizer_name: Adam
     optimizer_parameters:
       eps: 0.0001
@@ -76,16 +70,6 @@ attack:
             activation: False
             gradient: False
             metrics: True
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: True
-          - label: True
-            loss: True
-            activation: True
-            gradient: True
-            metrics: False
           - label: True
             loss: True
             activation: True
