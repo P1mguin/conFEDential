@@ -47,7 +47,7 @@ attack:
 #        - 512
 #        - 16
 #        - 256
-        - 16
+        - 4
 #        - 16
     optimizer_name: Adam
     optimizer_parameters:
