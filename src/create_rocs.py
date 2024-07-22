@@ -9,14 +9,14 @@ from tqdm import tqdm
 
 
 # Combine all csvs in results in one big dataframe
-def get_roc_curve_df(path):
+def get_roc_curve_df():
 	# For all files in the results folder, take the 'linekey', the 'lineval' and the 'step' column as a dataframe
 	dataframes = []
 	guessing_appended = False
-	for file_name in os.listdir(path):
+	for file_name in os.listdir("src/results"):
 		if not file_name.endswith("csv"):
 			continue
-		df = pd.read_csv(f"{path}/{file_name}", usecols=["lineKey", "lineVal", "step"])
+		df = pd.read_csv(f"src/results/{file_name}", usecols=["lineKey", "lineVal", "step"])
 		df["lineKey"] = df["lineKey"].str.extract(r'(\w+)')
 		df = df.pivot_table(index="step", columns="lineKey", values="lineVal")
 		df.rename(columns={"Train": f"{file_name} - Train", "Validation": f"{file_name} - Validation"}, inplace=True)
@@ -64,7 +64,7 @@ def get_average_of_learning_methods(df):
 
 # Compute the AUC
 # Compute the AUC on the log scale
-def store_auc_values(df, dataset, model, locality, attack_type):
+def print_auc_values(df):
 	for col in df.columns:
 		if col == "step":
 			continue
@@ -87,10 +87,7 @@ def store_auc_values(df, dataset, model, locality, attack_type):
 		log_x = -(log_x - min(log_x)) / min(log_x) + 1e-9
 		log_y = -(log_y - min(log_y)) / min(log_y) + 1e-9
 		auc_log = auc(log_x, log_y)
-		with open("src/results/result.csv", "a") as f:
-			f.write(f"{dataset},{model},{locality},{attack_type},{col},{auc_linear},{auc_log}\n")
-
-		# print(f"AUC for {col}:\n\tAUC: {auc_linear}\n\tAUC (log): {auc_log}")
+		print(f"AUC for {col}:\n\tAUC: {auc_linear}\n\tAUC (log): {auc_log}")
 
 
 # Downsample the ROC curves to 200 points
@@ -130,44 +127,25 @@ def downsample_df(df, target_samples=100):
 		downsampled_df[col] += 1e-9
 	return downsampled_df
 
-translation = {
-	"100": "A",
-	"110": "B",
-	"101": "C",
-	"111": "D"
-}
+
 def main():
-	# Create empty result csv file
-	with open("src/results/result.csv", "w") as f:
-		f.write("dataset,model,locality,attack_type,col,linear,log\n")
+	# Get all the ROC curves in one dataloader
+	roc_curve_df = get_roc_curve_df()
 
-	for path, directories, files in os.walk("src/results"):
-		if len(files) == 0 or path is "src/results":
-			continue
+	# Compute the AUC of all lines
+	print_auc_values(roc_curve_df)
 
-		print(" ".join(path.split("/")[3:]))
-		dataset = path.split("/")[3]
-		model = path.split("/")[4]
-		locality = path.split("/")[5]
-		attack_type = translation[path.split("/")[6]]
+	# Take the average for multiple learning methods
+	roc_curve_df = get_average_of_learning_methods(roc_curve_df)
 
-		# Get all the ROC curves in one dataloader
-		roc_curve_df = get_roc_curve_df(path)
+	# Compute the AUC of combined lines
+	print_auc_values(roc_curve_df)
 
-		# Compute the AUC of all lines
-		# print_auc_values(roc_curve_df)
+	# Downsample the lines
+	roc_curve_df = downsample_df(roc_curve_df)
 
-		# Take the average for multiple learning methods
-		roc_curve_df = get_average_of_learning_methods(roc_curve_df)
-
-		# Compute the AUC of combined lines
-		store_auc_values(roc_curve_df, dataset, model, locality, attack_type)
-
-		# # Downsample the lines
-		# roc_curve_df = downsample_df(roc_curve_df)
-		#
-		# # Save the file
-		# roc_curve_df.to_csv("src/results/result.csv")
+	# Save the file
+	roc_curve_df.to_csv("src/results/result.csv")
 
 
 if __name__ == '__main__':
