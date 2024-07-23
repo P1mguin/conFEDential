@@ -63,18 +63,23 @@ attack:
   data_access:
     steps:
       - 1.0
-      - 0.1
       - 1.0
       - 0.1
-  message_access: server
+      - 0.1
+  message_access:
+    steps:
+      - server
+      - server
+      - client
+      - client
   aggregate_access: [63]
-  repetitions: 3
+  repetitions: 0
   attack_simulation:
     batch_size:
       steps:
         - 512
-        - 512
         - 256
+        - 512
         - 256
     optimizer_name: Adam
     optimizer_parameters:
@@ -89,14 +94,14 @@ attack:
           metrics: False
         - label: True
           loss: True
-          activation: False
-          gradient: False
-          metrics: False
-        - label: True
-          loss: True
           activation: True
           gradient: True
           metrics: True
+        - label: True
+          loss: True
+          activation: False
+          gradient: False
+          metrics: False
         - label: True
           loss: True
           activation: True
