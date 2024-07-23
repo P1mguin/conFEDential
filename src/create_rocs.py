@@ -8,8 +8,11 @@ from sklearn.metrics import auc
 from tqdm import tqdm
 
 
-# Combine all csvs in results in one big dataframe
-def get_roc_curve_df(path):
+def get_roc_curve_df(path: str):
+	"""
+	Combine all the ROC curves in the results folder into one dataframe
+	:param path: the path in which the ROC curves are described
+	"""
 	# For all files in the results folder, take the 'linekey', the 'lineval' and the 'step' column as a dataframe
 	dataframes = []
 	guessing_appended = False
@@ -34,14 +37,19 @@ def get_roc_curve_df(path):
 	return final_df.sort_values(by="step")
 
 
-# Average out the ROC curves
-def get_average_of_learning_methods(df):
+def get_average_of_learning_methods(df: pd.DataFrame):
+	"""
+	Combine multiple results of the same learning method into one
+	:param df: the dataframe in which the results are stored
+	"""
 	# Initialize a dictionary to hold the combined data
 	combined_data = {'step': df['step']}
 
+	# Get all the learning methods
 	learning_methods = set(re.sub(r'\d+', '', col.split('.')[0]) for col in df.columns if col != 'step')
 
 	for method in learning_methods:
+		# Get the columns for the current method
 		train_cols = [col for col in df.columns if col.startswith(method) and 'Train' in col]
 		val_cols = [col for col in df.columns if col.startswith(method) and 'Validation' in col]
 
@@ -53,19 +61,23 @@ def get_average_of_learning_methods(df):
 		if val_cols:
 			combined_data[f'{method} - Validation'] = df[val_cols].mean(axis=1)
 
+		# If there are no train or validation columns, just copy the data
 		if not train_cols and not val_cols:
 			combined_data[method] = df[method]
 
 	# Convert the combined data dictionary to a DataFrame
 	combined_df = pd.DataFrame(combined_data)
-
 	return combined_df
 
 
-# Compute the AUC
-# Compute the AUC on the log scale
-def print_auc_values(df):
+def print_auc_values(df: pd.DataFrame):
+	"""
+	Print the AUC values for the ROC curves
+	:param df: the dataframe with the ROC curves
+	"""
+	# For all columns in the dataframe, compute the AUC for linear and logarithmic axes
 	for col in df.columns:
+		# Do not compute the AUC for the x-axis
 		if col == "step":
 			continue
 
@@ -90,12 +102,19 @@ def print_auc_values(df):
 		print(f"AUC for {col}:\n\tAUC: {auc_linear}\n\tAUC (log): {auc_log}")
 
 
-# Downsample the ROC curves to 200 points
-def downsample_df(df, target_samples=100):
+def downsample_df(df: pd.DataFrame, target_samples: int = 100):
+	"""
+	Downsample the dataframe to have a target number of samples
+	:param df: the dataframe which columns to downsample
+	:param target_samples: the target number of samples
+	"""
+	# Initialize a dictionary to hold the downsampled data
 	downsampled_data = {}
 
+	# Sort the dataframe by step
 	df = df.sort_values(by="step")
 
+	# For all columns in the dataframe, downsample the data
 	for col in tqdm(df.columns):
 		if col == 'step':
 			continue
@@ -110,7 +129,6 @@ def downsample_df(df, target_samples=100):
 			for _ in range(50):  # Limit the number of iterations to prevent infinite loop
 				epsilon = (epsilon_min + epsilon_max) / 2.0
 				downsampled_line = np.array(rdp(line, epsilon=epsilon))
-
 				if len(downsampled_line) > target_samples:
 					epsilon_min = epsilon
 				elif len(downsampled_line) < target_samples:
@@ -118,8 +136,11 @@ def downsample_df(df, target_samples=100):
 				else:
 					break  # Stop if we've found an epsilon that gives us the target number of samples
 
+			# Store the downsampled data in the dictionary
 			downsampled_data[f"step-{col}"] = downsampled_line[:, 0]
 			downsampled_data[col] = downsampled_line[:, 1]
+
+	# Convert the downsampled data dictionary to a DataFrame
 	downsampled_df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in downsampled_data.items()]))
 
 	# Add an infinitesimally small value to each column so the log plot closes

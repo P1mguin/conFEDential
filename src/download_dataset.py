@@ -3,14 +3,13 @@ import os
 
 from datasets import load_dataset
 
+# Arguments for the download_dataset.py script
 parser = argparse.ArgumentParser(description="Download dataset from hugging face in correct cache directory")
-
 parser.add_argument(
 	"--dataset",
 	type=str,
 	help="The Hugging Face dataset name"
 )
-
 parser.add_argument(
 	"--cache-root",
 	type=str,
@@ -19,10 +18,13 @@ parser.add_argument(
 )
 
 
-def main() -> None:
+def main():
+	# Get the run arguments
 	args = parser.parse_args()
 	cache_root = f"{os.path.abspath(args.cache_root)}/"
 	dataset = args.dataset
+
+	# Download the dataset
 	load_dataset(dataset, cache_dir=f"{cache_root}data", download_mode="force_redownload", split=["train", "test"])
 
 
