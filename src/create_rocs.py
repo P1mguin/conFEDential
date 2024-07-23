@@ -9,14 +9,14 @@ from tqdm import tqdm
 
 
 # Combine all csvs in results in one big dataframe
-def get_roc_curve_df():
+def get_roc_curve_df(path):
 	# For all files in the results folder, take the 'linekey', the 'lineval' and the 'step' column as a dataframe
 	dataframes = []
 	guessing_appended = False
-	for file_name in os.listdir("src/results"):
+	for file_name in os.listdir(path):
 		if not file_name.endswith("csv"):
 			continue
-		df = pd.read_csv(f"src/results/{file_name}", usecols=["lineKey", "lineVal", "step"])
+		df = pd.read_csv(f"{path}/{file_name}", usecols=["lineKey", "lineVal", "step"])
 		df["lineKey"] = df["lineKey"].str.extract(r'(\w+)')
 		df = df.pivot_table(index="step", columns="lineKey", values="lineVal")
 		df.rename(columns={"Train": f"{file_name} - Train", "Validation": f"{file_name} - Validation"}, inplace=True)
@@ -127,25 +127,34 @@ def downsample_df(df, target_samples=100):
 		downsampled_df[col] += 1e-9
 	return downsampled_df
 
-
+translation = {
+	"100": "A",
+	"110": "B",
+	"101": "C",
+	"111": "D"
+}
 def main():
-	# Get all the ROC curves in one dataloader
-	roc_curve_df = get_roc_curve_df()
+	for path, directories, files in os.walk("src/results"):
+		if len(files) == 0 or path == "src/results":
+			continue
 
-	# Compute the AUC of all lines
-	print_auc_values(roc_curve_df)
+		# Print the path
+		print(" ".join(path.split("/")[2:]))
 
-	# Take the average for multiple learning methods
-	roc_curve_df = get_average_of_learning_methods(roc_curve_df)
+		# Get all the ROC curves in one dataloader
+		roc_curve_df = get_roc_curve_df(path)
 
-	# Compute the AUC of combined lines
-	print_auc_values(roc_curve_df)
+		# Take the average for multiple learning methods
+		roc_curve_df = get_average_of_learning_methods(roc_curve_df)
 
-	# Downsample the lines
-	roc_curve_df = downsample_df(roc_curve_df)
+		# Compute the AUC of combined lines
+		print_auc_values(roc_curve_df)
 
-	# Save the file
-	roc_curve_df.to_csv("src/results/result.csv")
+		# Downsample the lines
+		roc_curve_df = downsample_df(roc_curve_df)
+
+		# Save the file
+		roc_curve_df.to_csv(f"{path}/result.csv")
 
 
 if __name__ == '__main__':
