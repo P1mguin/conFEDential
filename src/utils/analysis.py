@@ -10,7 +10,10 @@ from scipy.stats import entropy, wasserstein_distance
 from tqdm import tqdm
 
 
-def _sample_vectors_to_same_size(p, q):
+def _sample_vectors_to_same_size(p, q, log_scale=False):
+	if log_scale:
+		p = np.log10(p + 1e-8)
+		q = np.log10(q + 1e-8)
 	# Ensure the distributions are normalized
 	p = normalize(p) + 1e-8
 	q = normalize(q) + 1e-8
@@ -42,11 +45,15 @@ def compute_kullback_leibler_divergence(p, q):
 	kl_pq = entropy(p, q)
 	return kl_pq
 
-def compute_wasserstein_distance(p, q):
-	p, q = _sample_vectors_to_same_size(p, q)
+def compute_wasserstein_distance(p, q, log_scale=False):
+	p, q = _sample_vectors_to_same_size(p, q, log_scale)
 	wasserstein = wasserstein_distance(p, q)
 	return wasserstein
 
+def compute_mean_difference(p, q):
+	p_mean = np.mean(p)
+	q_mean = np.mean(q)
+	return p_mean - q_mean
 
 def do_analyses(dataloader):
 	non_members_dict = {
@@ -137,7 +144,7 @@ def do_analyses(dataloader):
 	log(INFO, f"Gradient KL: {gradient_kls}")
 	log(INFO, f"Metrics KL: {metrics_kls}")
 
-	# Compute the kullback-leibler divergence for each variable
+	# Compute the wasserstein distance for each variable
 	loss_wass = compute_wasserstein_distance(non_members_dict["loss"], members_dict["loss"])
 	label_wass = compute_wasserstein_distance(non_members_dict["label"], members_dict["label"])
 	activation_wasss = [compute_wasserstein_distance(non_member, member) for non_member, member in zip(non_members_dict["activation"], members_dict["activation"])]
@@ -153,6 +160,40 @@ def do_analyses(dataloader):
 	log(INFO, f"Activation Wasserstein: {activation_wasss}")
 	log(INFO, f"Gradient Wasserstein: {gradient_wasss}")
 	log(INFO, f"Metrics Wasserstein: {metrics_wasss}")
+
+	# Compute the wasserstein distance along the log distribution for each variable
+	loss_wass = compute_wasserstein_distance(non_members_dict["loss"], members_dict["loss"], log_scale=True)
+	label_wass = compute_wasserstein_distance(non_members_dict["label"], members_dict["label"], log_scale=True)
+	activation_wasss = [compute_wasserstein_distance(non_member, member, log_scale=True) for non_member, member in zip(non_members_dict["activation"], members_dict["activation"])]
+	gradient_wasss = [compute_wasserstein_distance(non_member, member, log_scale=True) for non_member, member in zip(non_members_dict["gradient"], members_dict["gradient"])]
+	metrics_wasss = {
+		metric_key: [
+			compute_wasserstein_distance(non_member, member, log_scale=True) for non_member, member in zip(non_members_dict["metrics"][metric_key], members_dict["metrics"][metric_key])
+		]
+		for metric_key in members_dict["metrics"].keys()
+	}
+	log(INFO, f"Loss Log Wasserstein: {loss_wass}")
+	log(INFO, f"Label Log Wasserstein: {label_wass}")
+	log(INFO, f"Activation Log Wasserstein: {activation_wasss}")
+	log(INFO, f"Gradient Log Wasserstein: {gradient_wasss}")
+	log(INFO, f"Metrics Log Wasserstein: {metrics_wasss}")
+
+	# Compute the difference between the means for each variable
+	loss_mean = compute_mean_difference(non_members_dict["loss"], members_dict["loss"])
+	label_mean = compute_mean_difference(non_members_dict["label"], members_dict["label"])
+	activation_means = [compute_mean_difference(non_member, member) for non_member, member in zip(non_members_dict["activation"], members_dict["activation"])]
+	gradient_means = [compute_mean_difference(non_member, member) for non_member, member in zip(non_members_dict["gradient"], members_dict["gradient"])]
+	metrics_means = {
+		metric_key: [
+			compute_mean_difference(non_member, member) for non_member, member in zip(non_members_dict["metrics"][metric_key], members_dict["metrics"][metric_key])
+		]
+		for metric_key in members_dict["metrics"].keys()
+	}
+	log(INFO, f"Loss Mean Difference: {loss_mean}")
+	log(INFO, f"Label Mean Difference: {label_mean}")
+	log(INFO, f"Activation Mean Difference: {activation_means}")
+	log(INFO, f"Gradient Mean Difference: {gradient_means}")
+	log(INFO, f"Metrics Mean Difference: {metrics_means}")
 
 
 def normalize(data):
