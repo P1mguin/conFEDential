@@ -27,23 +27,23 @@ simulation:
 attack:
   data_access:
     steps:
-      - 1.0
-      - 0.01
-      - 1.0
+#      - 1.0
+#      - 0.01
+#      - 1.0
       - 0.01
       - 1.0
       - 0.01
       - 1.0
       - 0.01
   message_access: server
-  aggregate_access: 1
-  repetitions: 1
+  aggregate_access: [124]
+  repetitions: 3
   attack_simulation:
     batch_size:
       steps:
-        - 512
-        - 512
-        - 16
+#        - 512
+#        - 512
+#        - 16
         - 16
         - 32
         - 32
@@ -55,21 +55,21 @@ attack:
     model_architecture:
       components:
         steps:
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: False
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: False
-          - label: True
-            loss: True
-            activation: False
-            gradient: False
-            metrics: True
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: True
           - label: True
             loss: True
             activation: False

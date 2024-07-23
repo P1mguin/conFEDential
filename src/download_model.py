@@ -3,20 +3,18 @@ import os
 
 import torch
 
+# Arguments for the download_model.py script
 parser = argparse.ArgumentParser(description="Download module from torch hub in correct cache directory")
-
 parser.add_argument(
 	"--repo",
 	type=str,
 	help="The torch hub repository name"
 )
-
 parser.add_argument(
 	"--model",
 	type=str,
 	help="The torch hub model name"
 )
-
 parser.add_argument(
 	"--cache-root",
 	type=str,
@@ -24,10 +22,14 @@ parser.add_argument(
 	help="Absolute path to root of the directory in which the model architecture will be saved"
 )
 
-def main() -> None:
+
+def main():
+	# Get the run arguments
 	args = parser.parse_args()
 	repo = args.repo
 	model = args.model
+
+	# Download the model
 	net = torch.hub.load(repo, model, force_reload=True)
 	cache_root = f"{os.path.abspath(args.cache_root)}/"
 	os.makedirs(f"{cache_root}model_architectures/", exist_ok=True)

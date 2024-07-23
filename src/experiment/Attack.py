@@ -112,14 +112,15 @@ class Attack:
 		optimizer = self._attack_simulation.get_optimizer(attack_model.parameters())
 
 		# Set initial parameters and get initial performance
-		test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
-		val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
+		test_roc_auc, test_fpr, test_tpr, test_loss, test_accuracy = self._test_model(attack_model, test_loader)
+		val_roc_auc, val_fpr, val_tpr, val_loss, val_accuracy = self._test_model(attack_model, validation_loader)
 
 		# Log the initial performance
 		log(
 			INFO,
 			f"Initial performance: validation auc {val_roc_auc}, test auc {test_roc_auc},"
-			f" validation loss {val_loss}, test loss {test_loss}"
+			f" validation loss {val_loss}, test loss {test_loss},"
+			f" validation accuracy {val_accuracy}, test accuracy {test_accuracy}"
 		)
 		if len(test_loader.dataset) == 1:
 			self._log_aucs(
@@ -127,7 +128,9 @@ class Attack:
 				[val_fpr],
 				[val_tpr],
 				[val_loss, test_loss],
+				[val_accuracy, test_accuracy],
 				["Validation", "Test"],
+				log_roc=False,
 				step=-1
 			)
 		else:
@@ -136,19 +139,25 @@ class Attack:
 				[val_fpr, test_fpr],
 				[val_tpr, test_tpr],
 				[val_loss, test_loss],
+				[val_accuracy, test_accuracy],
 				["Validation", "Test"],
+				log_roc=False,
 				step=-1
 			)
 
-		# Training loop with early stopping
+		# Training loop with early stopping over the average loss of the last 5 rounds with patience of 10 rounds
 		patience = 10
 		patience_counter = 0
 		relative_tolerance = 1e-3
+		average_over = 5
+		losses = [val_loss]
+		average_loss = val_loss
 
-		attack_model.train()
 		i = 0
+		breaking = False
 		while True:
-			previous_val_loss = val_loss
+			attack_model.train()
+			previous_average_loss = average_loss
 			predictions = torch.Tensor().to(training.DEVICE)
 			is_members = torch.Tensor().to(training.DEVICE)
 			for (
@@ -183,37 +192,21 @@ class Attack:
 			lines = rdp(line, epsilon=0.0001)
 			train_fpr, train_tpr = lines[:, 0], lines[:, 1]
 
+			# Get the train loss and accuracy
 			train_loss = criterion(predictions, is_members)
-			test_roc_auc, test_fpr, test_tpr, test_loss = self._test_model(attack_model, test_loader)
-			val_roc_auc, val_fpr, val_tpr, val_loss = self._test_model(attack_model, validation_loader)
+			train_accuracy = (predictions.round() == is_members).sum().item() / is_members.size(0)
 
-			# Log the performance
-			log(
-				INFO,
-				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
-				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss}"
-			)
-			if len(test_loader.dataset) == 1:
-				self._log_aucs(
-					[train_roc_auc, val_roc_auc],
-					[train_fpr, val_fpr],
-					[train_tpr, val_tpr],
-					[train_loss, val_loss, test_loss],
-					["Train", "Validation", "Test"],
-					step=i
-				)
-			else:
-				self._log_aucs(
-					[train_roc_auc, val_roc_auc, test_roc_auc],
-					[train_fpr, val_fpr, test_fpr],
-					[train_tpr, val_tpr, test_tpr],
-					[train_loss, val_loss, test_loss],
-					["Train", "Validation", "Test"],
-					step=i
-				)
+			test_roc_auc, test_fpr, test_tpr, test_loss, test_accuracy = self._test_model(attack_model, test_loader)
+			val_roc_auc, val_fpr, val_tpr, val_loss, val_accuracy = self._test_model(attack_model, validation_loader)
+
+			# Get the average loss over the last few values
+			losses.append(val_loss)
+			if len(losses) > average_over:
+				losses.pop(0)
+			average_loss = sum(losses) / len(losses)
 
 			# Early stopping
-			loss_decrease = -(val_loss - previous_val_loss) / previous_val_loss
+			loss_decrease = -(average_loss - previous_average_loss) / previous_average_loss
 			log(DEBUG, f"Loss decrease: {loss_decrease}")
 
 			if loss_decrease < relative_tolerance:
@@ -225,9 +218,42 @@ class Attack:
 						i,
 						val_loss
 					)
-					break
+					breaking = True
 			else:
 				patience_counter = 0
+
+			# Log the performance
+			log(
+				INFO,
+				f"Epoch {i}: train auc {train_roc_auc}, validation auc {val_roc_auc}, test auc {test_roc_auc},"
+				f" train loss {train_loss}, validation loss {val_loss}, test loss {test_loss},"
+				f" train accuracy {train_accuracy}, validation accuracy {val_accuracy}, test accuracy {test_accuracy}"
+			)
+			if len(test_loader.dataset) == 1:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc],
+					[train_fpr, val_fpr],
+					[train_tpr, val_tpr],
+					[train_loss, val_loss, test_loss],
+					[train_accuracy, val_accuracy, test_accuracy],
+					["Train", "Validation", "Test"],
+					log_roc=breaking,
+					step=i
+				)
+			else:
+				self._log_aucs(
+					[train_roc_auc, val_roc_auc, test_roc_auc],
+					[train_fpr, val_fpr, test_fpr],
+					[train_tpr, val_tpr, test_tpr],
+					[train_loss, val_loss, test_loss],
+					[train_accuracy, val_accuracy, test_accuracy],
+					["Train", "Validation", "Test"],
+					log_roc=breaking,
+					step=i
+				)
+
+			if breaking:
+				break
 
 			i += 1
 		wandb.finish()
@@ -253,12 +279,19 @@ class Attack:
 				predictions = torch.cat((predictions, prediction))
 				is_members = torch.cat((is_members, is_value_member))
 
+		# Compute the roc auc
 		fpr, tpr, _ = roc_curve(is_members.cpu(), predictions.cpu())
 		roc_auc = auc(fpr, tpr)
-		loss = criterion(predictions, is_members)
-		return roc_auc, fpr, tpr, loss
 
-	def _log_aucs(self, roc_aucs, fprs, tprs, losses, titles, step: int):
+		# Get the loss
+		loss = criterion(predictions, is_members)
+
+		# Get the accuracy
+		accuracy = (predictions.round() == is_members).sum().item() / is_members.size(0)
+
+		return roc_auc, fpr, tpr, loss, accuracy
+
+	def _log_aucs(self, roc_aucs, fprs, tprs, losses, accuracies, titles, log_roc: bool, step: int):
 		wandb_log = {}
 
 		# Add the losses to the wandb log
@@ -267,6 +300,12 @@ class Attack:
 			title = titles[i]
 			wandb_log[f"{title} loss"] = loss
 
+		# Add the accuracies to the wandb log
+		for i in range(len(accuracies)):
+			accuracy = accuracies[i]
+			title = titles[i]
+			wandb_log[f"{title} accuracy"] = accuracy
+
 		# Add the auc to the wandb log
 		for i in range(len(roc_aucs)):
 			roc_auc = roc_aucs[i]
@@ -274,19 +313,20 @@ class Attack:
 			wandb_log[f"{title} ROC AUC"] = roc_auc
 			titles[i] = f"{title} (area = {round(roc_auc, 2)})"
 
-		# Remove the titles that do not have a roc auc
-		titles = titles[:len(roc_aucs)]
+		if log_roc:
+			# Remove the titles that do not have a roc auc
+			titles = titles[:len(roc_aucs)]
 
-		# Add guessing as a line to the plot
-		fprs += [np.array([0., 1.])]
-		tprs += [np.array([0., 1.])]
-		titles += ["Guessing (area = 0.50)"]
+			# Add guessing as a line to the plot
+			fprs += [np.array([0., 1.])]
+			tprs += [np.array([0., 1.])]
+			titles += ["Guessing (area = 0.50)"]
 
-		# Add the roc curve to the wandb log
-		plot_title = f"ROC AUCs at epoch {step}"
-		wandb_log[plot_title] = wandb.plot.line_series(
-			xs=fprs, ys=tprs, keys=titles, title=plot_title, xname="False Positive Rate"
-		)
+			# Add the roc curve to the wandb log
+			plot_title = f"ROC AUCs at epoch {step}"
+			wandb_log[plot_title] = wandb.plot.line_series(
+				xs=fprs, ys=tprs, keys=titles, title=plot_title, xname="False Positive Rate"
+			)
 		wandb.log(wandb_log)
 
 	def reset_variables(self):
@@ -313,7 +353,8 @@ class Attack:
 			aggregate_access_indices = list(range(global_rounds - self._aggregate_access, global_rounds))
 		elif isinstance(self._aggregate_access, float):
 			# Return n fraction of the rounds counting from the back
-			aggregate_access_indices = list(range(global_rounds - int(global_rounds * self._aggregate_access), global_rounds))
+			aggregate_access_indices = list(
+				range(global_rounds - int(global_rounds * self._aggregate_access), global_rounds))
 		elif isinstance(self._aggregate_access, list):
 			# Return the specified rounds
 			aggregate_access_indices = self._aggregate_access

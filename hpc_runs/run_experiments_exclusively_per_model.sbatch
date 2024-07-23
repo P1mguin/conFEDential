@@ -7,18 +7,18 @@
 #SBATCH --output=/dev/null
 
 scripts=(
+    "hpc_runs/purchase/logistic_regression.sbatch"
+    "hpc_runs/texas/logistic_regression.sbatch"
+    "hpc_runs/purchase/fcn.sbatch"
+    "hpc_runs/texas/fcn.sbatch"
     "hpc_runs/cifar10/resnet18.sbatch"
     "hpc_runs/cifar100/resnet34.sbatch"
-    "hpc_runs/purchase/fcn.sbatch"
-    "hpc_runs/purchase/logistic_regression.sbatch"
-    "hpc_runs/texas/fcn.sbatch"
-    "hpc_runs/texas/logistic_regression.sbatch"
 )
 
 # Function to get the computation nodes on which jobs of a user are already running
 function get_exclusion_list() {
     local user=$1
-    local exclusion_list="caserta,ctit081,ctit087"
+    local exclusion_list="caserta,ctit081,ctit082,ctit087"
     for job in $(squeue -u $user -h -o "%i"); do
         node=$(squeue -j $job -h -o "%N")
         if [ -n "$node" ]; then

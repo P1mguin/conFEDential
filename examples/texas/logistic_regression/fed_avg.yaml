@@ -30,8 +30,8 @@ attack:
       - 1.0
       - 0.1
   message_access: server
-  aggregate_access: 1
-  repetitions: 1
+  aggregate_access: [207]
+  repetitions: 3
   attack_simulation:
     batch_size:
       steps:

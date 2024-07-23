@@ -14,6 +14,6 @@ source venv/bin/activate
 
 # Sync all runs with wandb and clean up
 wandb sync --sync-all
-wandb sync --clean-force
+wandb sync --clean --clean-old-hours 0
 
-sbatch --nodelist caserta hpc_runs/run_experiments_exclusively.sbatch
+sbatch --nodelist caserta hpc_runs/run_experiments_exclusively_per_learning_method.sbatch

@@ -53,15 +53,15 @@ attack:
       - 1.0
       - 0.1
   message_access: server
-  aggregate_access: 1
-  repetitions: 1
+  aggregate_access: [32]
+  repetitions: 3
   attack_simulation:
     batch_size:
       steps:
         - 512
         - 512
-        - 64
-        - 64
+        - 32
+        - 32
     optimizer_name: Adam
     optimizer_parameters:
       eps: 0.0001

@@ -71,7 +71,8 @@ class Config:
 		federation_simulation_capture_directory = self.simulation.get_capture_directory()
 		capture_hash = federation_simulation_capture_directory.split("/")[-2]
 		if not os.path.exists(f"{federation_simulation_capture_directory}aggregates"):
-			log(INFO, f"No previous federated learning simulation found with hash {capture_hash}, starting training simulation...")
+			log(INFO,
+				f"No previous federated learning simulation found with hash {capture_hash}, starting training simulation...")
 			self.simulation.simulate_federation(
 				concurrent_clients, memory, num_cpus, num_gpus, is_ray_initialised, is_capturing, is_online, run_name
 			)
@@ -94,10 +95,14 @@ class Config:
 				test_dataset
 			) = self._get_attack_datasets(fraction_train, fraction_test)
 
+			# Uncomment to analyse the Kullback-Leibler and Jensen-Shannon divergence of each variable
+			# utils.do_analyses(validation_dataset)
+
 			# Uncomment to visualize the difference between members and non-members
-			# utils.visualize_loss_difference(validation_dataset)
-			# utils.visualize_confidence_difference(validation_dataset)
-			# utils.visualize_logit_difference(validation_dataset)
+			# utils.visualize_loss_difference(validation_dataset, visualize_per_class=True)
+			# utils.visualize_loss_difference(validation_dataset, log_scale=True, visualize_per_class=True)
+			# utils.visualize_confidence_difference(validation_dataset, visualize_per_class=True)
+			# utils.visualize_logit_difference(validation_dataset, visualize_per_class=True)
 
 			# Get the template model and train it
 			membership_net = self._construct_membership_net(train_dataset)
@@ -137,7 +142,8 @@ class Config:
 		aggregate_path = f"{self.simulation.get_capture_directory()}aggregates/aggregates.hdf5"
 		aggregate_access_indices = self.attack.get_aggregate_access_indices(aggregate_path)
 		message_access = self.attack.message_access
-		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates(aggregate_access_indices, message_access)
+		aggregated_models, aggregated_metrics = self.simulation.get_server_aggregates(aggregate_access_indices,
+																					  message_access)
 
 		# Get the intercepted samples
 		intercepted_data, remaining_data = self._get_intercepted_samples(fraction_test)

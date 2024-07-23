@@ -21,8 +21,15 @@ datasets = {
 }
 
 
-def uncompress_tgz(name: str, cache_root):
+def uncompress_tgz(name: str, cache_root: str):
+	"""
+	Uncompresses a tgz file into a directory
+	:param name: the name of the dataset in the tgz file
+	:param cache_root: the root directory of the cache
+	"""
 	print(f"Uncompressing {name} dataset")
+
+	# Get the paths in which the tgz file is stored and the directory to extract to
 	dataset = datasets[name]
 	cache_dir = f"{cache_root}data/{dataset['cache_path']}"
 	file_path = f"{cache_root}data/{dataset['cache_path']}{name}.tgz"
@@ -32,13 +39,18 @@ def uncompress_tgz(name: str, cache_root):
 		print(f"Files already extracted: {cache_dir}")
 		return
 
+	# Extract the tgz file
 	with tarfile.open(file_path, "r:gz") as tar:
 		tar.extractall(cache_dir)
 
 
-async def download_files(cache_root):
+async def download_files(cache_root: str):
+	"""
+	Download all the files in the datasets dictionary
+	:param cache_root: the root directory of the cache
+	"""
+	# Create an event loop and download all the files
 	loop = asyncio.get_running_loop()
-
 	urls = [dataset["link"] for name, dataset in datasets.items()]
 	file_paths = [f"{cache_root}data/{dataset['cache_path']}{name}.tgz" for name, dataset in datasets.items()]
 	args = zip(urls, file_paths)
@@ -47,17 +59,23 @@ async def download_files(cache_root):
 
 
 async def download_file(url: str, file_path: str):
+	"""
+	Download a file from a URL to a file path
+	:param url: the url to download the file from
+	:param file_path: the path to save the file to
+	"""
+	# If the file already exists continue
 	if os.path.exists(file_path):
 		print(f"File already exists: {file_path}")
 		return
 
+	# Download the file
 	os.makedirs(os.path.dirname(file_path), exist_ok=True)
 	with open(file_path, "wb") as f:
 		async with httpx.AsyncClient() as client:
 			async with client.stream("GET", url) as r:
 				r.raise_for_status()
 				total = int(r.headers.get("content-length", 0))
-
 				tqdm_params = {
 					"desc": url,
 					"total": total,
@@ -73,7 +91,12 @@ async def download_file(url: str, file_path: str):
 						downloaded = r.num_bytes_downloaded
 
 
-def process_purchase(cache_root):
+def process_purchase(cache_root: str):
+	"""
+	Process the purchase dataset into a parquet file
+	:param cache_root: the root directory of the cache
+	"""
+	# Set the configuration of where to load and store the data
 	data_config = datasets["purchase"]
 	cache_path = f"{cache_root}data/{data_config['cache_path']}dataset_purchase"
 	parquet_path = f"{cache_root}data/{data_config['target_path']}"
@@ -98,7 +121,12 @@ def process_purchase(cache_root):
 	df.to_parquet(parquet_path, compression="snappy")
 
 
-def process_texas(cache_root):
+def process_texas(cache_root: str):
+	"""
+	Process the texas dataset into a parquet file
+	:param cache_root: the root directory of the cache
+	"""
+	# Set the configuration of where to load and store the data
 	data_config = datasets["texas"]
 	texas_100_path = f"{cache_root}data/{data_config['cache_path']}texas/100/"
 	parquet_path = f"{cache_root}data/{data_config['target_path']}"
@@ -120,7 +148,12 @@ def process_texas(cache_root):
 	df.to_parquet(parquet_path, compression="snappy")
 
 
-def clean_up_directories(cache_root):
+def clean_up_directories(cache_root: str):
+	"""
+	Clean up the directories by removing all files except the arrow files
+	:param cache_root: the root directory of the cache
+	"""
+	# Walk the cache directory and remove everything except the arrow file
 	for name in datasets.keys():
 		print(f"Cleaning up {name} directory")
 		data_config = datasets[name]
@@ -136,8 +169,8 @@ def clean_up_directories(cache_root):
 				os.rmdir(os.path.join(root, dir))
 
 
+# Arguments for the attack simulation
 parser = argparse.ArgumentParser(description="Download PURCHASE100 and TEXAS100 from Shokris repositories")
-
 parser.add_argument(
 	"--cache-root",
 	type=str,
@@ -145,18 +178,24 @@ parser.add_argument(
 	help="Absolute path to root of the directory in which the model architecture will be saved"
 )
 
+
 def main():
+	# Get the run arguments
 	args = parser.parse_args()
 	cache_root = f"{os.path.abspath(args.cache_root)}/"
 
+	# Download the datasets
 	asyncio.run(download_files(cache_root))
 
+	# Uncompress the datasets
 	uncompress_tgz("purchase", cache_root)
 	uncompress_tgz("texas", cache_root)
 
+	# Preprocess the datasets
 	process_purchase(cache_root)
 	process_texas(cache_root)
 
+	# Clean up the directories
 	clean_up_directories(cache_root)
 
 
