@@ -1,16 +1,26 @@
 #!/bin/bash
 
-# Load the necessary modules
-module load python/3.10.7
-module load nvidia/nvhpc/23.3
-module load slurm/utils
-module load monitor/node
+scripts=(
+    "hpc_runs/purchase/logistic_regression/fed_adam.sbatch"
+    "hpc_runs/purchase/logistic_regression/fed_avg.sbatch"
+    "hpc_runs/purchase/logistic_regression/fed_nag.sbatch"
+    "hpc_runs/purchase/logistic_regression/fed_nl.sbatch"
+    "hpc_runs/texas/logistic_regression/fed_adam.sbatch"
+    "hpc_runs/texas/logistic_regression/fed_avg.sbatch"
+    "hpc_runs/texas/logistic_regression/fed_nag.sbatch"
+    "hpc_runs/texas/logistic_regression/fed_nl.sbatch"
+    "hpc_runs/purchase/fcn/fed_adam.sbatch"
+    "hpc_runs/purchase/fcn/fed_avg.sbatch"
+    "hpc_runs/purchase/fcn/fed_nag.sbatch"
+    "hpc_runs/texas/fcn/fed_adam.sbatch"
+    "hpc_runs/texas/fcn/fed_avg.sbatch"
+    "hpc_runs/texas/fcn/fed_nag.sbatch"
+    "hpc_runs/cifar10/resnet18/fed_adam.sbatch"
+    "hpc_runs/cifar10/resnet18/fed_avg.sbatch"
+    "hpc_runs/cifar10/resnet18/fed_nag.sbatch"
+    "hpc_runs/cifar100/resnet34/fed_adam.sbatch"
+    "hpc_runs/cifar100/resnet34/fed_avg.sbatch"
+    "hpc_runs/cifar100/resnet34/fed_nag.sbatch"
+)
 
-# Activate the virtual environment
-source venv/bin/activate
-
-# Sync all runs with wandb and clean up
-wandb sync --sync-all
-wandb sync --clean --clean-old-hours 0
-
-sbatch --nodelist caserta hpc_runs/run_experiments_per_learning_method.sbatch
+sbatch --nodelist caserta hpc_runs/run_experiments.sbatch --export=scripts
