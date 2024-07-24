@@ -23,4 +23,4 @@ scripts=(
     "hpc_runs/cifar100/resnet34/fed_nag.sbatch"
 )
 
-sbatch --nodelist caserta hpc_runs/run_experiments.sbatch --export=scripts
+sbatch --nodelist caserta hpc_runs/run_experiments.sbatch "${scripts[@]}"
