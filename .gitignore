@@ -264,3 +264,5 @@ images/*
 !images/.keep
 src/results/*
 !src/results/.keep
+hpc_runs/*/outputs/*/*
+!hpc_runs/*/outputs/*/.keep
