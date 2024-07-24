@@ -4,8 +4,6 @@
 #SBATCH --mail-type=NONE
 #SBATCH --mem=1G
 #SBATCH --cpus-per-task=1
-#SBATCH --output=/dev/null
-#SBATCH --error=/dev/null
 #SBATCH --parsable
 
 # Load necessary modules
