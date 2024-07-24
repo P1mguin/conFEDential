@@ -82,37 +82,43 @@ class Config:
 
 		for i in range(self.attack.repetitions):
 			log(INFO, f"Starting {i + 1}th repetition of the attack simulation")
-			# Clean the variables of the attack
-			self.attack.reset_variables()
+			j = 0
+			while True:
+				j += 1
+				log(INFO, f"Starting {j}th attempt for stable attack")
+				# Clean the variables of the attack
+				self.attack.reset_variables()
 
-			# For each intercepted datapoint, get their gradients, activation functions, loss
-			# Add fraction eval for debugging purposes
-			fraction_test = 1.0
-			fraction_train = 0.85
-			(
-				train_dataset,
-				validation_dataset,
-				test_dataset
-			) = self._get_attack_datasets(fraction_train, fraction_test)
+				# For each intercepted datapoint, get their gradients, activation functions, loss
+				# Add fraction eval for debugging purposes
+				fraction_test = 1.0
+				fraction_train = 0.85
+				(
+					train_dataset,
+					validation_dataset,
+					test_dataset
+				) = self._get_attack_datasets(fraction_train, fraction_test)
 
-			# Uncomment to analyse the Kullback-Leibler and Jensen-Shannon divergence of each variable
-			# utils.do_analyses(validation_dataset)
+				# Uncomment to analyse the Kullback-Leibler and Jensen-Shannon divergence of each variable
+				# utils.do_analyses(validation_dataset)
 
-			# Uncomment to visualize the difference between members and non-members
-			# utils.visualize_loss_difference(validation_dataset, visualize_per_class=True)
-			# utils.visualize_loss_difference(validation_dataset, log_scale=True, visualize_per_class=True)
-			# utils.visualize_confidence_difference(validation_dataset, visualize_per_class=True)
-			# utils.visualize_logit_difference(validation_dataset, visualize_per_class=True)
+				# Uncomment to visualize the difference between members and non-members
+				# utils.visualize_loss_difference(validation_dataset, visualize_per_class=True)
+				# utils.visualize_loss_difference(validation_dataset, log_scale=True, visualize_per_class=True)
+				# utils.visualize_confidence_difference(validation_dataset, visualize_per_class=True)
+				# utils.visualize_logit_difference(validation_dataset, visualize_per_class=True)
 
-			# Get the template model and train it
-			membership_net = self._construct_membership_net(train_dataset)
+				# Get the template model and train it
+				membership_net = self._construct_membership_net(train_dataset)
 
-			wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
-			mode = "online" if is_online else "offline"
-			wandb_kwargs = {**wandb_kwargs, "mode": mode}
-			self.attack.train_membership_inference_net(
-				membership_net, train_dataset, validation_dataset, test_dataset, wandb_kwargs
-			)
+				wandb_kwargs = self.simulation.get_wandb_kwargs(run_name)
+				mode = "online" if is_online else "offline"
+				wandb_kwargs = {**wandb_kwargs, "mode": mode}
+				train_roc_auc = self.attack.train_membership_inference_net(
+					membership_net, train_dataset, validation_dataset, test_dataset, wandb_kwargs
+				)
+				if round(train_roc_auc, 1) != 0.5:
+					break
 
 	def _construct_membership_net(self, attack_dataset):
 		(

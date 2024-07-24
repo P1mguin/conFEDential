@@ -257,6 +257,7 @@ class Attack:
 
 			i += 1
 		wandb.finish()
+		return train_roc_auc
 
 	def _test_model(self, model, dataloader):
 		# Set the model on the right device and put it in testing mode
