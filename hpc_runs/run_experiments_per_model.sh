@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Pull the latest changes from the git repository
-git pull
-
 # Load the necessary modules
 module load python/3.10.7
 module load nvidia/nvhpc/23.3
@@ -16,4 +13,4 @@ source venv/bin/activate
 wandb sync --sync-all
 wandb sync --clean --clean-old-hours 0
 
-sbatch --nodelist caserta hpc_runs/run_experiments_exclusively_per_learning_method.sbatch
+sbatch --nodelist caserta hpc_runs/run_exclusively_per_model.sbatch
