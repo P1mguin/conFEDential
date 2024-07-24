@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH --job-name=job_deployer
-#SBATCH --output=/dev/null
-#SBATCH --error=/dev/null
 #SBATCH --mail-type=NONE
 #SBATCH --mem=1G
 #SBATCH --cpus-per-task=1
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 #SBATCH --parsable
 
 # Load necessary modules
@@ -39,11 +39,9 @@ get_exclusion_list(){
 submit_job() {
     local script=$1
     local exclusion_list=$(get_exclusion_list)
-    if [ -z "$exclusion_list" ]; then
-        sbatch $script
-    else
-        sbatch --exclude=$exclusion_list $script
-    fi
+    local sbatch_output=$(sbatch --exclude=$exclusion_list $script)
+    local job_id=$(echo " $sbatch_output" | awk '{print $4}')
+    echo "$job_id"
 }
 
 if [ $# -eq 0 ]; then
@@ -52,33 +50,29 @@ if [ $# -eq 0 ]; then
 fi
 
 for script in "$@"; do
-  submit_job $script &
-done
+    # Store how many jobs are running
+    running_jobs=$(squeue -u s2240084 -h -t R -o "%i" | wc -l)
 
-wait
+    # Submit job with exclusion list
+    job_id=$(submit_job $script)
+    echo "$job_id"
 
-while true; do
-  sleep 60
-
-  # Check the status of the jobs of s2240084
-  user_jobs=$(squeue -u s2240084 -h -o "%A %t %N")
-
-  # Process each job
-  while read -r job_id job_status job_node; do
-    if [[ "$job_status" == "PD" ]]; then
-      # Job is pending, check if the exclusion list has changed
-      exclusion_list=$(get_exclusion_list)
-      current_exclusion=$(scontrol show job $job_id | grep "ExcNodeList=" | cut -d= -f2)
-
-      if [ "$exclusion_list" != "$current_exclusion" ]; then
-        # Re-submit the job with the updated exclusion list
-        scancel $job_id
-        script=$(scontrol show job $job_id | grep "Command=" | cut -d= -f2)
-        submit_job $script &
+    # While job is pending, if the amount of running jobs decreases, update amount of running jobs and
+    # resubmit with new exclusion list
+    while true; do
+      job_status=$(squeue -j $job_id -h -o "%T")
+      if [ "$job_status" == "PENDING" ]; then
+        new_running_jobs=$(squeue -u s2240084 -h -t R -o "%i" | wc -l)
+        exclusion_list=$(get_exclusion_list)
+        if [ $new_running_jobs -lt $running_jobs ]; then
+          # Cancel the job id and resubmit with new exclusion list
+          scancel $job_id
+          running_jobs=$new_running_jobs
+          job_id=$(submit_job $script)
+        fi
+      else
+        break
       fi
-    fi
-
-    done <<< "$user_jobs"
-
-    wait
+      sleep 10
+    done
 done
