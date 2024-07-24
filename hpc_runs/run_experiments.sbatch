@@ -1,6 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=job_deployer
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 #SBATCH --mail-type=NONE
 #SBATCH --mem=1G
 #SBATCH --cpus-per-task=1
