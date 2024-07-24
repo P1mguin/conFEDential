@@ -69,11 +69,11 @@ attack:
       eps: 0.0001
     model_architecture:
       components:
-        - label: True
-          loss: True
-          activation: False
-          gradient: False
-          metrics: False
+        label: True
+        loss: True
+        activation: False
+        gradient: False
+        metrics: False
 #      components:
 #        steps:
 #        - label: True
