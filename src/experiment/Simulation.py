@@ -441,6 +441,8 @@ def get_ray_init_args(memory: int | None, num_cpus: int | None, num_gpus: int | 
 	else:
 		memory = math.floor(memory * (1024 ** 3))
 
+	temp_dir = f"/{'/'.join(PROJECT_DIRECTORY.split('/')[1:3])}/.local/ray"
+
 	ray_init_args = {
 		"runtime_env": {
 			"working_dir": PROJECT_DIRECTORY,
@@ -449,6 +451,7 @@ def get_ray_init_args(memory: int | None, num_cpus: int | None, num_gpus: int | 
 		"num_cpus": num_cpus,
 		"num_gpus": num_gpus,
 		"_memory": memory,
+		"_temp_dir": temp_dir
 	}
 
 	return ray_init_args
