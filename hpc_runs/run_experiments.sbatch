@@ -55,7 +55,6 @@ for script in "$@"; do
 
     # Submit job with exclusion list
     job_id=$(submit_job $script)
-    echo "$job_id"
 
     # While job is pending, if the amount of running jobs decreases, update amount of running jobs and
     # resubmit with new exclusion list
