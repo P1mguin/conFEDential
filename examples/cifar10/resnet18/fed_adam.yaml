@@ -40,9 +40,9 @@ simulation:
           - 0.99
         eps:
           values:
-            - 10e-4
-            - 10e-3
-            - 10e-2
+            - 0.0001  #10e-4
+            - 0.001   #10e-3
+            - 0.01    #10e-2
     model_architecture:
       repo_or_dir: 'pytorch/vision:v0.10.0'
       model: 'resnet18'
