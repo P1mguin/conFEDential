@@ -2,9 +2,9 @@
 conFEDential is a Python workbench to test the impact of different configurations on the performance of a Federated 
 Learning (FL) model and to discover how resilient it is against Membership Inference Attacks (MIAs). A MIA is an attack
 where the goal is to discover if a specific data point was used to train a model. Because of its simplicity, it is 
-frequently used to evaluate the privacy of a model. They rely on the fact that  Machine Learning models often perform 
-better on the data they have already seen. For instance, in the image below, it can be seen that a ResNet18 [[1]](#1) model 
-trained on CIFAR10 [[2]](#2) has a lower loss on members than it has on non-members:
+frequently used as a basic security audit to evaluate the privacy of a model. They rely on the fact that Machine Learning
+models often perform better on the data they have already seen. For instance, in the image below, it can be seen that a 
+ResNet18 [[1]](#1) model trained on CIFAR-10 [[2]](#2) has a lower loss on members than it has on non-members:
 ![img](https://i.imgur.com/s6YnQWq.png)
 The project is made in mind to be as flexible as possible. Meaning, that nearly all inputs and configurations can be 
 changed. This includes configuration of the (in)homogenous data, federation, victim model architecture, training 
@@ -12,13 +12,187 @@ hyperparameters, attack model and the attack model hyperparameters. For the atta
 attack by Nasr et al. [[3]](#3). The attack is modular in the sense that the attack model automatically adjusts its 
 expected input size to the victim model and its input data.
 
+### Built with
+- [PyTorch](https://pytorch.org/) - PyTorch is an open-source machine learning library that is developed by Facebook. It is used for the 
+implementation of the victim model and the attack model.
+- [Flower](https://flower.ai/) - Flower is a federated learning framework that is developed by AdaptML. It is used to simulate the federated
+learning environment.
+- [HuggingFace](https://huggingface.co/) - HuggingFace is a machine learning library that is developed by HuggingFace. It is used to download and
+load datasets.
+- [FedArtML](https://pypi.org/project/FedArtML/) - FedArtML is a federated learning framework that is developed by AdaptML. It is used to split the data in a
+federated learning environment.
+- [Weights & Biases](https://wandb.ai/site) - Weights & Biases is a machine learning library that is developed by Weights & Biases. It is used to
+log the results of the experiments.
+- [Ray](https://docs.ray.io/en/latest/) - Ray is a machine learning library that is developed by Anyscale. 
+It is used to parallelize the client computations in the federation.
+
+## Table of Contents
+- [Installation](#Installation)
+  - [Install requirements](#Install-requirements)
+  - [Download datasets and model architectures](#Download-datasets-and-model-architectures)
+  - [Modify Flower code](#Modify-Flower-code)
+  - [Configure Weights & Biases](#Configure-Weights-&-Biases)
+- [Usage](#Usage)
+- [Experiment Configuration](#Experiment-Configuration)
+  - [Simulation](#Simulation)
+    - [Data](#Data)
+    - [Federation](#Federation)
+    - [Model](#Model)
+  - [Attack](#Attack)
+    - [Attack Simulation](#Attack-Simulation)
+      - [Model Architecture](#Model-Architecture)
+        - [Components](#Components)
+        - [Gradient Component](#Gradient-Component)
+        - [Fully Connected Component](#Fully-Connected-Component)
+        - [Encoder Component](#Encoder-Component)
+  - [Batched experiment](#Batched-experiment)
+  - [Intermediate Results](#Intermediate-Results)
+  - [Contributing](#Contributing)
+    - [Adding Datasets](#Adding-Datasets)
+    - [Adding Optimisers](#Adding-Optimisers)
+  - [References](#References)
+
 ## Installation
 The project was built using Python 3.10.7, but any later version should also work. If any problems occur, downgrade to
 Python 3.10.7. To install the project, follow the steps below:
+### Install requirements
+1. Clone the repository
+    ```bash 
+    git clone git@github.com:P1mguin/conFEDential.git
+    ```
+2. Create a virtual environment for the project with Python 3.10.7 and activate
+    ```bash
+    python3.10 -m venv venv
+    source venv/bin/activate
+    ```
+3. Set the correct CUDA version of PyTorch in the `requirements.txt` file. For instance, if you have cuda 12.1, change 
+the lines:
+```
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch==2.2.2+cu118
+torchaudio==2.2.2+cu118
+torchvision==2.2.2+cu118
+```
+to
+```
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.2.2
+torchaudio==2.2.2
+torchvision==2.2.2
+```
+To find which CUDA version you have, run the following command:
+```bash
+nvcc --version
+```
+To find the corresponding PyTorch version, see the [PyTorch website](https://pytorch.org/get-started/locally/).
+3. Install the requirements
+```bash
+pip install -r requirements.txt
+```
+### Download datasets and model architectures
+1. Install CIFAR-10 and CIFAR-100:
+```bash
+python src/download_dataset.py --dataset CIFAR10
+python src/download_dataset.py --dataset CIFAR100
+```
+2. Install Purchase100 and Texas100:
+```bash
+python src/install_privacy_datasets.py
+```
+3. Install ResNet18 and ResNet34 architecture:
+```bash
+python src/download_model.py --repo pytorch/vision:v0.10.0 --model resnet18
+python src/download_model.py --repo pytorch/vision:v0.10.0 --model resnet34
+```
 
-#TODO: Write this whilst setting up project on another laptop
+### Modify Flower code
+The Flower code is modified to have early stopping. This is done by modifying `flwr.server.server.py` in the Flower
+package. The following code should be added to the `fit` method of the `Server` class:
+```python
+start_time = timeit.default_timer()
 
-#TODO: Make sure to write on how to modify the Flower code to have early stopping
+patience = 10
+patience_counter = 0
+relative_tolerance = 1e-3
+loss = res[0]
+current_round = 0
+while True:
+    previous_loss = loss
+    current_round += 1
+    # Train model and replace previous global model
+    res_fit = self.fit_round(
+        server_round=current_round,
+        timeout=timeout,
+    )
+    ...
+        history.add_loss_centralized(server_round=current_round, loss=loss_cen)
+        history.add_metrics_centralized(
+            server_round=current_round, metrics=metrics_cen
+        )
+
+    loss = res_cen[0]
+    loss_decrease = -(loss - previous_loss) / previous_loss
+    log(DEBUG, "Loss decrease: %s", loss_decrease)
+
+    # Evaluate model on a sample of available clients
+    res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
+    ...
+            history.add_metrics_distributed(
+                server_round=current_round, metrics=evaluate_metrics_fed
+            )
+
+    if loss_decrease < relative_tolerance:
+        patience_counter += 1
+        if patience_counter >= patience:
+            log(
+                INFO,
+                "Early stopping at round %s, loss: %s",
+                current_round,
+                loss,
+            )
+            break
+    else:
+        patience_counter = 0
+
+# Bookkeeping
+end_time = timeit.default_timer()
+elapsed = end_time - start_time
+log(INFO, "FL finished in %s", elapsed)
+return history
+```
+
+### Configure Weights & Biases
+1. Log in to W&B:
+```bash
+wandb login
+```
+2. Create a new project (or use an existing project) on W&B and copy the project name. This name should be put in the 
+`project` variable in `src/experiment/Simulation.py`.
+
+## Usage
+An experiment can be started by running `src/main.py`. This script takes several arguments:
+- `--yaml-file`: The path to the YAML file that describes the experiment. This file should be in the `examples` folder.
+No default value.
+- `--clients`: The amount of clients that are run simulatenously. This is used to run multiple clients on the same 
+machine at once. By default, 4.
+- `--run-name`: The name of the run. This name is used to log the results in W&B. By default, none.
+- `--ray`: Whether a Ray server is already started, false if it needs to be initialised by the script. By default, false.
+- `--logging`: Whether the run should be synchronised to W&B. By default, false.
+- `--capturing`: Whether the messages and aggregates should be captured for further attack. If attacking, this is
+necessary. By default, true.
+- `--memory`: The amount of memory reserved for the Ray server in gigabytes. No default value.
+- `--num-cpus`: The amount of CPU threads reserved for the Ray server. No default value.
+- `--num-gpus`: The amount of GPUs reserved for the Ray server. No default value.
+- `--cache-root`: The root of the cache folder. This is used to store the intermediate results of the experiment. By
+default, `.cache`.
+
+An example usage of this experiment is:
+```bash
+python src/main.py --yaml-file examples/cifar10/resnet18/fed_nag.yaml --clients 1 --num-gpus 0 --num-cpus 16 --memory 4 --logging
+```
+This experiment runs an attack on a ResNet18 trained on CIFAR-10 with the FedNAG protocol. The experiment is run with 1
+simultaneous client, 16 CPU threads and 4GB of memory. The results are logged to W&B.
+
 
 ## Experiment Configuration
 In the `examples` folder, there are already several examples of attacks on different datasets. An experiment is defined
@@ -71,7 +245,7 @@ the simulation, the federation and the model that is trained.
 #### Data
 The data value describes what dataset is used, how it is preprocessed, how it is split and in what batch size it is used.
 - `dataset_name (str)`: The name of the dataset. This can be any dataset that is downloaded in the `.cache` folder or that is
-locally available. By default, we support CIFAR10 [[2]](#2), CIFAR100[[2]](#2), MNIST [[4]](#4), Purchase100 [[5]](#5) 
+locally available. By default, we support CIFAR-10 [[2]](#2), CIFAR-100[[2]](#2), MNIST [[4]](#4), Purchase100 [[5]](#5) 
 and Texas100 [[5]](#5). See [contributing](#Contributing) on how to add more datasets.
 - `batch_size (int)`: The batch size used for training the model.
 - `preprocess_fn (str)`: An additional function that will be applied to the data. For instance, if the x value should be
@@ -296,7 +470,7 @@ This results in the following file structure for `.cache/data/purchase`:
 
 ## Contributing
 ### Adding Datasets
-Besides CIFAR10, CIFAR100, MNIST, Purchase100 and Texas100, other datasets can be added. For that, you need to follow
+Besides CIFAR-10, CIFAR-100, MNIST, Purchase100 and Texas100, other datasets can be added. For that, you need to follow
 these steps:
 1. Download the dataset in `.cache/data/{dataset}/` where `{dataset}` is the name of the dataset.
 2. Create a class in `src.data` for that dataset and export it in the `__init__` file of the module. It is recommended
@@ -326,40 +500,35 @@ purpose. The methods do the following:
    different received models using the initial metric.
  
 ## References
-<a id="1">[1]</a> Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2016. Deep Residual
-Learning for Image Recognition. In 2016 IEEE Conference on Computer Vision and
-Pattern Recognition (CVPR). 770–778. https://doi.org/10.1109/CVPR.2016.90
+<a id="1">[1]</a> Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2016. Deep Residual Learning for Image 
+Recognition. In 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR). 770–778. 
+https://doi.org/10.1109/CVPR.2016.90
 
-<a id="2">[2]</a> Alex Krizhevsky. 2009. Learning multiple layers of features from tiny images.
-Technical Report.
+<a id="2">[2]</a> Alex Krizhevsky. 2009. Learning multiple layers of features from tiny images. Technical Report.
 
-<a id="3">[3]</a> Milad Nasr, Reza Shokri, and Amir Houmansadr. 2019. Comprehensive Privacy
-Analysis of Deep Learning: Passive and Active White-box Inference Attacks
-against Centralized and Federated Learning. In 2019 IEEE Symposium on Security
-and Privacy (SP). 739–753. https://doi.org/10.1109/SP.2019.00065
+<a id="3">[3]</a> Milad Nasr, Reza Shokri, and Amir Houmansadr. 2019. Comprehensive Privacy Analysis of Deep Learning: 
+Passive and Active White-box Inference Attacks against Centralized and Federated Learning. In 2019 IEEE Symposium on 
+Security and Privacy (SP). 739–753. https://doi.org/10.1109/SP.2019.00065
 
-<a id="4">[4]</a> Deng, L. (2012). The mnist database of handwritten digit images for machine learning research. 
-IEEE Signal Processing Magazine, 29(6), 141–142.
+<a id="4">[4]</a> Deng, L. (2012). The mnist database of handwritten digit images for machine learning research. IEEE
+Signal Processing Magazine, 29(6), 141–142.
 
-<a id="5">[5]</a> Reza Shokri, Marco Stronati, Congzheng Song, and Vitaly Shmatikov. 2017. Mem-
-bership Inference Attacks Against Machine Learning Models. In 2017 IEEE Sym-
-posium on Security and Privacy (SP). 3–18. https://doi.org/10.1109/SP.2017.41
+<a id="5">[5]</a> Reza Shokri, Marco Stronati, Congzheng Song, and Vitaly Shmatikov. 2017. Membership Inference Attacks 
+Against Machine Learning Models. In 2017 IEEE Symposium on Security and Privacy (SP). 3–18. 
+https://doi.org/10.1109/SP.2017.41
 
-<a id="6">[6]</a> Sashank Reddi, Zachary Charles, Manzil Zaheer, Zachary Garrett, Keith Rush,
-Jakub Konečný, Sanjiv Kumar, and H. Brendan McMahan. 2021. Adaptive Feder-
-ated Optimization. arXiv:2003.00295 (Sept. 2021). https://doi.org/10.48550/arXiv.
-2003.00295 arXiv:2003.00295 [cs, math, stat].
+<a id="6">[6]</a> Sashank Reddi, Zachary Charles, Manzil Zaheer, Zachary Garrett, Keith Rush, 
+Jakub Konečný, Sanjiv Kumar, and H. Brendan McMahan. 2021. Adaptive Feder
+ated Optimization. arXiv:2003.00295 (Sept. 2021). https://doi.org/10.48550/arXiv.2003.00295 arXiv:2003.00295 [cs, math, stat].
 
-<a id="7">[7]</a> H. Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise
-Agüera y Arcas. 2023. Communication-Efficient Learning of Deep Networks from
-Decentralized Data. arXiv:1602.05629 (Jan. 2023). http://arxiv.org/abs/1602.05629
-arXiv:1602.05629 [cs].
+<a id="7">[7]</a> H. Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Agüera y Arcas. 2023. 
+Communication-Efficient Learning of Deep Networks from Decentralized Data. arXiv:1602.05629 (Jan. 2023). 
+http://arxiv.org/abs/1602.05629 arXiv:1602.05629 [cs].
 
-<a id="8">[8]</a> Zhengjie Yang, Wei Bao, Dong Yuan, Nguyen H. Tran, and Albert Y. Zomaya. 2022. Federated Learning with Nesterov Accelerated Gradient. IEEE Transactions
-on Parallel and Distributed Systems 33, 12 (Dec. 2022), 4863–4873. https://doi.org/
-10.1109/TPDS.2022.3206480 arXiv:2009.08716 [cs, stat].
+<a id="8">[8]</a> Zhengjie Yang, Wei Bao, Dong Yuan, Nguyen H. Tran, and Albert Y. Zomaya. 2022. Federated Learning with 
+Nesterov Accelerated Gradient. IEEE Transactions on Parallel and Distributed Systems 33, 12 (Dec. 2022), 4863–4873.
+https://doi.org/10.1109/TPDS.2022.3206480 arXiv:2009.08716 [cs, stat].
 
-<a id="9">[9]</a> Mher Safaryan, Rustem Islamov, Xun Qian, and Peter Richtárik. 2022. FedNL: Mak-
-ing Newton-Type Methods Applicable to Federated Learning. arXiv:2106.02969
-(May 2022). https://doi.org/10.48550/arXiv.2106.02969 arXiv:2106.02969 [cs,
+<a id="9">[9]</a> Mher Safaryan, Rustem Islamov, Xun Qian, and Peter Richtárik. 2022. FedNL: Making Newton-Type Methods 
+Applicable to Federated Learning. arXiv:2106.02969 (May 2022). https://doi.org/10.48550/arXiv.2106.02969 arXiv:2106.02969 [cs,
 math].
