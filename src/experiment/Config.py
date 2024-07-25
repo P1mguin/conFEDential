@@ -117,7 +117,7 @@ class Config:
 				train_roc_auc = self.attack.train_membership_inference_net(
 					membership_net, train_dataset, validation_dataset, test_dataset, wandb_kwargs
 				)
-				if round(train_roc_auc, 1) != 0.5:
+				if round(train_roc_auc, 1) != 0.5 or j == 9:
 					break
 
 	def _construct_membership_net(self, attack_dataset):
