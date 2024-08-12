@@ -72,6 +72,6 @@ for script in "$@"; do
       else
         break
       fi
-      sleep 10
+      sleep 3600
     done
 done
