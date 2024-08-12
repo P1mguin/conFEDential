@@ -17,15 +17,7 @@ simulation:
     model_name: FCN
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
-      lr:
-        values:
-          - 0.001 #10e-3
-          - 0.003 #10e-2.5
-          - 0.010 #10e-2
-          - 0.032 #10e-1.5
-          - 0.100 #10e-1
-          - 0.2   #Halfway through
-          - 0.316 #10e-0.5
+      lr: 0.2
     model_architecture:
       - type: Linear
         in_features: 6169
