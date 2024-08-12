@@ -18,5 +18,5 @@ source venv/bin/activate
 cd /home/s2240084/conFEDential
 ray stop
 ray start --head --num-cpus 4 --temp-dir /local/ray --memory 17179869184
-srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_nag.yaml --ray --memory 16 --num-cpus 4 --clients 1 --run-name CIFAR100-RESNET34-FEDNAG --no-capturing
+srun python src/main.py --yaml-file examples/cifar100/resnet34/fed_nag.yaml --ray --memory 16 --num-cpus 4 --clients 1 --run-name CIFAR100-RESNET34-FEDNAG
 ray stop
