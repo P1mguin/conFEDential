@@ -18,10 +18,9 @@ module load monitor/node
 source venv/bin/activate
 
 # Function to get the list of nodes used by the user s2240084
-default_exclusion_list="caserta,ctit081,ctit082,ctit087,ctit090"
 get_exclusion_list(){
     local user=s2240084
-    local exclusion_list="caserta,ctit081,ctit082,ctit087"
+    local exclusion_list="caserta,ctit081,ctit082,ctit087,ctit090"
     for job in $(squeue -u $user -h -o "%i"); do
         node=$(squeue -j $job -h -o "%N")
         if [ -n "$node" ]; then
