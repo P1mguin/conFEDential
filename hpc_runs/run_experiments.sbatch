@@ -21,7 +21,7 @@ source venv/bin/activate
 default_exclusion_list="caserta,ctit081,ctit082,ctit087,ctit090"
 get_exclusion_list(){
     local user=s2240084
-    local exclusion_list=default_exclusion_list
+    local exclusion_list="caserta,ctit081,ctit082,ctit087"
     for job in $(squeue -u $user -h -o "%i"); do
         node=$(squeue -j $job -h -o "%N")
         if [ -n "$node" ]; then
