@@ -2,12 +2,12 @@
 
 scripts=(
 #    "hpc_runs/purchase/logistic_regression/fed_adam.sbatch"
-    "hpc_runs/purchase/logistic_regression/fed_avg.sbatch"
-    "hpc_runs/purchase/logistic_regression/fed_nag.sbatch"
+#    "hpc_runs/purchase/logistic_regression/fed_avg.sbatch"
+#    "hpc_runs/purchase/logistic_regression/fed_nag.sbatch"
 #    "hpc_runs/purchase/logistic_regression/fed_nl.sbatch"
 #    "hpc_runs/texas/logistic_regression/fed_adam.sbatch"
-    "hpc_runs/texas/logistic_regression/fed_avg.sbatch"
-    "hpc_runs/texas/logistic_regression/fed_nag.sbatch"
+#    "hpc_runs/texas/logistic_regression/fed_avg.sbatch"
+#    "hpc_runs/texas/logistic_regression/fed_nag.sbatch"
 #    "hpc_runs/texas/logistic_regression/fed_nl.sbatch"
 #    "hpc_runs/purchase/fcn/fed_adam.sbatch"
     "hpc_runs/purchase/fcn/fed_avg.sbatch"
