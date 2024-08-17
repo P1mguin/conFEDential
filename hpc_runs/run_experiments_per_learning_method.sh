@@ -2,16 +2,16 @@
 
 scripts=(
 #    "hpc_runs/texas/logistic_regression/fed_adam.sbatch"            # Not run simulation yet
-#    "hpc_runs/texas/logistic_regression/fed_avg.sbatch"            # Only attack simulation left
-#    "hpc_runs/texas/logistic_regression/fed_nag.sbatch"            # Only attack simulation left
-#    "hpc_runs/texas/logistic_regression/fed_nl.sbatch"             # Only attack simulation left
+    "hpc_runs/texas/logistic_regression/fed_avg.sbatch"            # Only attack simulation left
+    "hpc_runs/texas/logistic_regression/fed_nag.sbatch"            # Only attack simulation left
+    "hpc_runs/texas/logistic_regression/fed_nl.sbatch"             # Only attack simulation left
 #    "hpc_runs/texas/fcn/fed_adam.sbatch"                            # Not run simulation yet
-#    "hpc_runs/texas/fcn/fed_avg.sbatch"                            # Only attack simulation left
-#    "hpc_runs/texas/fcn/fed_nag.sbatch"                            # Only attack simulation left
+    "hpc_runs/texas/fcn/fed_avg.sbatch"                            # Only attack simulation left
+    "hpc_runs/texas/fcn/fed_nag.sbatch"                            # Only attack simulation left
 #    "hpc_runs/purchase/logistic_regression/fed_adam.sbatch"         # Not run simulation yet
-#    "hpc_runs/purchase/logistic_regression/fed_avg.sbatch"         # Only attack simulation left
-#    "hpc_runs/purchase/logistic_regression/fed_nag.sbatch"         # Only attack simulation left
-#    "hpc_runs/purchase/logistic_regression/fed_nl.sbatch"          # Only attack simulation left
+    "hpc_runs/purchase/logistic_regression/fed_avg.sbatch"         # Only attack simulation left
+    "hpc_runs/purchase/logistic_regression/fed_nag.sbatch"         # Only attack simulation left
+    "hpc_runs/purchase/logistic_regression/fed_nl.sbatch"          # Only attack simulation left
 #    "hpc_runs/purchase/fcn/fed_adam.sbatch"                         # Not run simulation yet
 #    "hpc_runs/purchase/fcn/fed_avg.sbatch"                         # Only attack simulation left
     "hpc_runs/purchase/fcn/fed_nag.sbatch"                          # Not run simulation yet
