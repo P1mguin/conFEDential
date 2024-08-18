@@ -42,7 +42,7 @@ attack:
       - server
       - client
       - client
-  aggregate_access: [164]
+  aggregate_access: [24]
   repetitions: 1
   attack_simulation:
     batch_size:
