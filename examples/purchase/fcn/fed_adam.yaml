@@ -18,19 +18,9 @@ simulation:
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
       local:
-        lr:
-          values:
-            - 0.003 #10e-2.5
-            - 0.010 #10e-2
-            - 0.032 #10e-1.5
-            - 0.100 #10e-1
+        lr: 0.003
       global:
-        lr:
-          values:
-            - 0.003 #10e-2.5
-            - 0.010 #10e-2
-            - 0.032 #10e-1.5
-            - 0.100 #10e-1
+        lr: 0.032
         betas:
           - 0.9
           - 0.99
