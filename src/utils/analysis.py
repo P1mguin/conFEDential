@@ -71,18 +71,24 @@ def do_analyses(dataloader):
 		"metrics": collections.defaultdict(list),
 	}
 
+	correct_member = 0
+	correct_non_member = 0
 	for x in tqdm(dataloader.dataset):
 		gradient, activation_values, metrics, loss, label = x[0]
 		label = torch.argmax(label).item()
 		loss = loss.item()
-		activation_averages = [np.average(layer) for layer in activation_values]
-		gradient_averages = [np.average(layer) for layer in gradient]
+		activation_averages = [np.average(layer.cpu()) for layer in activation_values]
+		gradient_averages = [np.average(layer.cpu()) for layer in gradient]
 		metric_averages = {
 			metric_key: [np.average(layer) for layer in metric_values] for metric_key, metric_values in metrics.items()
 		}
+		prediction = activation_values[-1].argmax().item()
+		correct = prediction == label
 		if x[1] == 0:
+			if correct: correct_non_member += 1
 			sample_dict = non_members_dict
 		else:
+			if correct: correct_member += 1
 			sample_dict = members_dict
 		sample_dict["label"].append(label)
 		sample_dict["loss"].append(loss)
@@ -90,6 +96,10 @@ def do_analyses(dataloader):
 		sample_dict["gradient"].append(gradient_averages)
 		for key, value in metric_averages.items():
 			sample_dict["metrics"][key].append(value)
+
+	total = len(dataloader.dataset)
+	log(INFO, f"Accuracy non-members: {round(correct_non_member/total*100, 1)}%")
+	log(INFO, f"Accuracy members: {round(correct_member/total*100, 1)}%")
 
 	# Organise the activation, gradient and metric per layer
 	members_dict["activation"] = np.array(list(map(list, zip(*members_dict["activation"]))))
