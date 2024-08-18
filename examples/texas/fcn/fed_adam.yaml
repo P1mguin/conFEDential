@@ -98,7 +98,7 @@ attack:
 #          loss: True
 #          activation: True
 #          gradient: True
-#          metrics: True
+#          metrics: False
 #        - label: True
 #          loss: True
 #          activation: False
@@ -108,7 +108,7 @@ attack:
 #          loss: True
 #          activation: True
 #          gradient: True
-#          metrics: True
+#          metrics: False
       gradient_component:
         - type: Dropout
           p: 0.2
