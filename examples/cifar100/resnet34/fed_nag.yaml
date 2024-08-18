@@ -13,7 +13,7 @@ simulation:
     fraction_fit: 0.1
     local_rounds: 4
   model:
-    optimizer_name: FedNag
+    optimizer_name: FedNAG
     model_name: ResNet34
     criterion_name: CrossEntropyLoss
     optimizer_parameters:
@@ -51,12 +51,12 @@ attack:
     batch_size: 512
 #      steps:
 #        - 512
-#        - 16
 #        - 32
+#        - 16
 #        - 8
 #        - 512
-#        - 16
 #        - 32
+#        - 16
 #        - 8
     optimizer_name: Adam
     optimizer_parameters:
@@ -77,23 +77,8 @@ attack:
 #            metrics: False
 #          - label: True
 #            loss: True
-#            activation: False
-#            gradient: False
-#            metrics: True
-#          - label: True
-#            loss: True
 #            activation: True
 #            gradient: True
-#            metrics: False
-#          - label: True
-#            loss: True
-#            activation: True
-#            gradient: True
-#            metrics: True
-#          - label: True
-#            loss: True
-#            activation: False
-#            gradient: False
 #            metrics: False
 #          - label: True
 #            loss: True
@@ -104,7 +89,22 @@ attack:
 #            loss: True
 #            activation: True
 #            gradient: True
+#            metrics: True
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
 #            metrics: False
+#          - label: True
+#            loss: True
+#            activation: True
+#            gradient: True
+#            metrics: False
+#          - label: True
+#            loss: True
+#            activation: False
+#            gradient: False
+#            metrics: True
 #          - label: True
 #            loss: True
 #            activation: True
