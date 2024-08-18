@@ -25,13 +25,13 @@ simulation:
 attack:
   data_access:
     steps:
-      - 1.0
+#      - 1.0
       - 1.0
       - 0.1
       - 0.1
   message_access:
     steps:
-      - server
+#      - server
       - server
       - client
       - client
@@ -40,7 +40,7 @@ attack:
   attack_simulation:
     batch_size:
       steps:
-        - 512
+#        - 512
         - 256
         - 512
         - 256
@@ -50,11 +50,11 @@ attack:
     model_architecture:
       components:
         steps:
-        - label: True
-          loss: True
-          activation: False
-          gradient: False
-          metrics: False
+#        - label: True
+#          loss: True
+#          activation: False
+#          gradient: False
+#          metrics: False
         - label: True
           loss: True
           activation: True
