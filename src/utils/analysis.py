@@ -97,9 +97,8 @@ def do_analyses(dataloader):
 		for key, value in metric_averages.items():
 			sample_dict["metrics"][key].append(value)
 
-	total = len(dataloader.dataset)
-	log(INFO, f"Accuracy non-members: {round(correct_non_member/total*100, 1)}%")
-	log(INFO, f"Accuracy members: {round(correct_member/total*100, 1)}%")
+	log(INFO, f"Accuracy non-members: {round(correct_non_member/len(non_members_dict['label'])*100, 1)}%")
+	log(INFO, f"Accuracy members: {round(correct_member/len(members_dict['label'])*100, 1)}%")
 
 	# Organise the activation, gradient and metric per layer
 	members_dict["activation"] = np.array(list(map(list, zip(*members_dict["activation"]))))
